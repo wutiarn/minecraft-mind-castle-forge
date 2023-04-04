@@ -59,9 +59,10 @@ public class ImageBlockEntityRenderer implements BlockEntityRenderer<ImageBlockE
             return -1;
         }
         if (textureId == -1) {
+            LOGGER.info("Uploading image to texture");
             textureId = uploadTexture(bufferedImage);
+            LOGGER.info("Image uploaded to texture");
         }
-        LOGGER.info("Image uploaded to texture");
         return textureId;
     }
 

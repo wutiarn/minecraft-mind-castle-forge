@@ -127,69 +127,53 @@ public class ImageBlockEntityRenderer implements BlockEntityRenderer<ImageBlockE
     public void render(ImageBlockEntity entity, float pPartialTick, PoseStack pose, MultiBufferSource multiBufferSource, int pPackedLight, int pPackedOverlay) {
         int textureId = getTextureId();
 
-        RenderSystem.enableDepthTest();
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-//        RenderSystem.setShaderColor(frame.brightness, frame.brightness, frame.brightness, frame.alpha);
-        RenderSystem.bindTexture(textureId);
-        RenderSystem.setShaderTexture(0, textureId);
-
-        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-
-        pose.pushPose();
-        pose.translate(0.5, 0.5, 0.5);
-        pose.popPose();
-
-        Matrix4f mat = pose.last().pose();
-        Matrix3f mat3f = pose.last().normal();
-
-        RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder builder = tesselator.getBuilder();
-        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
-
-        builder
-                .vertex(mat, 0, 0, 0)
-                .uv(0, 0)
-                .normal(mat3f, 0, 0, 0)
-                .endVertex();
-
-        builder
-                .vertex(mat, 0, 0, 1)
-                .uv(0, 1)
-                .normal(mat3f, 0, 0, 1)
-                .endVertex();
-
-        builder
-                .vertex(mat, 1, 0, 1)
-                .uv(1, 1)
-                .normal(mat3f, 1, 0, 1)
-                .endVertex();
-
-        builder
-                .vertex(mat, 1, 0, 0)
-                .uv(1, 0)
-                .normal(mat3f, 1, 0, 0)
-                .endVertex();
-
-        tesselator.end();
-
-//        Matrix4f mat = pose.last().pose();
-//        Matrix3f mat3f = pose.last().normal();
-//        Vec3i normal = face.facing.normal;
-//        for (BoxCorner corner : face.corners)
-//            builder.vertex(mat, box.get(corner.x), box.get(corner.y), box.get(corner.z))
-//                    .uv(corner.isFacing(face.getTexU()) != frame.flipX ? 1 : 0, corner.isFacing(face.getTexV()) != frame.flipY ? 1 : 0).color(-1)
-//                    .normal(mat3f, normal.getX(), normal.getY(), normal.getZ()).endVertex();
-//        tesselator.end();
-
 //        RenderSystem.enableDepthTest();
 //        RenderSystem.enableBlend();
 //        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-//        RenderSystem.setShaderColor(frame.brightness, frame.brightness, frame.brightness, frame.alpha);
+////        RenderSystem.setShaderColor(frame.brightness, frame.brightness, frame.brightness, frame.alpha);
+//        RenderSystem.bindTexture(textureId);
+//        RenderSystem.setShaderTexture(0, textureId);
 //
-//        poseStack.pushPose();
-//        poseStack.popPose();
+//        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+//        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+//
+//        pose.pushPose();
+//        pose.translate(0.5, 0.5, 0.5);
+//        pose.popPose();
+//
+//        Matrix4f mat = pose.last().pose();
+//        Matrix3f mat3f = pose.last().normal();
+//
+//        RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
+//        Tesselator tesselator = Tesselator.getInstance();
+//        BufferBuilder builder = tesselator.getBuilder();
+//        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
+//
+//        builder
+//                .vertex(mat, 0, 0, 0)
+//                .uv(0, 0)
+//                .normal(mat3f, 0, 0, 0)
+//                .endVertex();
+//
+//        builder
+//                .vertex(mat, 0, 0, 1)
+//                .uv(0, 1)
+//                .normal(mat3f, 0, 0, 1)
+//                .endVertex();
+//
+//        builder
+//                .vertex(mat, 1, 0, 1)
+//                .uv(1, 1)
+//                .normal(mat3f, 1, 0, 1)
+//                .endVertex();
+//
+//        builder
+//                .vertex(mat, 1, 0, 0)
+//                .uv(1, 0)
+//                .normal(mat3f, 1, 0, 0)
+//                .endVertex();
+//
+//        tesselator.end();
+
     }
 }

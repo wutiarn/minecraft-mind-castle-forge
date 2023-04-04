@@ -2,12 +2,17 @@ package ru.wtrn.minecraft.mindpalace.block.entity.renderer;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.core.Vec3i;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -135,6 +140,49 @@ public class ImageBlockEntityRenderer implements BlockEntityRenderer<ImageBlockE
         pose.pushPose();
         pose.translate(0.5, 0.5, 0.5);
         pose.popPose();
+
+        Matrix4f mat = pose.last().pose();
+        Matrix3f mat3f = pose.last().normal();
+
+        RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder builder = tesselator.getBuilder();
+        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
+
+        builder
+                .vertex(mat, 0, 0, 0)
+                .uv(0, 0)
+                .normal(mat3f, 0, 0, 0)
+                .endVertex();
+
+        builder
+                .vertex(mat, 0, 0, 1)
+                .uv(0, 1)
+                .normal(mat3f, 0, 0, 1)
+                .endVertex();
+
+        builder
+                .vertex(mat, 1, 0, 1)
+                .uv(1, 1)
+                .normal(mat3f, 1, 0, 1)
+                .endVertex();
+
+        builder
+                .vertex(mat, 1, 0, 0)
+                .uv(1, 0)
+                .normal(mat3f, 1, 0, 0)
+                .endVertex();
+
+        tesselator.end();
+
+//        Matrix4f mat = pose.last().pose();
+//        Matrix3f mat3f = pose.last().normal();
+//        Vec3i normal = face.facing.normal;
+//        for (BoxCorner corner : face.corners)
+//            builder.vertex(mat, box.get(corner.x), box.get(corner.y), box.get(corner.z))
+//                    .uv(corner.isFacing(face.getTexU()) != frame.flipX ? 1 : 0, corner.isFacing(face.getTexV()) != frame.flipY ? 1 : 0).color(-1)
+//                    .normal(mat3f, normal.getX(), normal.getY(), normal.getZ()).endVertex();
+//        tesselator.end();
 
 //        RenderSystem.enableDepthTest();
 //        RenderSystem.enableBlend();

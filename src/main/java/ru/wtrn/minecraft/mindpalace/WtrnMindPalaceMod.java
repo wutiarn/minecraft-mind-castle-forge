@@ -16,6 +16,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 import ru.wtrn.minecraft.mindpalace.block.ModBlocks;
+import ru.wtrn.minecraft.mindpalace.block.entity.ModBlockEntities;
 import ru.wtrn.minecraft.mindpalace.items.ModCreativeModeTab;
 import ru.wtrn.minecraft.mindpalace.items.ModItems;
 
@@ -35,6 +36,7 @@ public class WtrnMindPalaceMod {
 
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
+        ModBlockEntities.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);

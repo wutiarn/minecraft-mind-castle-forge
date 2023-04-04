@@ -16,7 +16,8 @@ public class ImageBlockEntityRenderer implements BlockEntityRenderer<ImageBlockE
     }
 
     @Override
-    public void render(ImageBlockEntity entity, float p_112308_, PoseStack poseStack, MultiBufferSource multiBufferSource, int pPackedLight, int pPackedOverlay) {
-        LOGGER.trace("Renderer call");
+    public void render(ImageBlockEntity entity, float pPartialTick, PoseStack poseStack, MultiBufferSource multiBufferSource, int pPackedLight, int pPackedOverlay) {
+        poseStack.pushPose();
+        poseStack.popPose();
     }
 }

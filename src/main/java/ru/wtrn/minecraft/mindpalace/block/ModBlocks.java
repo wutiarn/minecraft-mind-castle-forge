@@ -19,7 +19,7 @@ public class ModBlocks {
             DeferredRegister.create(ForgeRegistries.BLOCKS, WtrnMindPalaceMod.MOD_ID);
 
     public static final RegistryObject<Block> IMAGE_BLOCK = registerBlock("image_block",
-            () -> new Block(BlockBehaviour.Properties.of(Material.GLASS)));
+            () -> new ImageBlock(BlockBehaviour.Properties.of(Material.GLASS)));
 
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block) {
         RegistryObject<T> toReturn = BLOCKS.register(name, block);

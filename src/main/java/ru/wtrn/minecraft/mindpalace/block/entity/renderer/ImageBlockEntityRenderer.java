@@ -3,12 +3,15 @@ package ru.wtrn.minecraft.mindpalace.block.entity.renderer;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.core.Vec3i;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -120,8 +123,23 @@ public class ImageBlockEntityRenderer implements BlockEntityRenderer<ImageBlockE
 
 
     @Override
-    public void render(ImageBlockEntity entity, float pPartialTick, PoseStack poseStack, MultiBufferSource multiBufferSource, int pPackedLight, int pPackedOverlay) {
+    public void render(ImageBlockEntity entity, float pPartialTick, PoseStack pose, MultiBufferSource multiBufferSource, int pPackedLight, int pPackedOverlay) {
         int textureId = getTextureId();
+
+        RenderSystem.enableDepthTest();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+//        RenderSystem.setShaderColor(frame.brightness, frame.brightness, frame.brightness, frame.alpha);
+        RenderSystem.bindTexture(textureId);
+        RenderSystem.setShaderTexture(0, textureId);
+
+        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+
+        pose.pushPose();
+        pose.translate(0.5, 0.5, 0.5);
+        pose.popPose();
+
 //        RenderSystem.enableDepthTest();
 //        RenderSystem.enableBlend();
 //        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);

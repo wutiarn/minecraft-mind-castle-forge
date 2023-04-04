@@ -40,7 +40,6 @@ public class ImageBlockEntityRenderer implements BlockEntityRenderer<ImageBlockE
     private void loadTexture() throws IOException {
         String url = "https://i.imgur.com/M6UFOku.png";
         HttpURLConnection httpURLConnection = (HttpURLConnection) (new URL(url)).openConnection(Minecraft.getInstance().getProxy());
-        BufferedImage bufferedImage;
         try {
             httpURLConnection.setDoInput(true);
             httpURLConnection.setDoOutput(false);
@@ -56,6 +55,9 @@ public class ImageBlockEntityRenderer implements BlockEntityRenderer<ImageBlockE
     }
 
     private int getTextureId() {
+        if (bufferedImage == null) {
+            return -1;
+        }
         if (textureId == -1) {
             textureId = uploadTexture(bufferedImage);
         }

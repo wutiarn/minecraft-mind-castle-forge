@@ -48,7 +48,7 @@ public class ImageFrameItem extends Item {
                     level.addFreshEntity(frame);
                 }
 
-                itemstack.shrink(1);
+                player.getInventory().removeItem(itemstack);
                 return InteractionResult.sidedSuccess(level.isClientSide);
             } else {
                 return InteractionResult.CONSUME;

@@ -2,12 +2,16 @@ package ru.wtrn.minecraft.mindpalace.block.entity.renderer;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.core.Vec3i;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -15,6 +19,7 @@ import org.slf4j.Logger;
 import ru.wtrn.minecraft.mindpalace.block.entity.ImageBlockEntity;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Facing;
 import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
+import ru.wtrn.minecraft.mindpalace.util.math.box.BoxCorner;
 import ru.wtrn.minecraft.mindpalace.util.math.box.BoxFace;
 
 import javax.imageio.ImageIO;
@@ -123,11 +128,43 @@ public class ImageBlockEntityRenderer implements BlockEntityRenderer<ImageBlockE
 
     @Override
     public void render(ImageBlockEntity entity, float pPartialTick, PoseStack pose, MultiBufferSource multiBufferSource, int pPackedLight, int pPackedOverlay) {
+        RenderSystem.enableDepthTest();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+//        RenderSystem.setShaderColor(frame.brightness, frame.brightness, frame.brightness, frame.alpha);
         int textureId = getTextureId();
+
+        RenderSystem.bindTexture(textureId);
+        RenderSystem.setShaderTexture(0, textureId);
+
+        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 
         Facing facing = Facing.WEST;
         AlignedBox box = new AlignedBox();
         box.grow(facing.axis, 0.01F);
         BoxFace face = BoxFace.get(facing);
+
+
+        pose.pushPose();
+
+        pose.translate(0.5, 0.5, 0.5);
+        pose.mulPose(facing.rotation().rotation((float) Math.toRadians(0)));
+        pose.translate(-0.5, -0.5, -0.5);
+
+        RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder builder = tesselator.getBuilder();
+        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
+        Matrix4f mat = pose.last().pose();
+        Matrix3f mat3f = pose.last().normal();
+        Vec3i normal = face.facing.normal;
+        for (BoxCorner corner : face.corners)
+            builder.vertex(mat, box.get(corner.x), box.get(corner.y), box.get(corner.z))
+                    .uv(corner.isFacing(face.getTexU()) ? 1 : 0, corner.isFacing(face.getTexV()) ? 1 : 0).color(-1)
+                    .normal(mat3f, normal.getX(), normal.getY(), normal.getZ()).endVertex();
+        tesselator.end();
+
+        pose.popPose();
     }
 }

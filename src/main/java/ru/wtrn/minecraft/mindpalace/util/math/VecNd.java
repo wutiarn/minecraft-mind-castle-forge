@@ -57,7 +57,7 @@ public abstract class VecNd<T extends VecNd> {
     public abstract boolean epsilonEquals(T vec, double epsilon);
     
     public boolean epsilonEquals(T vec) {
-        return epsilonEquals(vec, VectorFan.EPSILON);
+        return epsilonEquals(vec, VecNf.EPSILON);
     }
     
     public abstract double distance(T vec);

@@ -23,36 +23,7 @@ public class NormalPlane {
         this.normal = new Vec3f();
         normal.set(facing.axis, facing.offset());
     }
-    
-    public Boolean isInFront(Vec3f vec) {
-        Vec3f temp = new Vec3f(vec);
-        temp.sub(origin);
-        float result = normal.dot(temp);
-        if (result < 0 ? (result > -VectorFan.EPSILON) : (result < VectorFan.EPSILON))
-            return null;
-        return result > 0;
-    }
-    
-    public boolean cuts(VectorFan strip) {
-        boolean front = false;
-        boolean back = false;
-        for (int i = 0; i < strip.count(); i++) {
-            Boolean result = isInFront(strip.get(i));
-            
-            if (result == null)
-                return true;
-            
-            if (result)
-                front = true;
-            if (!result)
-                back = true;
-            
-            if (front && back)
-                return true;
-        }
-        return false;
-    }
-    
+
     public Vec3f intersect(Vec3f start, Vec3f end) {
         Vec3f lineOrigin = start;
         Vec3f lineDirection = new Vec3f(end);
@@ -66,17 +37,6 @@ public class NormalPlane {
         Vec3f point = new Vec3f(lineDirection);
         point.scale(t);
         point.add(lineOrigin);
-        return point;
-    }
-    
-    public Vec3f intersect(Ray3f ray) {
-        if (normal.dot(ray.direction) == 0)
-            return null;
-        
-        float t = (normal.dot(origin) - normal.dot(ray.origin)) / normal.dot(ray.direction);
-        Vec3f point = new Vec3f(ray.direction);
-        point.scale(t);
-        point.add(ray.origin);
         return point;
     }
     

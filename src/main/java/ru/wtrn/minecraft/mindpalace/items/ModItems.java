@@ -24,8 +24,8 @@ public class ModItems {
                 return builder.build("image_frame_entity");
             });
 
-    public static final RegistryObject<Item> IMAGE_FRAME_ITEM = ITEMS.register("image_frame_item",
-            () -> new ImageFrameItem(new Item.Properties()));
+    public static final RegistryObject<ImageFrameItem> IMAGE_FRAME_ITEM = ITEMS.register("image_frame_item",
+            () -> new ImageFrameItem(new Item.Properties().stacksTo(1)));
 
 
     public static void register(IEventBus eventBus) {

@@ -63,4 +63,14 @@ public class ImageFrameItem extends Item {
     public Component getName(ItemStack pStack) {
         return Component.literal("Image #1234");
     }
+
+    public void setImageId(ItemStack stack, long imageId) {
+        CompoundTag tag = stack.getOrCreateTag();
+        tag.putLong("imageId", imageId);
+    }
+
+    public long getImageId(ItemStack stack) {
+        CompoundTag tag = stack.getOrCreateTag();
+        return tag.getLong("imageId");
+    }
 }

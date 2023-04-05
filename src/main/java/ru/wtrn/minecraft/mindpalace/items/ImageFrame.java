@@ -62,7 +62,7 @@ public class ImageFrame extends HangingEntity {
 
     @Override
     public boolean survives() {
-        return super.survives();
+        return true;
     }
 
     public AlignedBox getBox() {

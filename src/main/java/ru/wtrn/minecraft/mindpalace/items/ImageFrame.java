@@ -10,6 +10,7 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -52,6 +53,7 @@ public class ImageFrame extends HangingEntity {
 
     @Override
     public void dropItem(@Nullable Entity pBrokenEntity) {
+        this.playSound(SoundEvents.PAINTING_BREAK, 1.0F, 1.0F);
         ImageFrameItem item = ModItems.IMAGE_FRAME_ITEM.get();
         ItemStack stack = new ItemStack(item, 1);
         item.setImageId(stack, getImageId());
@@ -159,7 +161,7 @@ public class ImageFrame extends HangingEntity {
 
     @Override
     public void playPlacementSound() {
-
+        this.playSound(SoundEvents.PAINTING_PLACE, 1.0F, 1.0F);
     }
 
     @Override

@@ -3,13 +3,14 @@ package ru.wtrn.minecraft.mindpalace.items;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.*;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -73,8 +74,11 @@ public class ImageFrame extends HangingEntity {
             kill();
             dropItem(pPlayer);
         }
-        if (pPlayer.isLocalPlayer()) {
-            pPlayer.sendSystemMessage(Component.literal("Image ID: " + getImageId()));
+        if (!pPlayer.isLocalPlayer()) {
+            long imageId = getImageId();
+            MutableComponent component = Component.literal("Image ID: " + getImageId())
+                    .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://mci.wtrn.ru/i/" + imageId)));
+            pPlayer.sendSystemMessage(component);
         }
         return InteractionResult.SUCCESS;
     }

@@ -2,6 +2,9 @@ package ru.wtrn.minecraft.mindpalace.items;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.HangingEntity;
@@ -17,6 +20,7 @@ public class ImageFrame extends HangingEntity {
 
     private final float xSize = 10f;
     private final float ySize = 10f;
+    public static final float frameThickness = 0.031F;
 
     public ImageFrame(EntityType<ImageFrame> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -55,10 +59,14 @@ public class ImageFrame extends HangingEntity {
     public AlignedBox getBox() {
         Direction direction = getDirection();
         Facing facing = Facing.get(direction);
-        AlignedBox box = ImageBlock.box(direction);
 
-        Vec2f min = new Vec2f(0, 0);
-        Vec2f max = new Vec2f(xSize, ySize);
+        AlignedBox box = new AlignedBox();
+        box.setMax(facing.axis, frameThickness);
+
+        float margin = -0.5f;
+
+        Vec2f min = new Vec2f(margin, margin);
+        Vec2f max = new Vec2f(xSize + margin, ySize + margin);
 
         Axis one = facing.one();
         Axis two = facing.two();
@@ -79,6 +87,17 @@ public class ImageFrame extends HangingEntity {
         box.setMin(two, min.y);
         box.setMax(two, max.y);
         return box;
+    }
+
+    @Override
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
+        return new ClientboundAddEntityPacket(this, this.direction.get3DDataValue(), this.getPos());
+    }
+
+    @Override
+    public void recreateFromPacket(ClientboundAddEntityPacket pPacket) {
+        super.recreateFromPacket(pPacket);
+        this.setDirection(Direction.from3DDataValue(pPacket.getData()));
     }
 
 }

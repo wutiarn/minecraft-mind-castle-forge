@@ -160,7 +160,7 @@ public class ImageFrameEntityRenderer extends EntityRenderer<ImageFrame> {
         pose.pushPose();
 
         Vec3i normal = face.facing.normal;
-        pose.translate(normal.getX(), normal.getY(), normal.getZ());
+//        pose.translate(normal.getX(), normal.getY(), normal.getZ());
 
         RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
         Tesselator tesselator = Tesselator.getInstance();

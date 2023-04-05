@@ -1,5 +1,7 @@
 package ru.wtrn.minecraft.mindpalace.items;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.HangingEntity;
@@ -10,6 +12,11 @@ import org.jetbrains.annotations.Nullable;
 public class ImageFrame extends HangingEntity {
     public ImageFrame(EntityType<ImageFrame> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
+    }
+
+    public ImageFrame(EntityType<? extends HangingEntity> pEntityType, Level pLevel, BlockPos pPos, Direction direction) {
+        super(pEntityType, pLevel, pPos);
+        setDirection(direction);
     }
 
     @Override

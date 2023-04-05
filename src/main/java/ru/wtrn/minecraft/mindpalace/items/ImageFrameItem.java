@@ -32,7 +32,7 @@ public class ImageFrameItem extends Item {
             return InteractionResult.FAIL;
         } else {
             Level level = pContext.getLevel();
-            HangingEntity hangingentity = new ImageFrame(ModItems.IMAGE_FRAME_ENTITY.get(), level);
+            HangingEntity hangingentity = new ImageFrame(ModItems.IMAGE_FRAME_ENTITY.get(), level, blockpos1, direction);
 
             CompoundTag compoundtag = itemstack.getTag();
             if (compoundtag != null) {

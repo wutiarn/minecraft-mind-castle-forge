@@ -2,15 +2,23 @@ package ru.wtrn.minecraft.mindpalace.items;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.HangingEntity;
+import net.minecraft.world.entity.decoration.Painting;
+import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -21,6 +29,8 @@ import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Facing;
 import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
 import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
+
+import java.util.Optional;
 
 public class ImageFrame extends HangingEntity {
 
@@ -136,5 +146,19 @@ public class ImageFrame extends HangingEntity {
             return;
         }
         this.setBoundingBox(getBox().getBB(getPos()));
+    }
+
+    public void addAdditionalSaveData(CompoundTag pCompound) {
+        pCompound.putByte("facing", (byte)this.direction.get2DDataValue());
+        super.addAdditionalSaveData(pCompound);
+    }
+
+    /**
+     * (abstract) Protected helper method to read subclass entity data from NBT.
+     */
+    public void readAdditionalSaveData(CompoundTag pCompound) {
+        this.direction = Direction.from2DDataValue(pCompound.getByte("facing"));
+        super.readAdditionalSaveData(pCompound);
+        this.setDirection(this.direction);
     }
 }

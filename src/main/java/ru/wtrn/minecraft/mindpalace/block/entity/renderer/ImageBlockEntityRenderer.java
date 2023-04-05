@@ -13,8 +13,9 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.slf4j.Logger;
 import ru.wtrn.minecraft.mindpalace.block.entity.ImageBlockEntity;
-import ru.wtrn.minecraft.mindpalace.util.math.Facing;
+import ru.wtrn.minecraft.mindpalace.util.math.base.Facing;
 import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
+import ru.wtrn.minecraft.mindpalace.util.math.box.BoxFace;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -125,7 +126,7 @@ public class ImageBlockEntityRenderer implements BlockEntityRenderer<ImageBlockE
         int textureId = getTextureId();
 
         Facing facing = Facing.WEST;
-        AlignedBox box = frame.getBox();
+        AlignedBox box = new AlignedBox();
         box.grow(facing.axis, 0.01F);
         BoxFace face = BoxFace.get(facing);
     }

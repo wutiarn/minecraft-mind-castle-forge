@@ -12,12 +12,6 @@ public class ModBlockEntities {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
             DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, WtrnMindPalaceMod.MOD_ID);
 
-    public static final RegistryObject<BlockEntityType<ImageBlockEntity>> IMAGE_BLOCK =
-            BLOCK_ENTITIES.register("image_block", () ->
-                    BlockEntityType.Builder.of(ImageBlockEntity::new,
-                            ModBlocks.IMAGE_BLOCK.get()).build(null));
-
-
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);
     }

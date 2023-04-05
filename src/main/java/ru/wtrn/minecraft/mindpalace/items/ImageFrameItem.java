@@ -13,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraftforge.registries.RegistryObject;
 
 public class ImageFrameItem extends Item {
 
@@ -33,18 +34,18 @@ public class ImageFrameItem extends Item {
             return InteractionResult.FAIL;
         } else {
             Level level = pContext.getLevel();
-            HangingEntity hangingentity = new ImageFrame(ModItems.IMAGE_FRAME_ENTITY.get(), level, blockpos1, direction);
+            EntityType<ImageFrame> entityType = ModItems.IMAGE_FRAME_ENTITY.get();
+            ImageFrameItem item = ModItems.IMAGE_FRAME_ITEM.get();
+            ImageFrame frame = new ImageFrame(entityType, level, blockpos1, direction);
 
-            CompoundTag compoundtag = itemstack.getTag();
-            if (compoundtag != null) {
-                EntityType.updateCustomEntityTag(level, player, hangingentity, compoundtag);
-            }
+            if (frame.survives()) {
+                long imageId = item.getImageId(itemstack);
+                frame.setImageId(imageId);
 
-            if (hangingentity.survives()) {
                 if (!level.isClientSide) {
-                    hangingentity.playPlacementSound();
-                    level.gameEvent(player, GameEvent.ENTITY_PLACE, hangingentity.position());
-                    level.addFreshEntity(hangingentity);
+                    frame.playPlacementSound();
+                    level.gameEvent(player, GameEvent.ENTITY_PLACE, frame.position());
+                    level.addFreshEntity(frame);
                 }
 
                 itemstack.shrink(1);

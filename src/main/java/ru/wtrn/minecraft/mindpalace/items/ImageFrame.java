@@ -122,6 +122,7 @@ public class ImageFrame extends HangingEntity {
 
     public void addAdditionalSaveData(CompoundTag pCompound) {
         pCompound.putByte("facing", (byte)this.direction.get2DDataValue());
+        pCompound.putLong("imageId", imageId);
         super.addAdditionalSaveData(pCompound);
     }
 
@@ -130,6 +131,7 @@ public class ImageFrame extends HangingEntity {
      */
     public void readAdditionalSaveData(CompoundTag pCompound) {
         this.direction = Direction.from2DDataValue(pCompound.getByte("facing"));
+        this.imageId = pCompound.getLong("imageId");
         super.readAdditionalSaveData(pCompound);
         this.setDirection(this.direction);
     }
@@ -160,4 +162,11 @@ public class ImageFrame extends HangingEntity {
         return true;
     }
 
+    public long getImageId() {
+        return imageId;
+    }
+
+    public void setImageId(long imageId) {
+        this.imageId = imageId;
+    }
 }

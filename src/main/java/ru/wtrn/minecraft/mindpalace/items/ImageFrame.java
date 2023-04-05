@@ -5,10 +5,15 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.HangingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import ru.wtrn.minecraft.mindpalace.block.ImageBlock;
@@ -111,12 +116,17 @@ public class ImageFrame extends HangingEntity {
 
     @Override
     public boolean isAttackable() {
-        return true;
+        return false;
     }
 
     @Override
-    public boolean skipAttackInteraction(Entity pEntity) {
-        return false;
+    public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
+        ItemStack mainHandItem = pPlayer.getMainHandItem();
+        if (mainHandItem.is(Items.STICK)) {
+            kill();
+            dropItem(null);
+        }
+        return InteractionResult.SUCCESS;
     }
 
     @Override

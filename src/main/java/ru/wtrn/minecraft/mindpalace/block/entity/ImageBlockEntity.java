@@ -11,8 +11,9 @@ import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
 import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
 
 public class ImageBlockEntity extends BlockEntity {
-    public Vec2f min = new Vec2f(0, 0);
-    public Vec2f max = new Vec2f(10, 1);
+
+    private final float xSize = 10f;
+    private final float ySize = 10f;
 
     public ImageBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(ModBlockEntities.IMAGE_BLOCK.get(), blockPos, blockState);
@@ -26,6 +27,12 @@ public class ImageBlockEntity extends BlockEntity {
         Direction direction = getDirection();
         Facing facing = Facing.get(direction);
         AlignedBox box = ImageBlock.box(direction);
+
+        float xMiddle = xSize / 2;
+        float yMiddle = ySize / 2;
+
+        Vec2f min = new Vec2f(0.5f - xMiddle, 0.5f - yMiddle);
+        Vec2f max = new Vec2f(0.5f + xMiddle, 0.5f + yMiddle);
 
         Axis one = facing.one();
         Axis two = facing.two();

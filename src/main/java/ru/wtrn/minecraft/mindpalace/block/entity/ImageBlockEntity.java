@@ -44,6 +44,11 @@ public class ImageBlockEntity extends BlockEntity {
             two = facing.one();
         }
 
+        if (facing == Facing.EAST || facing == Facing.NORTH) {
+            min.x -= xSize - 1;
+            max.x -= xSize - 1;
+        }
+
         box.setMin(one, min.x);
         box.setMax(one, max.x);
 

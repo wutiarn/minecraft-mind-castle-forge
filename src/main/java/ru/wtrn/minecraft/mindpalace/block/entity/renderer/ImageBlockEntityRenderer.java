@@ -129,7 +129,7 @@ public class ImageBlockEntityRenderer implements BlockEntityRenderer<ImageBlockE
 
     @Override
     public boolean shouldRenderOffScreen(ImageBlockEntity pBlockEntity) {
-        return true;
+        return false;
     }
 
     @Override
@@ -160,9 +160,8 @@ public class ImageBlockEntityRenderer implements BlockEntityRenderer<ImageBlockE
 
         pose.pushPose();
 
-        pose.translate(0.5, 0.5, 0.5);
-        pose.mulPose(facing.rotation().rotation((float) Math.toRadians(0)));
-        pose.translate(-0.5, -0.5, -0.5);
+        Vec3i normal = face.facing.normal;
+        pose.translate(normal.getX(), normal.getY(), normal.getZ());
 
         RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
         Tesselator tesselator = Tesselator.getInstance();
@@ -170,7 +169,6 @@ public class ImageBlockEntityRenderer implements BlockEntityRenderer<ImageBlockE
         builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
         Matrix4f mat = pose.last().pose();
         Matrix3f mat3f = pose.last().normal();
-        Vec3i normal = face.facing.normal;
         for (BoxCorner corner : face.corners)
             builder.vertex(mat, box.get(corner.x), box.get(corner.y), box.get(corner.z))
                     .uv(corner.isFacing(face.getTexU()) ? 1 : 0, corner.isFacing(face.getTexV()) ? 1 : 0).color(-1)

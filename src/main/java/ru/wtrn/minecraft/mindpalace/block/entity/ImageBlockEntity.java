@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import ru.wtrn.minecraft.mindpalace.block.ImageBlock;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Facing;
@@ -48,5 +49,10 @@ public class ImageBlockEntity extends BlockEntity {
         box.setMin(two, min.y);
         box.setMax(two, max.y);
         return box;
+    }
+
+    @Override
+    public AABB getRenderBoundingBox() {
+        return getBox().getBB(getBlockPos());
     }
 }

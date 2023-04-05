@@ -7,11 +7,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.HangingEntity;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -28,7 +32,7 @@ public class ImageFrame extends HangingEntity {
     private final float ySize = 10f;
     public static final float frameThickness = 0.031F;
     private boolean initialized = false;
-    private long imageId = 0;
+    private static final EntityDataAccessor<Long> DATA_IMAGE_ID = SynchedEntityData.defineId(ImageFrame.class, EntityDataSerializers.LONG);
 
     public ImageFrame(EntityType<ImageFrame> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -50,7 +54,7 @@ public class ImageFrame extends HangingEntity {
     public void dropItem(@Nullable Entity pBrokenEntity) {
         ImageFrameItem item = ModItems.IMAGE_FRAME_ITEM.get();
         ItemStack stack = new ItemStack(item, 1);
-        item.setImageId(stack, imageId);
+        item.setImageId(stack, getImageId());
         this.spawnAtLocation(stack);
     }
 
@@ -62,7 +66,7 @@ public class ImageFrame extends HangingEntity {
             dropItem(null);
         }
         if (pPlayer.isLocalPlayer()) {
-            pPlayer.sendSystemMessage(Component.literal("Image ID: " + imageId));
+            pPlayer.sendSystemMessage(Component.literal("Image ID: " + getImageId()));
         }
         return InteractionResult.SUCCESS;
     }
@@ -115,6 +119,12 @@ public class ImageFrame extends HangingEntity {
     }
 
     @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.getEntityData().define(DATA_IMAGE_ID, 0L);
+    }
+
+    @Override
     public void recreateFromPacket(ClientboundAddEntityPacket pPacket) {
         super.recreateFromPacket(pPacket);
         this.setDirection(Direction.from3DDataValue(pPacket.getData()));
@@ -122,7 +132,7 @@ public class ImageFrame extends HangingEntity {
 
     public void addAdditionalSaveData(CompoundTag pCompound) {
         pCompound.putByte("facing", (byte)this.direction.get2DDataValue());
-        pCompound.putLong("imageId", imageId);
+        pCompound.putLong("imageId", getImageId());
         super.addAdditionalSaveData(pCompound);
     }
 
@@ -131,7 +141,7 @@ public class ImageFrame extends HangingEntity {
      */
     public void readAdditionalSaveData(CompoundTag pCompound) {
         this.direction = Direction.from2DDataValue(pCompound.getByte("facing"));
-        this.imageId = pCompound.getLong("imageId");
+        setImageId(pCompound.getLong("imageId"));
         super.readAdditionalSaveData(pCompound);
         this.setDirection(this.direction);
     }
@@ -163,10 +173,10 @@ public class ImageFrame extends HangingEntity {
     }
 
     public long getImageId() {
-        return imageId;
+        return getEntityData().get(DATA_IMAGE_ID);
     }
 
     public void setImageId(long imageId) {
-        this.imageId = imageId;
+        getEntityData().set(DATA_IMAGE_ID, imageId);
     }
 }

@@ -1,10 +1,11 @@
-package ru.wtrn.minecraft.mindpalace.util.math;
+package ru.wtrn.minecraft.mindpalace.util.math.vec;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
+import team.creative.creativecore.common.util.math.base.Axis;
 
 public class Vec3d extends VecNd<Vec3d> {
     
@@ -48,7 +49,7 @@ public class Vec3d extends VecNd<Vec3d> {
     }
     
     public BlockPos toBlockPos() {
-        return new BlockPos(x, y, z);
+        return BlockPos.containing(x, y, z);
     }
     
     @Override

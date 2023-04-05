@@ -1,32 +1,32 @@
-package ru.wtrn.minecraft.mindpalace.util.math;
+package ru.wtrn.minecraft.mindpalace.util.math.vec;
 
-public class Vec2d extends VecNd<Vec2d> {
+public class Vec2f extends VecNf<Vec2f> {
     
-    public double x;
-    public double y;
+    public float x;
+    public float y;
     
-    public Vec2d() {
+    public Vec2f() {
         super();
     }
     
-    public Vec2d(double x, double y) {
+    public Vec2f(float x, float y) {
         super();
         this.x = x;
         this.y = y;
     }
     
-    public Vec2d(Vec2d vec) {
+    public Vec2f(Vec2f vec) {
         super(vec);
     }
     
     @Override
-    public void set(Vec2d vec) {
+    public void set(Vec2f vec) {
         this.x = vec.x;
         this.y = vec.y;
     }
     
     @Override
-    public double get(int dim) {
+    public float get(int dim) {
         if (dim == 0)
             return x;
         else if (dim == 1)
@@ -34,13 +34,8 @@ public class Vec2d extends VecNd<Vec2d> {
         return 0;
     }
     
-    public void set(double x, double y) {
-        this.x = x;
-        this.y = y;
-    }
-    
     @Override
-    public void set(int dim, double value) {
+    public void set(int dim, float value) {
         if (dim == 0)
             this.x = value;
         else if (dim == 1)
@@ -53,28 +48,28 @@ public class Vec2d extends VecNd<Vec2d> {
     }
     
     @Override
-    public Vec2d copy() {
-        return new Vec2d(x, y);
+    public Vec2f copy() {
+        return new Vec2f(x, y);
     }
     
-    public void add(double x, double y) {
+    public void add(float x, float y) {
         this.x += x;
         this.y += y;
     }
     
     @Override
-    public void add(Vec2d vec) {
+    public void add(Vec2f vec) {
         this.x += x;
         this.y += y;
     }
     
-    public void sub(double x, double y) {
+    public void sub(float x, float y) {
         this.x -= x;
         this.y -= y;
     }
     
     @Override
-    public void sub(Vec2d vec) {
+    public void sub(Vec2f vec) {
         this.x -= vec.x;
         this.y -= vec.y;
     }
@@ -87,33 +82,33 @@ public class Vec2d extends VecNd<Vec2d> {
     
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Vec2d)
-            return ((Vec2d) obj).x == x && ((Vec2d) obj).y == y;
+        if (obj instanceof Vec2f)
+            return ((Vec2f) obj).x == x && ((Vec2f) obj).y == y;
         return false;
     }
     
     @Override
-    public boolean epsilonEquals(Vec2d var1, double var2) {
-        double var3 = this.x - var1.x;
-        if (Double.isNaN(var3))
+    public boolean epsilonEquals(Vec2f var1, float var2) {
+        float var3 = this.x - var1.x;
+        if (Float.isNaN(var3))
             return false;
         else if ((var3 < 0.0F ? -var3 : var3) > var2)
             return false;
         var3 = this.y - var1.y;
-        if (Double.isNaN(var3))
+        if (Float.isNaN(var3))
             return false;
         return (var3 < 0.0F ? -var3 : var3) <= var2;
     }
     
     @Override
-    public double distance(Vec2d vec) {
+    public double distance(Vec2f vec) {
         double x = this.x - vec.x;
         double y = this.y - vec.y;
         return Math.sqrt(x * x + y * y);
     }
     
     @Override
-    public double distanceSqr(Vec2d vec) {
+    public double distanceSqr(Vec2f vec) {
         double x = this.x - vec.x;
         double y = this.y - vec.y;
         return x * x + y * y;
@@ -130,7 +125,7 @@ public class Vec2d extends VecNd<Vec2d> {
     }
     
     @Override
-    public double angle(Vec2d vec) {
+    public double angle(Vec2f vec) {
         double vDot = this.dot(vec) / (this.length() * vec.length());
         if (vDot < -1.0)
             vDot = -1.0;
@@ -140,7 +135,7 @@ public class Vec2d extends VecNd<Vec2d> {
     }
     
     @Override
-    public double dot(Vec2d vec) {
+    public float dot(Vec2f vec) {
         return x * vec.x + y * vec.y;
     }
     

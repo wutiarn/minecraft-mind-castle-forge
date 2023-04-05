@@ -1,4 +1,4 @@
-package ru.wtrn.minecraft.mindpalace.util.math;
+package ru.wtrn.minecraft.mindpalace.util.math.base;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
@@ -10,6 +10,8 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
+import team.creative.creativecore.common.util.math.vec.Vec3d;
+import team.creative.creativecore.common.util.math.vec.Vec3f;
 
 public enum Axis {
     

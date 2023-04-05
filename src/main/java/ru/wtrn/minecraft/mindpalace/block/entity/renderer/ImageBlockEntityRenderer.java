@@ -14,6 +14,7 @@ import org.lwjgl.opengl.GL12;
 import org.slf4j.Logger;
 import ru.wtrn.minecraft.mindpalace.block.entity.ImageBlockEntity;
 import ru.wtrn.minecraft.mindpalace.util.math.Facing;
+import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;

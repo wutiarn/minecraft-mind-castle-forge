@@ -1,4 +1,4 @@
-package ru.wtrn.minecraft.mindpalace.util.math;
+package ru.wtrn.minecraft.mindpalace.util.math.vec;
 
 public class Vec1d extends VecNd<Vec1d> {
     

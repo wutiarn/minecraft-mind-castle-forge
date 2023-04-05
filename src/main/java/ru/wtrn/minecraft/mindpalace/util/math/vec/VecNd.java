@@ -1,4 +1,7 @@
-package ru.wtrn.minecraft.mindpalace.util.math;
+package ru.wtrn.minecraft.mindpalace.util.math.vec;
+
+import team.creative.creativecore.common.util.math.base.Axis;
+import team.creative.creativecore.common.util.math.geo.VectorFan;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -57,7 +60,7 @@ public abstract class VecNd<T extends VecNd> {
     public abstract boolean epsilonEquals(T vec, double epsilon);
     
     public boolean epsilonEquals(T vec) {
-        return epsilonEquals(vec, VecNf.EPSILON);
+        return epsilonEquals(vec, VectorFan.EPSILON);
     }
     
     public abstract double distance(T vec);

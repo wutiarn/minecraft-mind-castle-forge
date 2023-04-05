@@ -10,6 +10,8 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
@@ -125,6 +127,16 @@ public class ImageBlockEntityRenderer implements BlockEntityRenderer<ImageBlockE
         return textureID;
     }
 
+    @Override
+    public boolean shouldRenderOffScreen(ImageBlockEntity pBlockEntity) {
+        return true;
+    }
+
+    @Override
+    public boolean shouldRender(ImageBlockEntity frame, @NotNull Vec3 vec) {
+        return Vec3.atCenterOf(frame.getBlockPos()).closerThan(vec, 30);
+    }
+
 
     @Override
     public void render(ImageBlockEntity entity, float pPartialTick, PoseStack pose, MultiBufferSource multiBufferSource, int pPackedLight, int pPackedOverlay) {
@@ -140,8 +152,8 @@ public class ImageBlockEntityRenderer implements BlockEntityRenderer<ImageBlockE
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 
-        Facing facing = Facing.WEST;
-        AlignedBox box = new AlignedBox();
+        Facing facing = Facing.get(entity.getDirection());
+        AlignedBox box = entity.getBox();
         box.grow(facing.axis, 0.01F);
         BoxFace face = BoxFace.get(facing);
 

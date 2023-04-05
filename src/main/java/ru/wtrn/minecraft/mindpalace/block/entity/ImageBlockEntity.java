@@ -12,14 +12,18 @@ import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
 
 public class ImageBlockEntity extends BlockEntity {
     public Vec2f min = new Vec2f(0, 0);
-    public Vec2f max = new Vec2f(1, 1);
+    public Vec2f max = new Vec2f(10, 1);
 
     public ImageBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(ModBlockEntities.IMAGE_BLOCK.get(), blockPos, blockState);
     }
 
+    public Direction getDirection() {
+        return Direction.WEST;
+    }
+
     public AlignedBox getBox() {
-        Direction direction = Direction.WEST;
+        Direction direction = getDirection();
         Facing facing = Facing.get(direction);
         AlignedBox box = ImageBlock.box(direction);
 

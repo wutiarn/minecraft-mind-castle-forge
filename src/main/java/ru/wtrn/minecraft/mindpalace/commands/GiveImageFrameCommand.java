@@ -29,7 +29,7 @@ public class GiveImageFrameCommand {
         ItemStack stack = new ItemStack(item, 1);
         item.setImageId(stack, image_id);
         context.getSource().getPlayer().getInventory().add(stack);
-        context.getSource().sendSuccess(Component.literal("Given " + item.getName(stack)), true);
+        context.getSource().sendSuccess(Component.literal("Given " + item.getName(stack).getString()), true);
         return 0;
     }
 }

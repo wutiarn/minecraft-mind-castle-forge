@@ -3,6 +3,7 @@ package ru.wtrn.minecraft.mindpalace.items;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.HangingEntity;
@@ -56,5 +57,10 @@ public class ImageFrameItem extends Item {
 
     protected boolean mayPlace(Player pPlayer, Direction pDirection, ItemStack pHangingEntityStack, BlockPos pPos) {
         return !pDirection.getAxis().isVertical() && pPlayer.mayUseItemAt(pPos, pDirection, pHangingEntityStack);
+    }
+
+    @Override
+    public Component getName(ItemStack pStack) {
+        return Component.literal("Image #1234");
     }
 }

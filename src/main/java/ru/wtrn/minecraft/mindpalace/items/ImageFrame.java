@@ -28,6 +28,7 @@ public class ImageFrame extends HangingEntity {
     private final float ySize = 10f;
     public static final float frameThickness = 0.031F;
     private boolean initialized = false;
+    private long imageId = 0;
 
     public ImageFrame(EntityType<ImageFrame> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -47,7 +48,10 @@ public class ImageFrame extends HangingEntity {
 
     @Override
     public void dropItem(@Nullable Entity pBrokenEntity) {
-
+        ImageFrameItem item = ModItems.IMAGE_FRAME_ITEM.get();
+        ItemStack stack = new ItemStack(item, 1);
+        item.setImageId(stack, imageId);
+        this.spawnAtLocation(stack);
     }
 
     @Override
@@ -58,7 +62,7 @@ public class ImageFrame extends HangingEntity {
             dropItem(null);
         }
         if (pPlayer.isLocalPlayer()) {
-            pPlayer.sendSystemMessage(Component.literal("Image ID: TODO"));
+            pPlayer.sendSystemMessage(Component.literal("Image ID: " + imageId));
         }
         return InteractionResult.SUCCESS;
     }

@@ -2,22 +2,18 @@ package ru.wtrn.minecraft.mindpalace.block.entity.renderer;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.core.Vec3i;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.slf4j.Logger;
 import ru.wtrn.minecraft.mindpalace.block.entity.ImageBlockEntity;
+import ru.wtrn.minecraft.mindpalace.util.math.Facing;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -127,53 +123,9 @@ public class ImageBlockEntityRenderer implements BlockEntityRenderer<ImageBlockE
     public void render(ImageBlockEntity entity, float pPartialTick, PoseStack pose, MultiBufferSource multiBufferSource, int pPackedLight, int pPackedOverlay) {
         int textureId = getTextureId();
 
-//        RenderSystem.enableDepthTest();
-//        RenderSystem.enableBlend();
-//        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-////        RenderSystem.setShaderColor(frame.brightness, frame.brightness, frame.brightness, frame.alpha);
-//        RenderSystem.bindTexture(textureId);
-//        RenderSystem.setShaderTexture(0, textureId);
-//
-//        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-//        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-//
-//        pose.pushPose();
-//        pose.translate(0.5, 0.5, 0.5);
-//        pose.popPose();
-//
-//        Matrix4f mat = pose.last().pose();
-//        Matrix3f mat3f = pose.last().normal();
-//
-//        RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
-//        Tesselator tesselator = Tesselator.getInstance();
-//        BufferBuilder builder = tesselator.getBuilder();
-//        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
-//
-//        builder
-//                .vertex(mat, 0, 0, 0)
-//                .uv(0, 0)
-//                .normal(mat3f, 0, 0, 0)
-//                .endVertex();
-//
-//        builder
-//                .vertex(mat, 0, 0, 1)
-//                .uv(0, 1)
-//                .normal(mat3f, 0, 0, 1)
-//                .endVertex();
-//
-//        builder
-//                .vertex(mat, 1, 0, 1)
-//                .uv(1, 1)
-//                .normal(mat3f, 1, 0, 1)
-//                .endVertex();
-//
-//        builder
-//                .vertex(mat, 1, 0, 0)
-//                .uv(1, 0)
-//                .normal(mat3f, 1, 0, 0)
-//                .endVertex();
-//
-//        tesselator.end();
-
+        Facing facing = Facing.WEST;
+        AlignedBox box = frame.getBox();
+        box.grow(facing.axis, 0.01F);
+        BoxFace face = BoxFace.get(facing);
     }
 }

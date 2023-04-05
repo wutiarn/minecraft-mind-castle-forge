@@ -5,6 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.HangingEntity;
@@ -21,6 +22,7 @@ public class ImageFrame extends HangingEntity {
     private final float xSize = 10f;
     private final float ySize = 10f;
     public static final float frameThickness = 0.031F;
+    private boolean initialized = false;
 
     public ImageFrame(EntityType<ImageFrame> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -29,6 +31,13 @@ public class ImageFrame extends HangingEntity {
     public ImageFrame(EntityType<? extends HangingEntity> pEntityType, Level pLevel, BlockPos pPos, Direction direction) {
         super(pEntityType, pLevel, pPos);
         setDirection(direction);
+    }
+
+    @Override
+    protected void setDirection(Direction pFacingDirection) {
+        super.setDirection(pFacingDirection);
+        initialized = true;
+        recalculateBoundingBox();
     }
 
     @Override
@@ -100,4 +109,22 @@ public class ImageFrame extends HangingEntity {
         this.setDirection(Direction.from3DDataValue(pPacket.getData()));
     }
 
+    @Override
+    public boolean isAttackable() {
+        return true;
+    }
+
+    @Override
+    public boolean skipAttackInteraction(Entity pEntity) {
+        return false;
+    }
+
+    @Override
+    protected void recalculateBoundingBox() {
+        if (!initialized) {
+            super.recalculateBoundingBox();
+            return;
+        }
+        this.setBoundingBox(getBox().getBB(getPos()));
+    }
 }

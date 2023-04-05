@@ -17,6 +17,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -57,7 +58,12 @@ public class ImageFrame extends HangingEntity {
         ImageFrameItem item = ModItems.IMAGE_FRAME_ITEM.get();
         ItemStack stack = new ItemStack(item, 1);
         item.setImageId(stack, getImageId());
-        this.spawnAtLocation(stack);
+        if (pBrokenEntity instanceof Player) {
+            Inventory inventory = ((Player) pBrokenEntity).getInventory();
+            inventory.add(stack);
+        } else {
+            this.spawnAtLocation(stack);
+        }
     }
 
     @Override
@@ -65,7 +71,7 @@ public class ImageFrame extends HangingEntity {
         ItemStack mainHandItem = pPlayer.getMainHandItem();
         if (mainHandItem.is(Items.STICK)) {
             kill();
-            dropItem(null);
+            dropItem(pPlayer);
         }
         if (pPlayer.isLocalPlayer()) {
             pPlayer.sendSystemMessage(Component.literal("Image ID: " + getImageId()));

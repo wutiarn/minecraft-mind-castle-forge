@@ -128,11 +128,6 @@ public class ImageBlockEntityRenderer implements BlockEntityRenderer<ImageBlockE
     }
 
     @Override
-    public boolean shouldRenderOffScreen(ImageBlockEntity pBlockEntity) {
-        return false;
-    }
-
-    @Override
     public boolean shouldRender(ImageBlockEntity frame, @NotNull Vec3 vec) {
         return Vec3.atCenterOf(frame.getBlockPos()).closerThan(vec, 30);
     }
@@ -156,7 +151,6 @@ public class ImageBlockEntityRenderer implements BlockEntityRenderer<ImageBlockE
         AlignedBox box = entity.getBox();
         box.grow(facing.axis, 0.01F);
         BoxFace face = BoxFace.get(facing);
-
 
         pose.pushPose();
 

@@ -29,11 +29,8 @@ public class ImageBlockEntity extends BlockEntity {
         Facing facing = Facing.get(direction);
         AlignedBox box = ImageBlock.box(direction);
 
-        float xMiddle = xSize / 2;
-        float yMiddle = ySize / 2;
-
-        Vec2f min = new Vec2f(0.5f - xMiddle, 0.5f - yMiddle);
-        Vec2f max = new Vec2f(0.5f + xMiddle, 0.5f + yMiddle);
+        Vec2f min = new Vec2f(0, 0);
+        Vec2f max = new Vec2f(xSize, ySize);
 
         Axis one = facing.one();
         Axis two = facing.two();

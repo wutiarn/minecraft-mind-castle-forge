@@ -2,35 +2,24 @@ package ru.wtrn.minecraft.mindpalace.items;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.HangingEntity;
-import net.minecraft.world.entity.decoration.Painting;
-import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-import ru.wtrn.minecraft.mindpalace.block.ImageBlock;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Facing;
 import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
 import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
-
-import java.util.Optional;
 
 public class ImageFrame extends HangingEntity {
 
@@ -56,28 +45,27 @@ public class ImageFrame extends HangingEntity {
     }
 
     @Override
-    public int getWidth() {
-        return 1;
-    }
-
-    @Override
-    public int getHeight() {
-        return 1;
-    }
-
-    @Override
     public void dropItem(@Nullable Entity pBrokenEntity) {
 
     }
 
     @Override
-    public void playPlacementSound() {
-
+    public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
+        ItemStack mainHandItem = pPlayer.getMainHandItem();
+        if (mainHandItem.is(Items.STICK)) {
+            kill();
+            dropItem(null);
+        }
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public boolean survives() {
-        return true;
+    protected void recalculateBoundingBox() {
+        if (!initialized) {
+            super.recalculateBoundingBox();
+            return;
+        }
+        this.setBoundingBox(getBox().getBB(getPos()));
     }
 
     public AlignedBox getBox() {
@@ -124,30 +112,6 @@ public class ImageFrame extends HangingEntity {
         this.setDirection(Direction.from3DDataValue(pPacket.getData()));
     }
 
-    @Override
-    public boolean isAttackable() {
-        return false;
-    }
-
-    @Override
-    public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
-        ItemStack mainHandItem = pPlayer.getMainHandItem();
-        if (mainHandItem.is(Items.STICK)) {
-            kill();
-            dropItem(null);
-        }
-        return InteractionResult.SUCCESS;
-    }
-
-    @Override
-    protected void recalculateBoundingBox() {
-        if (!initialized) {
-            super.recalculateBoundingBox();
-            return;
-        }
-        this.setBoundingBox(getBox().getBB(getPos()));
-    }
-
     public void addAdditionalSaveData(CompoundTag pCompound) {
         pCompound.putByte("facing", (byte)this.direction.get2DDataValue());
         super.addAdditionalSaveData(pCompound);
@@ -161,4 +125,31 @@ public class ImageFrame extends HangingEntity {
         super.readAdditionalSaveData(pCompound);
         this.setDirection(this.direction);
     }
+
+
+    @Override
+    public int getWidth() {
+        return 1;
+    }
+
+    @Override
+    public int getHeight() {
+        return 1;
+    }
+
+    @Override
+    public void playPlacementSound() {
+
+    }
+
+    @Override
+    public boolean isAttackable() {
+        return false;
+    }
+
+    @Override
+    public boolean survives() {
+        return true;
+    }
+
 }

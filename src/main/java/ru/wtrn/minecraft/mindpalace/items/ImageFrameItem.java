@@ -61,7 +61,7 @@ public class ImageFrameItem extends Item {
 
     @Override
     public Component getName(ItemStack pStack) {
-        return Component.literal("Image #1234");
+        return Component.literal("Image #" + getImageId(pStack));
     }
 
     public void setImageId(ItemStack stack, long imageId) {

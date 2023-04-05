@@ -52,9 +52,10 @@ public class WtrnMindPalaceMod {
     }
 
     private void addCreative(CreativeModeTabEvent.BuildContents event) {
-        if (event.getTab() == ModCreativeModeTab.MIND_PALACE_TAB)
+        if (event.getTab() == ModCreativeModeTab.MIND_PALACE_TAB) {
             event.accept(ModBlocks.IMAGE_BLOCK);
             event.accept(ModItems.IMAGE_FRAME_ITEM);
+        }
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call

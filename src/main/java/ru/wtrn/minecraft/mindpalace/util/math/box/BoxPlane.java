@@ -1,7 +1,8 @@
 package ru.wtrn.minecraft.mindpalace.util.math.box;
 
-import team.creative.creativecore.common.util.math.base.Axis;
-import team.creative.creativecore.common.util.math.vec.Vec3d;
+
+import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec3d;
 
 public class BoxPlane {
     

@@ -1,8 +1,6 @@
 package ru.wtrn.minecraft.mindpalace.util.math.matrix;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
@@ -10,9 +8,9 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Vector3d;
-import team.creative.creativecore.common.util.math.base.Axis;
-import team.creative.creativecore.common.util.math.box.BoxCorner;
-import team.creative.creativecore.common.util.math.vec.Vec3d;
+import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
+import ru.wtrn.minecraft.mindpalace.util.math.box.BoxCorner;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec3d;
 
 public interface IVecOrigin {
     
@@ -180,7 +178,6 @@ public interface IVecOrigin {
         return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
     }
     
-    @Environment(EnvType.CLIENT)
     @OnlyIn(Dist.CLIENT)
     public default void setupRenderingInternal(PoseStack matrixStack, Entity entity, float partialTicks) {
         double rotX = rotXLast() + (rotX() - rotXLast()) * partialTicks;
@@ -204,7 +201,6 @@ public interface IVecOrigin {
         matrixStack.translate(-rotationCenter.x, -rotationCenter.y, -rotationCenter.z);
     }
     
-    @Environment(EnvType.CLIENT)
     @OnlyIn(Dist.CLIENT)
     public default void setupRendering(PoseStack matrixStack, Entity entity, float partialTicks) {
         setupRenderingInternal(matrixStack, entity, partialTicks);

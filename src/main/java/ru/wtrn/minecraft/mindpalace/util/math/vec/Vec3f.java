@@ -2,7 +2,7 @@ package ru.wtrn.minecraft.mindpalace.util.math.vec;
 
 import org.joml.Vector3d;
 import org.joml.Vector3f;
-import team.creative.creativecore.common.util.math.base.Axis;
+import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
 
 public class Vec3f extends VecNf<Vec3f> {
     

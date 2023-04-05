@@ -4,7 +4,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
-import team.creative.creativecore.common.util.math.geo.NormalPlane;
+import ru.wtrn.minecraft.mindpalace.util.math.geo.NormalPlane;
 
 public enum Facing {
     

@@ -4,8 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.Vec3i;
-import team.creative.creativecore.common.util.math.vec.Vec3d;
-import team.creative.creativecore.common.util.math.vec.Vec3f;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec3d;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec3f;
 
 public class Mirror {
     

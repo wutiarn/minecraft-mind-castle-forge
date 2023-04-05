@@ -1,12 +1,12 @@
 package ru.wtrn.minecraft.mindpalace.util.math.collision;
 
 import org.apache.commons.lang3.BooleanUtils;
-import team.creative.creativecore.common.util.math.base.Axis;
-import team.creative.creativecore.common.util.math.geo.Ray2d;
-import team.creative.creativecore.common.util.math.geo.VectorFan;
-import team.creative.creativecore.common.util.math.vec.Vec2d;
-import team.creative.creativecore.common.util.math.vec.Vec2f;
-import team.creative.creativecore.common.util.math.vec.Vec3f;
+import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
+import ru.wtrn.minecraft.mindpalace.util.math.geo.Ray2d;
+import ru.wtrn.minecraft.mindpalace.util.math.geo.VectorFan;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2d;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec3f;
 
 import java.util.ArrayList;
 import java.util.Arrays;

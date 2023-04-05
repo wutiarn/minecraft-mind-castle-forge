@@ -2,12 +2,10 @@ package ru.wtrn.minecraft.mindpalace.util.math.geo;
 
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import team.creative.creativecore.common.util.math.base.Axis;
+import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
 
 public class Rect {
     
@@ -23,7 +21,6 @@ public class Rect {
         this.maxY = y2;
     }
     
-    @Environment(EnvType.CLIENT)
     @OnlyIn(Dist.CLIENT)
     public static Rect getScreenRect() {
         Minecraft mc = Minecraft.getInstance();
@@ -78,7 +75,6 @@ public class Rect {
         }
     }
     
-    @Environment(EnvType.CLIENT)
     @OnlyIn(Dist.CLIENT)
     public void scissor() {
         Window window = Minecraft.getInstance().getWindow();

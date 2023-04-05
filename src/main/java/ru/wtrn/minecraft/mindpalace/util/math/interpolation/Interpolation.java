@@ -1,8 +1,8 @@
 package ru.wtrn.minecraft.mindpalace.util.math.interpolation;
 
-import team.creative.creativecore.common.util.math.vec.VecNd;
-import team.creative.creativecore.common.util.type.list.Tuple;
-import team.creative.creativecore.common.util.type.list.TupleList;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.VecNd;
+import ru.wtrn.minecraft.mindpalace.util.type.list.Tuple;
+import ru.wtrn.minecraft.mindpalace.util.type.list.TupleList;
 
 import java.util.List;
 import java.util.Map.Entry;

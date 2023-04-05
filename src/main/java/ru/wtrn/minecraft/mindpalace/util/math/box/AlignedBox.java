@@ -6,12 +6,12 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.joml.Vector3d;
-import team.creative.creativecore.common.util.math.base.Axis;
-import team.creative.creativecore.common.util.math.base.Facing;
-import team.creative.creativecore.common.util.math.matrix.Matrix3;
-import team.creative.creativecore.common.util.math.transformation.Rotation;
-import team.creative.creativecore.common.util.math.vec.Vec3d;
-import team.creative.creativecore.common.util.math.vec.Vec3f;
+import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
+import ru.wtrn.minecraft.mindpalace.util.math.base.Facing;
+import ru.wtrn.minecraft.mindpalace.util.math.matrix.Matrix3;
+import ru.wtrn.minecraft.mindpalace.util.math.transformation.Rotation;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec3d;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec3f;
 
 public class AlignedBox {
     
@@ -169,7 +169,7 @@ public class AlignedBox {
     }
     
     public BlockPos getOffset() {
-        return BlockPos.containing(minX, minY, minZ);
+        return new BlockPos(minX, minY, minZ);
     }
     
     public float get(Facing facing) {

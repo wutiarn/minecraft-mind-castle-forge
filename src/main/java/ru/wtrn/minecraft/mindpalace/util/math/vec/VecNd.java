@@ -1,7 +1,7 @@
 package ru.wtrn.minecraft.mindpalace.util.math.vec;
 
-import team.creative.creativecore.common.util.math.base.Axis;
-import team.creative.creativecore.common.util.math.geo.VectorFan;
+import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
+import ru.wtrn.minecraft.mindpalace.util.math.geo.VectorFan;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;

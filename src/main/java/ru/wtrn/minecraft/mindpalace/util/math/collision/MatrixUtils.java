@@ -1,7 +1,7 @@
 package ru.wtrn.minecraft.mindpalace.util.math.collision;
 
-import team.creative.creativecore.common.util.math.matrix.Matrix3;
-import team.creative.creativecore.common.util.math.matrix.Matrix4;
+import ru.wtrn.minecraft.mindpalace.util.math.matrix.Matrix3;
+import ru.wtrn.minecraft.mindpalace.util.math.matrix.Matrix4;
 
 public class MatrixUtils {
     

@@ -10,8 +10,8 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
-import team.creative.creativecore.common.util.math.vec.Vec3d;
-import team.creative.creativecore.common.util.math.vec.Vec3f;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec3d;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec3f;
 
 public enum Axis {
     

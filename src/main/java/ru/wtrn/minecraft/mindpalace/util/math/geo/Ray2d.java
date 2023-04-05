@@ -1,9 +1,9 @@
 package ru.wtrn.minecraft.mindpalace.util.math.geo;
 
 import org.joml.Vector3d;
-import team.creative.creativecore.common.util.math.base.Axis;
-import team.creative.creativecore.common.util.math.geo.VectorFan.ParallelException;
-import team.creative.creativecore.common.util.math.vec.*;
+import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
+import ru.wtrn.minecraft.mindpalace.util.math.geo.VectorFan.ParallelException;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.*;
 
 public class Ray2d {
     

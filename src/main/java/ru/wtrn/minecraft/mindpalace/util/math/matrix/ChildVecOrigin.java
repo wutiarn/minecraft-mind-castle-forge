@@ -2,8 +2,8 @@ package ru.wtrn.minecraft.mindpalace.util.math.matrix;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.world.entity.Entity;
-import team.creative.creativecore.common.util.math.base.Axis;
-import team.creative.creativecore.common.util.math.vec.Vec3d;
+import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec3d;
 
 public class ChildVecOrigin extends VecOrigin {
     

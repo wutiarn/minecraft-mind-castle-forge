@@ -1,10 +1,10 @@
 package ru.wtrn.minecraft.mindpalace.util.math.box;
 
 import net.minecraft.world.phys.AABB;
-import team.creative.creativecore.common.util.math.base.Axis;
-import team.creative.creativecore.common.util.math.base.Facing;
-import team.creative.creativecore.common.util.math.transformation.Rotation;
-import team.creative.creativecore.common.util.math.vec.Vec3d;
+import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
+import ru.wtrn.minecraft.mindpalace.util.math.base.Facing;
+import ru.wtrn.minecraft.mindpalace.util.math.transformation.Rotation;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec3d;
 
 public enum BoxCorner {
     

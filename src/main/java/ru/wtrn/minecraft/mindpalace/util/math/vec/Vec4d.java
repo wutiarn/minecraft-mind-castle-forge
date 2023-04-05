@@ -1,6 +1,6 @@
 package ru.wtrn.minecraft.mindpalace.util.math.vec;
 
-import team.creative.creativecore.common.util.math.base.Axis;
+import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
 
 public class Vec4d extends VecNd<Vec4d> {
     

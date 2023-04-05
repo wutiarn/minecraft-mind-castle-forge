@@ -4,23 +4,13 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Matrix4f;
-import team.creative.creativecore.client.render.box.RenderBox;
-import team.creative.creativecore.client.render.box.RenderBox.RenderInformationHolder;
-import team.creative.creativecore.client.render.model.CreativeBakedQuad;
-import team.creative.creativecore.common.util.math.base.Axis;
-import team.creative.creativecore.common.util.math.collision.IntersectionHelper;
-import team.creative.creativecore.common.util.math.utils.BooleanUtils;
-import team.creative.creativecore.common.util.math.vec.Vec2f;
-import team.creative.creativecore.common.util.math.vec.Vec3d;
-import team.creative.creativecore.common.util.math.vec.Vec3f;
-import team.creative.creativecore.common.util.math.vec.VectorUtils;
+import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
+import ru.wtrn.minecraft.mindpalace.util.math.collision.IntersectionHelper;
+import ru.wtrn.minecraft.mindpalace.util.math.utils.BooleanUtils;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec3d;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec3f;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -84,120 +74,7 @@ public class VectorFan {
         }
         return result;
     }
-    
-    @Environment(EnvType.CLIENT)
-    @OnlyIn(Dist.CLIENT)
-    public void generate(RenderInformationHolder holder, List<BakedQuad> quads) {
-        holder.normal = null;
-        Vec3f[] coords = this.coords;
-        if (!holder.getBox().allowOverlap && holder.hasBounds()) {
-            Axis one = holder.facing.one();
-            Axis two = holder.facing.two();
-            
-            float scaleOne;
-            float scaleTwo;
-            float offsetOne;
-            float offsetTwo;
-            if (holder.scaleAndOffset) {
-                scaleOne = 1 / VectorUtils.get(one, holder.scaleX, holder.scaleY, holder.scaleZ);
-                scaleTwo = 1 / VectorUtils.get(two, holder.scaleX, holder.scaleY, holder.scaleZ);
-                offsetOne = VectorUtils.get(one, holder.offsetX, holder.offsetY, holder.offsetZ);
-                offsetTwo = VectorUtils.get(two, holder.offsetX, holder.offsetY, holder.offsetZ);
-            } else {
-                scaleOne = 1;
-                scaleTwo = 1;
-                offsetOne = 0;
-                offsetTwo = 0;
-            }
-            
-            float minOne = VectorUtils.get(one, holder.minX, holder.minY, holder.minZ) * scaleOne - offsetOne;
-            float minTwo = VectorUtils.get(two, holder.minX, holder.minY, holder.minZ) * scaleTwo - offsetTwo;
-            float maxOne = VectorUtils.get(one, holder.maxX, holder.maxY, holder.maxZ) * scaleOne - offsetOne;
-            float maxTwo = VectorUtils.get(two, holder.maxX, holder.maxY, holder.maxZ) * scaleTwo - offsetTwo;
-            
-            coords = cutMinMax(one, two, holder.facing.axis, minOne, minTwo, maxOne, maxTwo);
-        }
-        if (coords == null)
-            return;
-        int index = 0;
-        while (index < coords.length - 3) {
-            generate(holder, coords[0], coords[index + 1], coords[index + 2], coords[index + 3], quads);
-            index += 2;
-        }
-        if (index < coords.length - 2)
-            generate(holder, coords[0], coords[index + 1], coords[index + 2], coords[index + 2], quads);
-    }
-    
-    @Environment(EnvType.CLIENT)
-    @OnlyIn(Dist.CLIENT)
-    protected void generate(RenderInformationHolder holder, Vec3f vec1, Vec3f vec2, Vec3f vec3, Vec3f vec4, List<BakedQuad> quads) {
-        BakedQuad quad = new CreativeBakedQuad(holder.quad, holder.getBox(), holder.color, holder.shouldOverrideColor, holder.facing.toVanilla());
-        RenderBox box = holder.getBox();
-        
-        for (int k = 0; k < 4; k++) {
-            Vec3f vec;
-            if (k == 0)
-                vec = vec1;
-            else if (k == 1)
-                vec = vec2;
-            else if (k == 2)
-                vec = vec3;
-            else
-                vec = vec4;
-            
-            int index = k * holder.format.getIntegerSize();
-            
-            float x;
-            float y;
-            float z;
-            
-            if (holder.scaleAndOffset) {
-                x = vec.x * holder.scaleX + holder.offsetX - holder.offset.getX();
-                y = vec.y * holder.scaleY + holder.offsetY - holder.offset.getY();
-                z = vec.z * holder.scaleZ + holder.offsetZ - holder.offset.getZ();
-            } else {
-                x = vec.x - holder.offset.getX();
-                y = vec.y - holder.offset.getY();
-                z = vec.z - holder.offset.getZ();
-            }
-            
-            if (doMinMaxLate() && !box.allowOverlap) {
-                if (holder.facing.axis != Axis.X)
-                    x = Mth.clamp(x, holder.minX, holder.maxX);
-                if (holder.facing.axis != Axis.Y)
-                    y = Mth.clamp(y, holder.minY, holder.maxY);
-                if (holder.facing.axis != Axis.Z)
-                    z = Mth.clamp(z, holder.minZ, holder.maxZ);
-            }
-            
-            float oldX = Float.intBitsToFloat(quad.getVertices()[index]);
-            float oldY = Float.intBitsToFloat(quad.getVertices()[index + 1]);
-            float oldZ = Float.intBitsToFloat(quad.getVertices()[index + 2]);
-            
-            quad.getVertices()[index] = Float.floatToIntBits(x + holder.offset.getX());
-            quad.getVertices()[index + 1] = Float.floatToIntBits(y + holder.offset.getY());
-            quad.getVertices()[index + 2] = Float.floatToIntBits(z + holder.offset.getZ());
-            
-            if (box.keepVU)
-                continue;
-            
-            int uvIndex = index + holder.uvOffset / 4;
-            
-            float uOffset;
-            float vOffset;
-            if (holder.uvInverted) {
-                uOffset = ((holder.facing.getV(oldX, oldY, oldZ) - holder.facing.getV(x, y, z)) / holder.facing.getV(holder.sizeX, holder.sizeY, holder.sizeZ)) * holder.sizeU;
-                vOffset = ((holder.facing.getU(oldX, oldY, oldZ) - holder.facing.getU(x, y, z)) / holder.facing.getU(holder.sizeX, holder.sizeY, holder.sizeZ)) * holder.sizeV;
-            } else {
-                uOffset = ((holder.facing.getU(oldX, oldY, oldZ) - holder.facing.getU(x, y, z)) / holder.facing.getU(holder.sizeX, holder.sizeY, holder.sizeZ)) * holder.sizeU;
-                vOffset = ((holder.facing.getV(oldX, oldY, oldZ) - holder.facing.getV(x, y, z)) / holder.facing.getV(holder.sizeX, holder.sizeY, holder.sizeZ)) * holder.sizeV;
-            }
-            quad.getVertices()[uvIndex] = Float.floatToIntBits(Float.intBitsToFloat(quad.getVertices()[uvIndex]) - uOffset);
-            quad.getVertices()[uvIndex + 1] = Float.floatToIntBits(Float.intBitsToFloat(quad.getVertices()[uvIndex + 1]) - vOffset);
-        }
-        quads.add(quad);
-    }
-    
+
     protected boolean doMinMaxLate() {
         return false;
     }
@@ -657,39 +534,7 @@ public class VectorFan {
         normal.cross(a, b);
         return new NormalPlane(coords[0], normal);
     }
-    
-    public NormalPlane createPlane(RenderInformationHolder holder) {
-        Vec3f a = new Vec3f(coords[1]);
-        a.sub(coords[0]);
-        if (holder.scaleAndOffset) {
-            a.x *= holder.scaleX;
-            a.y *= holder.scaleY;
-            a.z *= holder.scaleZ;
-        }
-        
-        Vec3f b = new Vec3f(coords[2]);
-        b.sub(coords[0]);
-        if (holder.scaleAndOffset) {
-            b.x *= holder.scaleX;
-            b.y *= holder.scaleY;
-            b.z *= holder.scaleZ;
-        }
-        
-        Vec3f normal = new Vec3f();
-        normal.cross(a, b);
-        
-        Vec3f origin = new Vec3f();
-        if (holder.scaleAndOffset) {
-            origin.x *= holder.scaleX;
-            origin.x += holder.offsetX;
-            origin.y *= holder.scaleY;
-            origin.y += holder.offsetY;
-            origin.z *= holder.scaleZ;
-            origin.z += holder.offsetZ;
-        }
-        return new NormalPlane(origin, normal);
-    }
-    
+
     public boolean isInside(List<List<NormalPlane>> shapes) {
         for (int j = 0; j < shapes.size(); j++) {
             List<NormalPlane> shape = shapes.get(j);

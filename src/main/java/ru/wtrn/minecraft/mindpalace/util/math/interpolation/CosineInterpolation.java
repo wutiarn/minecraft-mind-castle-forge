@@ -1,6 +1,6 @@
 package ru.wtrn.minecraft.mindpalace.util.math.interpolation;
 
-import team.creative.creativecore.common.util.math.vec.VecNd;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.VecNd;
 
 import java.util.List;
 

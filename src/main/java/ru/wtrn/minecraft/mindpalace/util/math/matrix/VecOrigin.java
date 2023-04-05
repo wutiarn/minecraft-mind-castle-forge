@@ -1,7 +1,7 @@
 package ru.wtrn.minecraft.mindpalace.util.math.matrix;
 
-import team.creative.creativecore.common.util.math.collision.MatrixUtils;
-import team.creative.creativecore.common.util.math.vec.Vec3d;
+import ru.wtrn.minecraft.mindpalace.util.math.collision.MatrixUtils;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec3d;
 
 public class VecOrigin implements IVecOrigin {
     

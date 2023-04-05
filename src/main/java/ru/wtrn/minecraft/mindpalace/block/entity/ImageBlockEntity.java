@@ -21,7 +21,11 @@ public class ImageBlockEntity extends BlockEntity {
     }
 
     public Direction getDirection() {
-        return Direction.WEST;
+        try {
+            return getBlockState().getValue(ImageBlock.FACING);
+        } catch (IllegalArgumentException e) {
+            return Direction.WEST;
+        }
     }
 
     public AlignedBox getBox() {

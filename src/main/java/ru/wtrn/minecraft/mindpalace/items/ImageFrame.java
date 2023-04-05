@@ -57,7 +57,9 @@ public class ImageFrame extends HangingEntity {
             kill();
             dropItem(null);
         }
-        pPlayer.sendSystemMessage(Component.literal("Image ID: TODO"));
+        if (pPlayer.isLocalPlayer()) {
+            pPlayer.sendSystemMessage(Component.literal("Image ID: TODO"));
+        }
         return InteractionResult.SUCCESS;
     }
 

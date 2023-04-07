@@ -28,9 +28,10 @@ public class CachedTexture {
             new ThreadFactoryBuilder().setNameFormat("mci-texture-loader-%d").setDaemon(true).build());
 
     private final String url;
+    private volatile BufferedImage bufferedImage = null;
     private volatile int textureId = NO_TEXTURE;
     private final AtomicInteger usageCounter = new AtomicInteger();
-    private volatile Future<?> initializationFuture = null;
+    private volatile Future<?> downloadFuture = null;
 
     public CachedTexture(String url) {
         this.url = url;
@@ -41,16 +42,20 @@ public class CachedTexture {
         if (textureId != NO_TEXTURE) {
             return textureId;
         }
-        if (initializationFuture == null) {
-            initializationFuture = executor.submit(() -> {
+        if (bufferedImage != null) {
+            textureId = uploadTexture(bufferedImage);
+            return textureId;
+        }
+        if (downloadFuture == null) {
+            downloadFuture = executor.submit(() -> {
                 try {
-                    this.initialize();
+                    this.download();
                 } catch (Exception e) {
-                    LOGGER.error("Failed to initialize CachedTexture for url {}", url, e);
+                    LOGGER.error("Failed to download image for url {}", url, e);
                 }
             });
         }
-        return textureId;
+        return NO_TEXTURE;
     }
 
     public void incrementUsageCounter() {
@@ -66,11 +71,11 @@ public class CachedTexture {
     }
 
     public void cleanup() {
-        if (textureId == NO_TEXTURE && initializationFuture == null) {
+        if (textureId == NO_TEXTURE && downloadFuture == null) {
             return;
         }
-        if (initializationFuture != null && !initializationFuture.isDone()) {
-            initializationFuture.cancel(true);
+        if (downloadFuture != null && !downloadFuture.isDone()) {
+            downloadFuture.cancel(true);
             waitForInitialization();
         }
         if (textureId != NO_TEXTURE) {
@@ -81,7 +86,7 @@ public class CachedTexture {
 
     private void waitForInitialization() {
         try {
-            initializationFuture.get();
+            downloadFuture.get();
         } catch (CancellationException e) {
             // ignore
         } catch (Exception e) {
@@ -89,20 +94,18 @@ public class CachedTexture {
         }
     }
 
-    private void initialize() throws IOException {
+    private void download() throws IOException {
         HttpURLConnection httpURLConnection = (HttpURLConnection) (new URL(url)).openConnection(Minecraft.getInstance().getProxy());
-        BufferedImage bufferedImage;
         try {
             httpURLConnection.setDoInput(true);
             httpURLConnection.setDoOutput(false);
             httpURLConnection.connect();
 
             InputStream inputStream = httpURLConnection.getInputStream();
-            bufferedImage = ImageIO.read(inputStream);
+            this.bufferedImage = ImageIO.read(inputStream);
         } finally {
             httpURLConnection.disconnect();
         }
-        textureId = uploadTexture(bufferedImage);
     }
 
     private static int uploadTexture(BufferedImage image) {

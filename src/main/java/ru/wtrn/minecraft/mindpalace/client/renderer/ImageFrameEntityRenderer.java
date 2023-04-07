@@ -35,7 +35,16 @@ public class ImageFrameEntityRenderer extends EntityRenderer<ImageFrame> {
     @Override
     public boolean shouldRender(ImageFrame pLivingEntity, Frustum pCamera, double pCamX, double pCamY, double pCamZ) {
         Vec3 cameraPosition = new Vec3(pCamX, pCamY, pCamZ);
-        return cameraPosition.closerThan(pLivingEntity.position(), 30);
+        Vec3 selfPosition = pLivingEntity.position();
+
+        double distanceSqr = cameraPosition.distanceToSqr(selfPosition);
+
+        if (distanceSqr > Math.pow(100, 2)) {
+            pLivingEntity.resetTexture();
+            return false;
+        }
+
+        return distanceSqr < Math.pow(30, 2);
     }
 
     @Override

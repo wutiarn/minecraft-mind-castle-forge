@@ -35,6 +35,7 @@ import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
 
 public class ImageFrame extends HangingEntity {
     private static final Logger LOGGER = LogUtils.getLogger();
+    private static final long NO_IMAGE = -1L;
     private int size = 3;
     private TargetSizeSide targetSizeSide = TargetSizeSide.WIDTH;
     public static final float frameThickness = 0.031F;
@@ -53,7 +54,7 @@ public class ImageFrame extends HangingEntity {
     public ImageFrame(EntityType<ImageFrame> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         if (pLevel.isClientSide) {
-            setTexture(0, TextureCache.LOADING_TEXTURE);
+            resetTexture();
         }
     }
 
@@ -136,9 +137,11 @@ public class ImageFrame extends HangingEntity {
         }
     }
 
-    @Override
-    public boolean touchingUnloadedChunk() {
-        return super.touchingUnloadedChunk();
+    public void resetTexture() {
+        if (lastTextureImageId == NO_IMAGE) {
+            return;
+        }
+        setTexture(NO_IMAGE, TextureCache.LOADING_TEXTURE);
     }
 
     private synchronized void setTexture(long imageId, CachedTexture texture) {
@@ -208,7 +211,7 @@ public class ImageFrame extends HangingEntity {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.getEntityData().define(DATA_IMAGE_ID, 0L);
+        this.getEntityData().define(DATA_IMAGE_ID, NO_IMAGE);
     }
 
     @Override

@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
@@ -33,7 +34,8 @@ public class ImageFrameEntityRenderer extends EntityRenderer<ImageFrame> {
 
     @Override
     public boolean shouldRender(ImageFrame pLivingEntity, Frustum pCamera, double pCamX, double pCamY, double pCamZ) {
-        return super.shouldRender(pLivingEntity, pCamera, pCamX, pCamY, pCamZ);
+        Vec3 cameraPosition = new Vec3(pCamX, pCamY, pCamZ);
+        return cameraPosition.closerThan(pLivingEntity.position(), 30);
     }
 
     @Override

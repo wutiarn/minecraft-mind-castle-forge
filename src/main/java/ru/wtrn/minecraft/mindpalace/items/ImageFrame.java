@@ -136,6 +136,11 @@ public class ImageFrame extends HangingEntity {
         }
     }
 
+    @Override
+    public boolean touchingUnloadedChunk() {
+        return super.touchingUnloadedChunk();
+    }
+
     private synchronized void setTexture(long imageId, CachedTexture texture) {
         texture.incrementUsageCounter();
         if (cachedTexture != null) {

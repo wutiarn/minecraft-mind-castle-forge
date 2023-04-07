@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -95,10 +96,19 @@ public abstract class CachedTexture {
     }
 
     public synchronized void cleanup() {
-        LOGGER.info("Running cleanup for image {} (isLoaded={})", url, textureId != NO_TEXTURE);
+        boolean onRenderThread = RenderSystem.isOnRenderThread();
+        LOGGER.info("Running cleanup for image {} (isLoaded={}, onRenderThread={})", url, textureId != NO_TEXTURE, onRenderThread);
         if (downloadFuture != null && !downloadFuture.isDone()) {
             downloadFuture.cancel(true);
             waitForInitialization();
+        }
+        if (onRenderThread) {
+            try {
+                GlStateManager._deleteTexture(textureId);
+                textureId = NO_TEXTURE;
+            } catch (Exception e) {
+                LOGGER.error("Failed to delete texture {} for image {}", textureId, url);
+            }
         }
         textureId = NO_TEXTURE;
         downloadFuture = null;

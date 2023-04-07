@@ -86,6 +86,16 @@ public class ImageFrameEntityRenderer extends EntityRenderer<ImageFrame> {
                     .normal(mat3f, normal.getX(), normal.getY(), normal.getZ()).endVertex();
         tesselator.end();
 
+        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
+
+        for (int i = face.corners.length - 1; i >= 0; i--) {
+            BoxCorner corner = face.corners[i];
+            builder.vertex(mat, box.get(corner.x), box.get(corner.y), box.get(corner.z))
+                    .uv(corner.isFacing(face.getTexU()) ? 0 : 1, corner.isFacing(face.getTexV()) ? 1 : 0).color(-1)
+                    .normal(mat3f, normal.getX(), normal.getY(), normal.getZ()).endVertex();
+        }
+        tesselator.end();
+
         pose.popPose();
     }
 

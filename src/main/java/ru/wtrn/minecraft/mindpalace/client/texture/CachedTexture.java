@@ -23,7 +23,7 @@ public abstract class CachedTexture {
 
     protected final String url;
     protected volatile BufferedImage bufferedImage = null;
-    private volatile int textureId = NO_TEXTURE;
+    protected volatile int textureId = NO_TEXTURE;
     protected volatile CachedTexture fallback = null;
     private final AtomicInteger usageCounter = new AtomicInteger();
     private volatile Future<?> downloadFuture = null;
@@ -130,7 +130,7 @@ public abstract class CachedTexture {
 
     protected abstract void loadImage() throws Exception;
 
-    private static int uploadTexture(BufferedImage image) {
+    protected static int uploadTexture(BufferedImage image) {
         int width = image.getWidth();
         int height = image.getHeight();
         int[] pixels = new int[width * height];

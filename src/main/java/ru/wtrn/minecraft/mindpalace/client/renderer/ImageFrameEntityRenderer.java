@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.logging.LogUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -14,9 +13,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 import org.slf4j.Logger;
 import ru.wtrn.minecraft.mindpalace.client.texture.CachedTexture;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
@@ -26,21 +23,11 @@ import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
 import ru.wtrn.minecraft.mindpalace.util.math.box.BoxCorner;
 import ru.wtrn.minecraft.mindpalace.util.math.box.BoxFace;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.ByteBuffer;
-
 public class ImageFrameEntityRenderer extends EntityRenderer<ImageFrame> {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private CachedTexture cachedTexture = TextureCache.get("http://100.64.1.3:8094/storage/i/3.jpg");
 
     public ImageFrameEntityRenderer(EntityRendererProvider.Context pContext) {
         super(pContext);
-        cachedTexture.incrementUsageCounter();
     }
 
 
@@ -55,7 +42,7 @@ public class ImageFrameEntityRenderer extends EntityRenderer<ImageFrame> {
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 //        RenderSystem.setShaderColor(frame.brightness, frame.brightness, frame.brightness, frame.alpha);
-        int textureId = cachedTexture.getTextureId();
+        int textureId = entity.getTextureId();
         if (textureId == CachedTexture.NO_TEXTURE) {
             return;
         }

@@ -10,20 +10,22 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.HangingEntity;
-import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
+import ru.wtrn.minecraft.mindpalace.client.texture.CachedTexture;
+import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Facing;
 import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
@@ -31,14 +33,25 @@ import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
 
 public class ImageFrame extends HangingEntity {
 
-    private final float xSize = 10f;
-    private final float ySize = 10f;
+    private int size = 3;
+    private TargetSizeSide targetSizeSide = TargetSizeSide.WIDTH;
     public static final float frameThickness = 0.031F;
     private boolean initialized = false;
     private static final EntityDataAccessor<Long> DATA_IMAGE_ID = SynchedEntityData.defineId(ImageFrame.class, EntityDataSerializers.LONG);
 
+    @OnlyIn(Dist.CLIENT)
+    private CachedTexture cachedTexture = null;
+
+    @OnlyIn(Dist.CLIENT)
+    private int lastTextureId = CachedTexture.NO_TEXTURE;
+
+
     public ImageFrame(EntityType<ImageFrame> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
+        if (pLevel.isClientSide) {
+            cachedTexture = TextureCache.get("http://100.64.1.3:8094/storage/i/" + getImageId());
+            cachedTexture.incrementUsageCounter();
+        }
     }
 
     public ImageFrame(EntityType<? extends HangingEntity> pEntityType, Level pLevel, BlockPos pPos, Direction direction) {
@@ -46,11 +59,23 @@ public class ImageFrame extends HangingEntity {
         setDirection(direction);
     }
 
+    @OnlyIn(Dist.CLIENT)
+    public int getTextureId() {
+        if (cachedTexture == null) {
+            return CachedTexture.NO_TEXTURE;
+        }
+        int textureId = cachedTexture.getTextureId();
+        if (initialized && textureId != this.lastTextureId) {
+            this.lastTextureId = textureId;
+            recalculateBoundingBox();
+        }
+        return textureId;
+    }
+
     @Override
     protected void setDirection(Direction pFacingDirection) {
         super.setDirection(pFacingDirection);
         initialized = true;
-        recalculateBoundingBox();
     }
 
     @Override
@@ -93,6 +118,23 @@ public class ImageFrame extends HangingEntity {
     }
 
     public AlignedBox getBox() {
+        float aspectRatio;
+        if (level.isClientSide && this.cachedTexture != null && cachedTexture.getHeight() > 0) {
+            aspectRatio = cachedTexture.getWidth() / (float) cachedTexture.getHeight();
+        } else {
+            aspectRatio = 16 / (float) 9;
+        }
+
+        float xSize;
+        float ySize;
+        if (targetSizeSide == TargetSizeSide.WIDTH) {
+            xSize = this.size;
+            ySize = xSize / aspectRatio;
+        } else {
+            ySize = this.size;
+            xSize = ySize * aspectRatio;
+        }
+
         Direction direction = getDirection();
         Facing facing = Facing.get(direction);
 
@@ -143,7 +185,7 @@ public class ImageFrame extends HangingEntity {
     }
 
     public void addAdditionalSaveData(CompoundTag pCompound) {
-        pCompound.putByte("facing", (byte)this.direction.get2DDataValue());
+        pCompound.putByte("facing", (byte) this.direction.get2DDataValue());
         pCompound.putLong("imageId", getImageId());
         super.addAdditionalSaveData(pCompound);
     }
@@ -190,5 +232,16 @@ public class ImageFrame extends HangingEntity {
 
     public void setImageId(long imageId) {
         getEntityData().set(DATA_IMAGE_ID, imageId);
+    }
+
+    public enum TargetSizeSide {
+        WIDTH(1),
+        HEIGHT(2);
+
+        public final byte id;
+
+        TargetSizeSide(int id) {
+            this.id = (byte) id;
+        }
     }
 }

@@ -36,7 +36,7 @@ import java.nio.ByteBuffer;
 
 public class ImageFrameEntityRenderer extends EntityRenderer<ImageFrame> {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private final CachedTexture cachedTexture = TextureCache.get("http://100.64.1.3:8094/storage/i/2.jpg");
+    private CachedTexture cachedTexture = TextureCache.get("http://100.64.1.3:8094/storage/i/2.jpg");
 
     public ImageFrameEntityRenderer(EntityRendererProvider.Context pContext) {
         super(pContext);

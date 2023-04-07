@@ -4,31 +4,25 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
-import net.minecraft.client.Minecraft;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.slf4j.Logger;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class CachedTexture {
+public abstract class CachedTexture {
     public static final int NO_TEXTURE = -1;
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(0, 5,
             1, TimeUnit.MINUTES, new LinkedBlockingQueue<>(),
             new ThreadFactoryBuilder().setNameFormat("mci-texture-loader-%d").setDaemon(true).build());
 
-    private final String url;
-    private volatile BufferedImage bufferedImage = null;
+    protected final String url;
+    protected volatile BufferedImage bufferedImage = null;
     private volatile int textureId = NO_TEXTURE;
     private final AtomicInteger usageCounter = new AtomicInteger();
     private volatile Future<?> downloadFuture = null;
@@ -49,7 +43,7 @@ public class CachedTexture {
         if (downloadFuture == null) {
             downloadFuture = executor.submit(() -> {
                 try {
-                    this.download();
+                    this.loadImage();
                 } catch (Exception e) {
                     LOGGER.error("Failed to download image for url {}", url, e);
                 }
@@ -94,19 +88,7 @@ public class CachedTexture {
         }
     }
 
-    private void download() throws IOException {
-        HttpURLConnection httpURLConnection = (HttpURLConnection) (new URL(url)).openConnection(Minecraft.getInstance().getProxy());
-        try {
-            httpURLConnection.setDoInput(true);
-            httpURLConnection.setDoOutput(false);
-            httpURLConnection.connect();
-
-            InputStream inputStream = httpURLConnection.getInputStream();
-            this.bufferedImage = ImageIO.read(inputStream);
-        } finally {
-            httpURLConnection.disconnect();
-        }
-    }
+    protected abstract void loadImage() throws Exception;
 
     private static int uploadTexture(BufferedImage image) {
         int width = image.getWidth();

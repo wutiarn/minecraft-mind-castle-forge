@@ -99,6 +99,7 @@ public abstract class CachedTexture {
             if (textureId != NO_TEXTURE) {
                 try {
                     GlStateManager._deleteTexture(textureId);
+                    textureId = NO_TEXTURE;
                 } catch (Exception e) {
                     LOGGER.error("Failed to delete texture {} for image {}", textureId, url);
                 }

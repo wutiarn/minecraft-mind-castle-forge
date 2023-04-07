@@ -22,7 +22,7 @@ public abstract class CachedTexture {
 
 
     protected final String url;
-    protected volatile BufferedImage bufferedImage = null;
+    protected volatile PreparedImage preparedImage = null;
     protected volatile int textureId = NO_TEXTURE;
     protected volatile CachedTexture fallback = null;
     private final AtomicInteger usageCounter = new AtomicInteger();
@@ -37,8 +37,8 @@ public abstract class CachedTexture {
         if (textureId != NO_TEXTURE) {
             return textureId;
         }
-        if (bufferedImage != null) {
-            textureId = uploadTexture(bufferedImage);
+        if (preparedImage != null) {
+            textureId = uploadTexture(preparedImage);
             return textureId;
         }
         if (downloadFuture == null) {
@@ -58,14 +58,14 @@ public abstract class CachedTexture {
     }
 
     public float getAspectRatio() {
-        if (bufferedImage != null) {
-            return bufferedImage.getWidth() / (float) bufferedImage.getHeight();
+        if (preparedImage != null) {
+            return preparedImage.width / (float) preparedImage.height;
         }
         return 16 / 9f;
     }
 
     public void incrementUsageCounter() {
-         usageCounter.incrementAndGet();
+        usageCounter.incrementAndGet();
         if (cleanupFuture != null) {
             cleanupFuture.cancel(false);
         }
@@ -102,7 +102,7 @@ public abstract class CachedTexture {
         }
         textureId = NO_TEXTURE;
         downloadFuture = null;
-        bufferedImage = null;
+        preparedImage = null;
         LOGGER.info("Cleanup completed for image {}", url);
     }
 
@@ -118,7 +118,7 @@ public abstract class CachedTexture {
 
     protected abstract void loadImage() throws Exception;
 
-    protected static int uploadTexture(BufferedImage image) {
+    protected static PreparedImage prepareImage(BufferedImage image) {
         int width = image.getWidth();
         int height = image.getHeight();
         int[] pixels = new int[width * height];
@@ -143,7 +143,15 @@ public abstract class CachedTexture {
             }
         }
         buffer.flip();
+        PreparedImage preparedImage = new PreparedImage();
+        preparedImage.width = width;
+        preparedImage.height = height;
+        preparedImage.hasAlpha = hasAlpha;
+        preparedImage.byteBuffer = buffer;
+        return preparedImage;
+    }
 
+    protected static int uploadTexture(PreparedImage image) {
         int textureID = GlStateManager._genTexture(); //Generate texture ID
         RenderSystem.bindTexture(textureID); //Bind texture ID
 
@@ -155,7 +163,7 @@ public abstract class CachedTexture {
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 
-        if (!hasAlpha)
+        if (!image.hasAlpha)
             RenderSystem.pixelStore(GL11.GL_UNPACK_ALIGNMENT, 1);
 
         // fixes random crash, when values are too high it causes a jvm crash, caused weird behavior when game is paused
@@ -164,9 +172,16 @@ public abstract class CachedTexture {
         GlStateManager._pixelStore(3315, 0);
 
         //Send texel data to OpenGL
-        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, hasAlpha ? GL11.GL_RGBA8 : GL11.GL_RGB8, width, height, 0, hasAlpha ? GL11.GL_RGBA : GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, buffer);
+        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, image.hasAlpha ? GL11.GL_RGBA8 : GL11.GL_RGB8, image.width, image.height, 0, image.hasAlpha ? GL11.GL_RGBA : GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, image.byteBuffer);
 
         //Return the texture ID so we can bind it later again
         return textureID;
+    }
+
+    protected static class PreparedImage {
+        public int width;
+        public int height;
+        public boolean hasAlpha;
+        public ByteBuffer byteBuffer;
     }
 }

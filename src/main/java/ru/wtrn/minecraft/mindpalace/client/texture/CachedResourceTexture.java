@@ -7,6 +7,7 @@ import net.minecraft.server.packs.resources.Resource;
 import org.slf4j.Logger;
 
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -31,7 +32,7 @@ public class CachedResourceTexture extends CachedTexture {
         if (textureId != NO_TEXTURE) {
             return textureId;
         }
-        if (bufferedImage == null) {
+        if (preparedImage == null) {
             try {
                 this.loadImage();
                 LOGGER.info("Image loaded: {}", url);
@@ -41,7 +42,7 @@ public class CachedResourceTexture extends CachedTexture {
                 return NO_TEXTURE;
             }
         }
-        textureId = uploadTexture(bufferedImage);
+        textureId = uploadTexture(preparedImage);
         return textureId;
     }
 
@@ -52,7 +53,8 @@ public class CachedResourceTexture extends CachedTexture {
             throw new IllegalArgumentException("Failed to find resource " + resourceLocation);
         }
         try (InputStream inputStream = resource.get().open()) {
-            this.bufferedImage = ImageIO.read(inputStream);
+            BufferedImage image = ImageIO.read(inputStream);
+            this.preparedImage = prepareImage(image);
         }
     }
 }

@@ -4,16 +4,13 @@ package ru.wtrn.minecraft.mindpalace.config;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 public class ModCommonConfigs {
-    public static final ForgeConfigSpec SPEC;
+    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    public static final ForgeConfigSpec.ConfigValue<String> MCI_SERVER_URL;
+    public static final ForgeConfigSpec.ConfigValue<String> MCI_SERVER_URL = BUILDER.comment("MCI Server URL")
+            .define("mci_url", "https://mci.wtrn.ru");
 
+    public static final ForgeConfigSpec.ConfigValue<Integer> DEFAULT_IMAGE_WIDTH = BUILDER.comment("Default width for new images")
+            .define("default_image_width", 3);
 
-    static {
-        ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
-
-        MCI_SERVER_URL = BUILDER.comment("MCI Server URL").define("mci_url", "https://mci.wtrn.ru");
-
-        SPEC = BUILDER.build();
-    }
+    public static final ForgeConfigSpec SPEC = BUILDER.build();
 }

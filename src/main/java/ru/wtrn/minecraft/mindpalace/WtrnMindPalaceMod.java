@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import ru.wtrn.minecraft.mindpalace.block.ModBlocks;
 import ru.wtrn.minecraft.mindpalace.block.entity.ModBlockEntities;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
+import ru.wtrn.minecraft.mindpalace.config.ModClientConfigs;
 import ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs;
 import ru.wtrn.minecraft.mindpalace.items.ModCreativeModeTab;
 import ru.wtrn.minecraft.mindpalace.items.ModItems;
@@ -47,6 +48,7 @@ public class WtrnMindPalaceMod {
         MinecraftForge.EVENT_BUS.register(TextureCache.class);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ModCommonConfigs.SPEC, "wtrnmindpalace-common.toml");
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ModClientConfigs.SPEC, "wtrnmindpalace-client.toml");
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);

@@ -15,6 +15,8 @@ import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static ru.wtrn.minecraft.mindpalace.config.ModClientConfigs.IMAGES_CLEANUP_DELAY_SECONDS;
+
 public abstract class CachedTexture {
     public static final int NO_TEXTURE = -1;
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -84,7 +86,7 @@ public abstract class CachedTexture {
                 cleanupFuture.cancel(false);
             }
             LOGGER.info("Scheduled cleanup for image {}", url);
-            cleanupFuture = executor.schedule(this::cleanup, 10, TimeUnit.SECONDS);
+            cleanupFuture = executor.schedule(this::cleanup, IMAGES_CLEANUP_DELAY_SECONDS.get(), TimeUnit.SECONDS);
             if (textureId != NO_TEXTURE) {
                 try {
                     GlStateManager._deleteTexture(textureId);

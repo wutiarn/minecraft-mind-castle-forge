@@ -33,10 +33,12 @@ import ru.wtrn.minecraft.mindpalace.util.math.base.Facing;
 import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
 import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
 
+import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.DEFAULT_IMAGE_WIDTH;
+
 public class ImageFrame extends HangingEntity {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final long NO_IMAGE = -1L;
-    private int size = 3;
+    private int size = DEFAULT_IMAGE_WIDTH.get();
     private TargetSizeSide targetSizeSide = TargetSizeSide.WIDTH;
     public static final float frameThickness = 0.031F;
     private boolean initialized = false;

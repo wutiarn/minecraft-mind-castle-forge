@@ -122,6 +122,15 @@ public class ImageFrame extends HangingEntity {
         this.setBoundingBox(getBox().getBB(getPos()));
     }
 
+    @Override
+    public void remove(RemovalReason pReason) {
+        super.remove(pReason);
+        if (level.isClientSide) {
+            cachedTexture.decrementUsageCounter();
+            cachedTexture = TextureCache.LOADING_TEXTURE;
+        }
+    }
+
     public AlignedBox getBox() {
         float aspectRatio;
         if (level.isClientSide && this.cachedTexture != null && cachedTexture.getHeight() > 0) {

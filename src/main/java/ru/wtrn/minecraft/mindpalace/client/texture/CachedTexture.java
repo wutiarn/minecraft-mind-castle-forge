@@ -44,6 +44,7 @@ public abstract class CachedTexture {
             downloadFuture = executor.submit(() -> {
                 try {
                     this.loadImage();
+                    LOGGER.info("Image loaded: {}", url);
                 } catch (Exception e) {
                     LOGGER.error("Failed to download image for url {}", url, e);
                 }
@@ -90,7 +91,7 @@ public abstract class CachedTexture {
         }
     }
 
-    public void cleanup() {
+    public synchronized void cleanup() {
         if (textureId == NO_TEXTURE && downloadFuture == null) {
             return;
         }
@@ -102,7 +103,9 @@ public abstract class CachedTexture {
             LOGGER.info("Running cleanup for image {}", url);
             GlStateManager._deleteTexture(textureId);
         }
-        textureId = 0;
+        textureId = NO_TEXTURE;
+        downloadFuture = null;
+        bufferedImage = null;
     }
 
     private void waitForInitialization() {

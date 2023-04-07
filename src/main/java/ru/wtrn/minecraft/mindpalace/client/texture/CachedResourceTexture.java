@@ -42,7 +42,7 @@ public class CachedResourceTexture extends CachedTexture {
                 return NO_TEXTURE;
             }
         }
-        textureId = uploadTexture(preparedImage);
+        uploadTexture(preparedImage);
         return textureId;
     }
 

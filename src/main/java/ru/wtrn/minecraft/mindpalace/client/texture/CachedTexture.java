@@ -39,7 +39,7 @@ public abstract class CachedTexture {
             return textureId;
         }
         if (preparedImage != null) {
-            textureId = uploadTexture(preparedImage);
+            uploadTexture(preparedImage);
             return textureId;
         }
         if (downloadFuture == null) {
@@ -65,14 +65,15 @@ public abstract class CachedTexture {
         return 16 / 9f;
     }
 
-    public void incrementUsageCounter() {
+    public synchronized void incrementUsageCounter() {
         usageCounter.incrementAndGet();
         if (cleanupFuture != null) {
+            cleanupFuture = null;
             cleanupFuture.cancel(false);
         }
     }
 
-    public void decrementUsageCounter() {
+    public synchronized void decrementUsageCounter() {
         int counterValue = usageCounter.decrementAndGet();
         if (counterValue <= 0) {
             if (counterValue < 0) {
@@ -100,7 +101,6 @@ public abstract class CachedTexture {
         LOGGER.info("Running cleanup for image {} (isLoaded={}, onRenderThread={})", url, textureId != NO_TEXTURE, onRenderThread);
         if (downloadFuture != null && !downloadFuture.isDone()) {
             downloadFuture.cancel(true);
-            waitForInitialization();
         }
         if (onRenderThread) {
             try {
@@ -113,17 +113,8 @@ public abstract class CachedTexture {
         textureId = NO_TEXTURE;
         downloadFuture = null;
         preparedImage = null;
+        usageCounter.set(0);
         LOGGER.info("Cleanup completed for image {}", url);
-    }
-
-    private void waitForInitialization() {
-        try {
-            downloadFuture.get();
-        } catch (CancellationException e) {
-            // ignore
-        } catch (Exception e) {
-            LOGGER.error("Failed to wait until initializationFuture completion", e);
-        }
     }
 
     protected abstract void loadImage() throws Exception;
@@ -161,9 +152,14 @@ public abstract class CachedTexture {
         return preparedImage;
     }
 
-    protected static int uploadTexture(PreparedImage image) {
-        int textureID = GlStateManager._genTexture(); //Generate texture ID
-        RenderSystem.bindTexture(textureID); //Bind texture ID
+    protected void uploadTexture(PreparedImage image) {
+        if (cleanupFuture != null) {
+            LOGGER.warn("Aborting texture upload due to pending cleanup for image {}", url);
+            textureId = NO_TEXTURE;
+            return;
+        }
+        int textureId = GlStateManager._genTexture(); //Generate texture ID
+        RenderSystem.bindTexture(textureId); //Bind texture ID
 
         //Setup wrap mode
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
@@ -185,7 +181,7 @@ public abstract class CachedTexture {
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, image.hasAlpha ? GL11.GL_RGBA8 : GL11.GL_RGB8, image.width, image.height, 0, image.hasAlpha ? GL11.GL_RGBA : GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, image.byteBuffer);
 
         //Return the texture ID so we can bind it later again
-        return textureID;
+        this.textureId = textureId;
     }
 
     protected static class PreparedImage {

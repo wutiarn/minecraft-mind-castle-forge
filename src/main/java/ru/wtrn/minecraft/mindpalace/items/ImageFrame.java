@@ -1,5 +1,6 @@
 package ru.wtrn.minecraft.mindpalace.items;
 
+import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 import ru.wtrn.minecraft.mindpalace.client.texture.CachedTexture;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
@@ -32,7 +34,7 @@ import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
 import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
 
 public class ImageFrame extends HangingEntity {
-
+    private static final Logger LOGGER = LogUtils.getLogger();
     private int size = 3;
     private TargetSizeSide targetSizeSide = TargetSizeSide.WIDTH;
     public static final float frameThickness = 0.031F;
@@ -73,6 +75,7 @@ public class ImageFrame extends HangingEntity {
         }
         int textureId = cachedTexture.getTextureId();
         if (initialized && textureId != this.lastTextureId) {
+            LOGGER.info("Texture id changed to {}", textureId);
             this.lastTextureId = textureId;
             recalculateBoundingBox();
         }

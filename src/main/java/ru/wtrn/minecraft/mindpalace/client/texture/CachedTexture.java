@@ -96,6 +96,13 @@ public abstract class CachedTexture {
             }
             LOGGER.info("Scheduled cleanup for image {}", url);
             cleanupFuture = executor.schedule(this::cleanup, 10, TimeUnit.SECONDS);
+            if (textureId != NO_TEXTURE) {
+                try {
+                    GlStateManager._deleteTexture(textureId);
+                } catch (Exception e) {
+                    LOGGER.error("Failed to delete texture {} for image {}", textureId, url);
+                }
+            }
         }
     }
 
@@ -104,13 +111,6 @@ public abstract class CachedTexture {
         if (downloadFuture != null && !downloadFuture.isDone()) {
             downloadFuture.cancel(true);
             waitForInitialization();
-        }
-        if (textureId != NO_TEXTURE) {
-            try {
-                GlStateManager._deleteTexture(textureId);
-            } catch (Exception e) {
-                LOGGER.error("Failed to delete texture {} for image {}", textureId, url);
-            }
         }
         textureId = NO_TEXTURE;
         downloadFuture = null;

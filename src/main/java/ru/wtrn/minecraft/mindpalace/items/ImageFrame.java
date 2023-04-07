@@ -40,7 +40,7 @@ public class ImageFrame extends HangingEntity {
     private static final EntityDataAccessor<Long> DATA_IMAGE_ID = SynchedEntityData.defineId(ImageFrame.class, EntityDataSerializers.LONG);
 
     @OnlyIn(Dist.CLIENT)
-    private CachedTexture cachedTexture = TextureCache.LOADING_TEXTURE;
+    private CachedTexture cachedTexture = null;
 
     private int lastTextureId = CachedTexture.NO_TEXTURE;
 
@@ -50,11 +50,17 @@ public class ImageFrame extends HangingEntity {
 
     public ImageFrame(EntityType<ImageFrame> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
+        if (pLevel.isClientSide) {
+            setTexture(0, TextureCache.LOADING_TEXTURE);
+        }
     }
 
     public ImageFrame(EntityType<? extends HangingEntity> pEntityType, Level pLevel, BlockPos pPos, Direction direction) {
         super(pEntityType, pLevel, pPos);
         setDirection(direction);
+        if (pLevel.isClientSide) {
+            setTexture(0, TextureCache.LOADING_TEXTURE);
+        }
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -62,12 +68,7 @@ public class ImageFrame extends HangingEntity {
         long imageId = getImageId();
         if (imageId != this.lastTextureImageId) {
             CachedTexture texture = TextureCache.get("http://100.64.1.3:8094/storage/i/" + imageId);
-            texture.incrementUsageCounter();
-            if (cachedTexture != null) {
-                cachedTexture.decrementUsageCounter();
-            }
-            cachedTexture = texture;
-            lastTextureImageId = imageId;
+            setTexture(imageId, texture);
         }
         int textureId = cachedTexture.getTextureId();
         if (initialized && textureId != this.lastTextureId) {
@@ -129,6 +130,15 @@ public class ImageFrame extends HangingEntity {
             cachedTexture.decrementUsageCounter();
             cachedTexture = TextureCache.LOADING_TEXTURE;
         }
+    }
+
+    private synchronized void setTexture(long imageId, CachedTexture texture) {
+        texture.incrementUsageCounter();
+        if (cachedTexture != null) {
+            cachedTexture.decrementUsageCounter();
+        }
+        cachedTexture = texture;
+        lastTextureImageId = imageId;
     }
 
     public AlignedBox getBox() {

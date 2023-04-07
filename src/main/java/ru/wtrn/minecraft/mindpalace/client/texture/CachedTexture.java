@@ -24,12 +24,12 @@ public abstract class CachedTexture {
     protected final String url;
     protected volatile BufferedImage bufferedImage = null;
     private volatile int textureId = NO_TEXTURE;
+    protected volatile CachedTexture fallback = null;
     private final AtomicInteger usageCounter = new AtomicInteger();
     private volatile Future<?> downloadFuture = null;
 
     public CachedTexture(String url) {
         this.url = url;
-
     }
 
     public int getTextureId() {
@@ -48,6 +48,9 @@ public abstract class CachedTexture {
                     LOGGER.error("Failed to download image for url {}", url, e);
                 }
             });
+        }
+        if (fallback != null) {
+            return fallback.getTextureId();
         }
         return NO_TEXTURE;
     }

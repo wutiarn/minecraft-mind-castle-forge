@@ -68,8 +68,8 @@ public abstract class CachedTexture {
     public synchronized void incrementUsageCounter() {
         usageCounter.incrementAndGet();
         if (cleanupFuture != null) {
-            cleanupFuture = null;
             cleanupFuture.cancel(false);
+            cleanupFuture = null;
         }
     }
 

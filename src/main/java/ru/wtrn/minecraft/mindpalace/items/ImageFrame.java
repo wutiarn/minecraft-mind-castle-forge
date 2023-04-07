@@ -40,18 +40,16 @@ public class ImageFrame extends HangingEntity {
     private static final EntityDataAccessor<Long> DATA_IMAGE_ID = SynchedEntityData.defineId(ImageFrame.class, EntityDataSerializers.LONG);
 
     @OnlyIn(Dist.CLIENT)
-    private CachedTexture cachedTexture = null;
+    private CachedTexture cachedTexture = TextureCache.LOADING_TEXTURE;
+
+    private int lastTextureId = CachedTexture.NO_TEXTURE;
 
     @OnlyIn(Dist.CLIENT)
-    private int lastTextureId = CachedTexture.NO_TEXTURE;
+    private long lastTextureImageId = 0;
 
 
     public ImageFrame(EntityType<ImageFrame> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        if (pLevel.isClientSide) {
-            cachedTexture = TextureCache.get("http://100.64.1.3:8094/storage/i/" + getImageId());
-            cachedTexture.incrementUsageCounter();
-        }
     }
 
     public ImageFrame(EntityType<? extends HangingEntity> pEntityType, Level pLevel, BlockPos pPos, Direction direction) {
@@ -61,8 +59,15 @@ public class ImageFrame extends HangingEntity {
 
     @OnlyIn(Dist.CLIENT)
     public int getTextureId() {
-        if (cachedTexture == null) {
-            return CachedTexture.NO_TEXTURE;
+        long imageId = getImageId();
+        if (imageId != this.lastTextureImageId) {
+            CachedTexture texture = TextureCache.get("http://100.64.1.3:8094/storage/i/" + imageId);
+            texture.incrementUsageCounter();
+            if (cachedTexture != null) {
+                cachedTexture.decrementUsageCounter();
+            }
+            cachedTexture = texture;
+            lastTextureImageId = imageId;
         }
         int textureId = cachedTexture.getTextureId();
         if (initialized && textureId != this.lastTextureId) {

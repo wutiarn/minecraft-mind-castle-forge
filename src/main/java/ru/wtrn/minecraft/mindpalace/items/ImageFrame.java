@@ -147,10 +147,10 @@ public class ImageFrame extends HangingEntity {
 
     public AlignedBox getBox() {
         float aspectRatio;
-        if (level.isClientSide && this.cachedTexture != null && cachedTexture.getHeight() > 0) {
-            aspectRatio = cachedTexture.getWidth() / (float) cachedTexture.getHeight();
+        if (level.isClientSide && this.cachedTexture != null) {
+            aspectRatio = cachedTexture.getAspectRatio();
         } else {
-            aspectRatio = 16 / (float) 9;
+            aspectRatio = 16 / 9f;
         }
 
         float xSize;

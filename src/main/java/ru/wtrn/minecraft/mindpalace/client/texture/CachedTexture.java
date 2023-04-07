@@ -57,24 +57,11 @@ public abstract class CachedTexture {
         return NO_TEXTURE;
     }
 
-    public int getWidth() {
-        if (bufferedImage == null) {
-            if (fallback != null) {
-                return fallback.getWidth();
-            }
-            return 0;
+    public float getAspectRatio() {
+        if (bufferedImage != null) {
+            return bufferedImage.getWidth() / (float) bufferedImage.getHeight();
         }
-        return bufferedImage.getWidth();
-    }
-
-    public int getHeight() {
-        if (bufferedImage == null) {
-            if (fallback != null) {
-                return fallback.getHeight();
-            }
-            return 0;
-        }
-        return bufferedImage.getHeight();
+        return 16 / 9f;
     }
 
     public void incrementUsageCounter() {

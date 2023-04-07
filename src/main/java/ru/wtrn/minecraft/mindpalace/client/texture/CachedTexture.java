@@ -78,7 +78,7 @@ public abstract class CachedTexture {
     }
 
     public void incrementUsageCounter() {
-        usageCounter.incrementAndGet();
+         usageCounter.incrementAndGet();
         if (cleanupFuture != null) {
             cleanupFuture.cancel(false);
         }
@@ -106,11 +106,16 @@ public abstract class CachedTexture {
             waitForInitialization();
         }
         if (textureId != NO_TEXTURE) {
-            GlStateManager._deleteTexture(textureId);
+            try {
+                GlStateManager._deleteTexture(textureId);
+            } catch (Exception e) {
+                LOGGER.error("Failed to delete texture {} for image {}", textureId, url);
+            }
         }
         textureId = NO_TEXTURE;
         downloadFuture = null;
         bufferedImage = null;
+        LOGGER.info("Cleanup completed for image {}", url);
     }
 
     private void waitForInitialization() {

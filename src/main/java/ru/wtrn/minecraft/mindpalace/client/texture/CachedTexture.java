@@ -80,11 +80,14 @@ public abstract class CachedTexture {
     }
 
     public void decrementUsageCounter() {
-        usageCounter.decrementAndGet();
-    }
-
-    public int getUsageCounter() {
-        return usageCounter.get();
+        int counterValue = usageCounter.decrementAndGet();
+        if (counterValue <= 0) {
+            if (counterValue < 0) {
+                LOGGER.warn("Illegal counter value {} for url {}. Resetting to 0", counterValue, url);
+                usageCounter.addAndGet(counterValue * -1);
+            }
+            cleanup();
+        }
     }
 
     public void cleanup() {
@@ -96,6 +99,7 @@ public abstract class CachedTexture {
             waitForInitialization();
         }
         if (textureId != NO_TEXTURE) {
+            LOGGER.info("Running cleanup for image {}", url);
             GlStateManager._deleteTexture(textureId);
         }
         textureId = 0;

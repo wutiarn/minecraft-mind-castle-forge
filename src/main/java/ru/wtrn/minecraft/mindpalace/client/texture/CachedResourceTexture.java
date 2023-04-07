@@ -14,16 +14,10 @@ import java.util.Optional;
 public class CachedResourceTexture extends CachedTexture {
 
     private final ResourceLocation resourceLocation;
-    private final boolean ignoreUsageCounters;
 
     public CachedResourceTexture(String resourceLocation) {
-        this(resourceLocation, false);
-    }
-
-    public CachedResourceTexture(String resourceLocation, boolean ignoreUsageCounters) {
         super(resourceLocation);
         this.resourceLocation = new ResourceLocation(resourceLocation);
-        this.ignoreUsageCounters = ignoreUsageCounters;
     }
 
     @Override
@@ -35,21 +29,5 @@ public class CachedResourceTexture extends CachedTexture {
         try (InputStream inputStream = resource.get().open()) {
             this.bufferedImage = ImageIO.read(inputStream);
         }
-    }
-
-    @Override
-    public void incrementUsageCounter() {
-        if (ignoreUsageCounters) {
-            return;
-        }
-        super.incrementUsageCounter();
-    }
-
-    @Override
-    public void decrementUsageCounter() {
-        if (ignoreUsageCounters) {
-            return;
-        }
-        super.decrementUsageCounter();
     }
 }

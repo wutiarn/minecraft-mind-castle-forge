@@ -17,9 +17,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class CachedTexture {
     public static final int NO_TEXTURE = -1;
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(0, 5,
-            1, TimeUnit.MINUTES, new LinkedBlockingQueue<>(),
-            new ThreadFactoryBuilder().setNameFormat("mci-texture-loader-%d").setDaemon(true).build());
+    private static final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(0,
+            new ThreadFactoryBuilder().setNameFormat("mci-texture-worker-%d").setDaemon(true).build());
+
 
     protected final String url;
     protected volatile BufferedImage bufferedImage = null;
@@ -27,6 +27,7 @@ public abstract class CachedTexture {
     protected volatile CachedTexture fallback = null;
     private final AtomicInteger usageCounter = new AtomicInteger();
     private volatile Future<?> downloadFuture = null;
+    private volatile ScheduledFuture<?> cleanupFuture = null;
 
     public CachedTexture(String url) {
         this.url = url;
@@ -78,6 +79,9 @@ public abstract class CachedTexture {
 
     public void incrementUsageCounter() {
         usageCounter.incrementAndGet();
+        if (cleanupFuture != null) {
+            cleanupFuture.cancel(false);
+        }
     }
 
     public void decrementUsageCounter() {
@@ -87,20 +91,21 @@ public abstract class CachedTexture {
                 LOGGER.warn("Illegal counter value {} for url {}. Resetting to 0", counterValue, url);
                 usageCounter.addAndGet(counterValue * -1);
             }
-            cleanup();
+            if (cleanupFuture != null) {
+                cleanupFuture.cancel(false);
+            }
+            LOGGER.info("Scheduled cleanup for image {}", url);
+            cleanupFuture = executor.schedule(this::cleanup, 10, TimeUnit.SECONDS);
         }
     }
 
     public synchronized void cleanup() {
-        if (textureId == NO_TEXTURE && downloadFuture == null) {
-            return;
-        }
+        LOGGER.info("Running cleanup for image {} (isLoaded={})", url, textureId != NO_TEXTURE);
         if (downloadFuture != null && !downloadFuture.isDone()) {
             downloadFuture.cancel(true);
             waitForInitialization();
         }
         if (textureId != NO_TEXTURE) {
-            LOGGER.info("Running cleanup for image {}", url);
             GlStateManager._deleteTexture(textureId);
         }
         textureId = NO_TEXTURE;

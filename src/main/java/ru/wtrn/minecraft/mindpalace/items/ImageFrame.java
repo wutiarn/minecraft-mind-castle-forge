@@ -55,12 +55,13 @@ public class ImageFrame extends HangingEntity {
         }
     }
 
+    /**
+     * This constructor is only used by ru.wtrn.minecraft.mindpalace.items.ImageFrameItem#useOn.
+     * So we don't initialize textures here to avoid usage counter issues.
+     */
     public ImageFrame(EntityType<? extends HangingEntity> pEntityType, Level pLevel, BlockPos pPos, Direction direction) {
         super(pEntityType, pLevel, pPos);
         setDirection(direction);
-        if (pLevel.isClientSide) {
-            setTexture(0, TextureCache.LOADING_TEXTURE);
-        }
     }
 
     @OnlyIn(Dist.CLIENT)

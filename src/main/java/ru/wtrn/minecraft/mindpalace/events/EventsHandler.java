@@ -5,9 +5,8 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.server.command.ConfigCommand;
 import ru.wtrn.minecraft.mindpalace.WtrnMindPalaceMod;
-import ru.wtrn.minecraft.mindpalace.block.entity.renderer.ImageFrameEntityRenderer;
+import ru.wtrn.minecraft.mindpalace.client.renderer.ImageFrameEntityRenderer;
 import ru.wtrn.minecraft.mindpalace.commands.GiveImageFrameCommand;
 import ru.wtrn.minecraft.mindpalace.items.ModItems;
 

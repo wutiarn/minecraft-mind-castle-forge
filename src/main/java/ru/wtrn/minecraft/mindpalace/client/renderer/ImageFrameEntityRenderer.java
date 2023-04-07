@@ -1,4 +1,4 @@
-package ru.wtrn.minecraft.mindpalace.block.entity.renderer;
+package ru.wtrn.minecraft.mindpalace.client.renderer;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;

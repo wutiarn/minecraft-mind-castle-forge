@@ -9,9 +9,6 @@ import org.slf4j.Logger;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Objects;
 import java.util.Optional;
 
 public class CachedResourceTexture extends CachedTexture {

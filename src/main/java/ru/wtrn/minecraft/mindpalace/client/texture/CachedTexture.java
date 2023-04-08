@@ -11,7 +11,9 @@ import org.slf4j.Logger;
 
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
-import java.util.concurrent.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.function.Supplier;
 
 import static ru.wtrn.minecraft.mindpalace.config.ModClientConfigs.IMAGES_CLEANUP_DELAY_SECONDS;

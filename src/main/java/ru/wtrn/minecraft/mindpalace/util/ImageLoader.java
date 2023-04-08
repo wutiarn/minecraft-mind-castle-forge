@@ -1,16 +1,15 @@
 package ru.wtrn.minecraft.mindpalace.util;
 
 import com.drew.imaging.ImageMetadataReader;
-import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifIFD0Directory;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 
 public class ImageLoader {
     public static BufferedImage loadImage(InputStream is, int contentLength) throws Exception {
@@ -28,6 +27,8 @@ public class ImageLoader {
         int orientation = exifMetadata.getInt(orientationTag);
         int rotationAngle = getRotationAngle(orientation);
 
+        image = rotateImage(image, rotationAngle);
+
         return image;
     }
 
@@ -41,5 +42,31 @@ public class ImageLoader {
             case 8 -> 270;
             default -> 0;
         };
+    }
+
+    /**
+     * Reference: https://stackoverflow.com/a/66189875
+     */
+    private static BufferedImage rotateImage(BufferedImage src, int cwRotationAngle) {
+        if (cwRotationAngle == 0) {
+            return src;
+        }
+        int w;
+        int h;
+        if (cwRotationAngle != 180) {
+            w = src.getHeight();
+            h = src.getWidth();
+        } else {
+            w = src.getWidth();
+            h = src.getHeight();
+        }
+
+        BufferedImage dst = new BufferedImage(w, h, src.getType());
+        Graphics2D graphic = dst.createGraphics();
+        graphic.translate((w - src.getWidth())/2.0, (h - src.getHeight())/2.0);
+        graphic.rotate(Math.toRadians(cwRotationAngle), src.getWidth()/2.0, src.getHeight()/2.0);
+        graphic.drawImage(src, null, 0, 0);
+        graphic.dispose();
+        return dst;
     }
 }

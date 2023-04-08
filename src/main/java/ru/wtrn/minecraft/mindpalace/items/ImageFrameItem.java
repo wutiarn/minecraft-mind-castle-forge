@@ -45,6 +45,7 @@ public class ImageFrameItem extends Item {
             if (frame.survives()) {
                 long imageId = item.getImageId(itemstack);
                 frame.setImageId(imageId);
+                frame.setTargetSize(getTargetSizeType(itemstack), getTargetSize(itemstack));
 
                 if (!level.isClientSide) {
                     frame.playPlacementSound();

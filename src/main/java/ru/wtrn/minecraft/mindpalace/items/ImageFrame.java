@@ -46,11 +46,13 @@ import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.DEFAULT_IMAGE
 public class ImageFrame extends HangingEntity {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final long NO_IMAGE = -1L;
-    private final int targetSize = DEFAULT_IMAGE_WIDTH.get();
-    private final TargetSizeType targetSizeType = TargetSizeType.WIDTH;
+    //    private final int targetSize = DEFAULT_IMAGE_WIDTH.get();
+//    private final TargetSizeType targetSizeType = TargetSizeType.WIDTH;
     public static final float frameThickness = 0.031F;
     private boolean initialized = false;
     private static final EntityDataAccessor<Long> DATA_IMAGE_ID = SynchedEntityData.defineId(ImageFrame.class, EntityDataSerializers.LONG);
+    private static final EntityDataAccessor<Byte> DATA_TARGET_SIZE_TYPE = SynchedEntityData.defineId(ImageFrame.class, EntityDataSerializers.BYTE);
+    private static final EntityDataAccessor<Integer> DATA_TARGET_SIZE = SynchedEntityData.defineId(ImageFrame.class, EntityDataSerializers.INT);
     private final CachedAction<?> doTickAction = new CachedAction<>(Duration.ofSeconds(1), () -> {
         this.doTick();
         return null;
@@ -93,10 +95,10 @@ public class ImageFrame extends HangingEntity {
         assert player != null;
         Vec3 playerPosition = player.position();
         if (!playerPosition.closerThan(this.position(), IMAGES_LOAD_DISTANCE.get())) {
-             return;
+            return;
         }
         // Prepare texture if user is close to entity, even if it is not rendered yet
-         getTextureId();
+        getTextureId();
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -126,6 +128,7 @@ public class ImageFrame extends HangingEntity {
         ImageFrameItem item = ModItems.IMAGE_FRAME_ITEM.get();
         ItemStack stack = new ItemStack(item, 1);
         item.setImageId(stack, getImageId());
+        item.setTargetSize(stack, getTargetSizeType(), getTargetSize());
         if (pBrokenEntity instanceof Player) {
             Inventory inventory = ((Player) pBrokenEntity).getInventory();
             inventory.add(stack);
@@ -148,6 +151,11 @@ public class ImageFrame extends HangingEntity {
             pPlayer.sendSystemMessage(component);
         }
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        recalculateBoundingBox();
     }
 
     @Override
@@ -174,11 +182,11 @@ public class ImageFrame extends HangingEntity {
 
         float xSize;
         float ySize;
-        if (targetSizeType == TargetSizeType.WIDTH) {
-            xSize = this.targetSize;
+        if (getTargetSizeType() == TargetSizeType.WIDTH) {
+            xSize = this.getTargetSize();
             ySize = xSize / aspectRatio;
         } else {
-            ySize = this.targetSize;
+            ySize = this.getTargetSize();
             xSize = ySize * aspectRatio;
         }
 
@@ -222,7 +230,10 @@ public class ImageFrame extends HangingEntity {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.getEntityData().define(DATA_IMAGE_ID, NO_IMAGE);
+        SynchedEntityData entityData = this.getEntityData();
+        entityData.define(DATA_IMAGE_ID, NO_IMAGE);
+        entityData.define(DATA_TARGET_SIZE_TYPE, TargetSizeType.WIDTH.id);
+        entityData.define(DATA_TARGET_SIZE, DEFAULT_IMAGE_WIDTH.get());
     }
 
     @Override
@@ -234,6 +245,8 @@ public class ImageFrame extends HangingEntity {
     public void addAdditionalSaveData(CompoundTag pCompound) {
         pCompound.putByte("facing", (byte) this.direction.get2DDataValue());
         pCompound.putLong("imageId", getImageId());
+        pCompound.putByte("targetSizeType", getTargetSizeType().id);
+        pCompound.putInt("targetSize", getTargetSize());
         super.addAdditionalSaveData(pCompound);
     }
 
@@ -243,6 +256,8 @@ public class ImageFrame extends HangingEntity {
     public void readAdditionalSaveData(CompoundTag pCompound) {
         this.direction = Direction.from2DDataValue(pCompound.getByte("facing"));
         setImageId(pCompound.getLong("imageId"));
+        TargetSizeType targetSizeType = TargetSizeType.getForId(pCompound.getByte("targetSizeType"));
+        setTargetSize(targetSizeType, pCompound.getInt("targetSize"));
         super.readAdditionalSaveData(pCompound);
         this.setDirection(this.direction);
     }
@@ -275,6 +290,25 @@ public class ImageFrame extends HangingEntity {
 
     public long getImageId() {
         return getEntityData().get(DATA_IMAGE_ID);
+    }
+
+    public TargetSizeType getTargetSizeType() {
+        Byte id = getEntityData().get(DATA_TARGET_SIZE_TYPE);
+        return TargetSizeType.getForId(id);
+    }
+
+    public int getTargetSize() {
+        int value = getEntityData().get(DATA_TARGET_SIZE);
+        if (value == 0) {
+            return DEFAULT_IMAGE_WIDTH.get();
+        }
+        return value;
+    }
+
+    public void setTargetSize(ImageFrame.TargetSizeType targetSizeSide, int size) {
+        SynchedEntityData entityData = getEntityData();
+        entityData.set(DATA_TARGET_SIZE_TYPE, targetSizeSide.id);
+        entityData.set(DATA_TARGET_SIZE, size);
     }
 
     public void setImageId(long imageId) {

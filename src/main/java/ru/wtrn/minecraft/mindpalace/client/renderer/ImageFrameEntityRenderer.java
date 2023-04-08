@@ -34,9 +34,11 @@ public class ImageFrameEntityRenderer extends EntityRenderer<ImageFrame> {
 
     @Override
     public boolean shouldRender(ImageFrame pLivingEntity, Frustum pCamera, double pCamX, double pCamY, double pCamZ) {
+        if (!super.shouldRender(pLivingEntity, pCamera, pCamX, pCamY, pCamZ)) {
+            return false;
+        }
         Vec3 cameraPosition = new Vec3(pCamX, pCamY, pCamZ);
         Vec3 selfPosition = pLivingEntity.position();
-
         return cameraPosition.closerThan(selfPosition, 30);
     }
 

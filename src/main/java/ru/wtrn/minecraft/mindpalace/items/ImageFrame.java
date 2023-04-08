@@ -1,6 +1,8 @@
 package ru.wtrn.minecraft.mindpalace.items;
 
 import com.mojang.logging.LogUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -22,17 +24,20 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import ru.wtrn.minecraft.mindpalace.client.texture.CachedTexture;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
+import ru.wtrn.minecraft.mindpalace.util.CachedAction;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Facing;
 import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
 import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
 
+import java.time.Duration;
 import java.util.function.Supplier;
 
 import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.DEFAULT_IMAGE_WIDTH;
@@ -45,7 +50,12 @@ public class ImageFrame extends HangingEntity {
     public static final float frameThickness = 0.031F;
     private boolean initialized = false;
     private static final EntityDataAccessor<Long> DATA_IMAGE_ID = SynchedEntityData.defineId(ImageFrame.class, EntityDataSerializers.LONG);
-    private int checkIntervalCounter = 0;
+    private final CachedAction<?> doTickAction = new CachedAction<>(Duration.ofSeconds(5), () -> {
+        this.doTick();
+        return null;
+    });
+
+    private final CachedAction<Long> getImageIdAction = new CachedAction<>(Duration.ofSeconds(1), () -> getEntityData().get(DATA_IMAGE_ID));
 
     @OnlyIn(Dist.CLIENT)
     private Supplier<CachedTexture> cachedTextureSupplier = TextureCache.LOADING_TEXTURE;
@@ -69,9 +79,28 @@ public class ImageFrame extends HangingEntity {
         setDirection(direction);
     }
 
+    @Override
+    public void tick() {
+        super.tick();
+        if (this.level.isClientSide) {
+            doTickAction.invoke();
+        }
+    }
+
+    private void doTick() {
+        LocalPlayer player = Minecraft.getInstance().player;
+        assert player != null;
+        Vec3 playerPosition = player.position();
+        if (!playerPosition.closerThan(this.position(), 100)) {
+             return;
+        }
+        // Prepare texture if user is close to entity, even if it is not rendered yet
+         getTextureId();
+    }
+
     @OnlyIn(Dist.CLIENT)
     public int getTextureId() {
-        long imageId = getImageId();
+        long imageId = getImageIdAction.invoke();
         if (imageId != this.lastTextureImageId) {
             String textureKey = "http://100.64.1.3:8094/storage/i/" + imageId;
             setTexture(imageId, textureKey);

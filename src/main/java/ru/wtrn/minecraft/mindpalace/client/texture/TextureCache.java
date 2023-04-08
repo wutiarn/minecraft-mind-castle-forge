@@ -19,7 +19,10 @@ public class TextureCache {
     public static Supplier<CachedTexture> ERROR_TEXTURE = getSupplier(new ResourceLocation(WtrnMindPalaceMod.MOD_ID, "textures/error.png").toString());
 
     public static CachedTexture get(String url) {
-        return cached.computeIfAbsent(url, CachedHttpTexture::new);
+        if (url.startsWith("http")) {
+            return cached.computeIfAbsent(url, CachedHttpTexture::new);
+        }
+        return cached.computeIfAbsent(url, CachedResourceTexture::new);
     }
 
     public static Supplier<CachedTexture> getSupplier(String url) {

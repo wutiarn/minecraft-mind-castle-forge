@@ -78,7 +78,6 @@ public class ImageFrame extends HangingEntity {
         }
         int textureId = cachedTextureSupplier.get().getTextureId();
         if (initialized && textureId != this.lastTextureId) {
-            LOGGER.info("Texture id changed to {}", textureId);
             this.lastTextureId = textureId;
             recalculateBoundingBox();
         }
@@ -131,7 +130,7 @@ public class ImageFrame extends HangingEntity {
     }
 
     private synchronized void setTexture(long imageId, String textureKey) {
-        cachedTextureSupplier = () -> TextureCache.get(textureKey);
+        cachedTextureSupplier = TextureCache.getSupplier(textureKey);
         lastTextureImageId = imageId;
     }
 

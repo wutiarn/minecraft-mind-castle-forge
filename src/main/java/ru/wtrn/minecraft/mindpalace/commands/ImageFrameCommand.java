@@ -23,7 +23,7 @@ public class ImageFrameCommand {
                                 Commands.argument("image_id", LongArgumentType.longArg()).executes(ImageFrameCommand::giveImage)
                         )
                         .then(
-                                Commands.argument("orientation", EnumArgument.enumArgument(Orientation.class))
+                                Commands.argument("targetSide", EnumArgument.enumArgument(TargetSide.class))
                                         .then(
                                                 Commands.argument("size", IntegerArgumentType.integer(0, 100))
                                                         .executes(ImageFrameCommand::setImageSize)
@@ -44,27 +44,29 @@ public class ImageFrameCommand {
     }
 
     public static int setImageSize(CommandContext<CommandSourceStack> context) {
-        Orientation orientation = context.getArgument("orientation", Orientation.class);
-        long size = context.getArgument("size", Integer.class);
+        TargetSide targetSide = context.getArgument("targetSide", TargetSide.class);
+        int size = context.getArgument("size", Integer.class);
 
         ServerPlayer player = context.getSource().getPlayer();
         ItemStack stack = player.getMainHandItem();
-
-        if (!stack.is(ModItems.IMAGE_FRAME_ITEM.get())) {
+        ImageFrameItem item = ModItems.IMAGE_FRAME_ITEM.get();
+        if (!stack.is(item)) {
             context.getSource().sendFailure(Component.literal("Image frame must be in main hand"));
             return 1;
         }
 
+        item.setTargetSize(stack, targetSide.targetSizeSide, size);
+
         return 0;
     }
 
-    enum Orientation {
-        w(ImageFrame.TargetSizeSide.WIDTH),
-        h(ImageFrame.TargetSizeSide.HEIGHT);
+    enum TargetSide {
+        w(ImageFrame.TargetSizeType.WIDTH),
+        h(ImageFrame.TargetSizeType.HEIGHT);
 
-        ImageFrame.TargetSizeSide targetSizeSide;
+        ImageFrame.TargetSizeType targetSizeSide;
 
-        Orientation(ImageFrame.TargetSizeSide targetSizeSide) {
+        TargetSide(ImageFrame.TargetSizeType targetSizeSide) {
             this.targetSizeSide = targetSizeSide;
         }
     }

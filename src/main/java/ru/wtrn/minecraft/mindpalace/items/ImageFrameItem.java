@@ -6,14 +6,18 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraftforge.registries.RegistryObject;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+
+import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.DEFAULT_IMAGE_WIDTH;
 
 public class ImageFrameItem extends Item {
 
@@ -65,6 +69,11 @@ public class ImageFrameItem extends Item {
         return Component.literal("Image #" + getImageId(pStack));
     }
 
+    @Override
+    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
+        pTooltipComponents.add(Component.literal(getTargetSizeType(pStack) + ": " + getTargetSize(pStack)));
+    }
+
     public void setImageId(ItemStack stack, long imageId) {
         CompoundTag tag = stack.getOrCreateTag();
         tag.putLong("imageId", imageId);
@@ -73,5 +82,26 @@ public class ImageFrameItem extends Item {
     public long getImageId(ItemStack stack) {
         CompoundTag tag = stack.getOrCreateTag();
         return tag.getLong("imageId");
+    }
+
+    public void setTargetSize(ItemStack stack, ImageFrame.TargetSizeType targetSizeSide, int size) {
+        CompoundTag tag = stack.getOrCreateTag();
+        tag.putByte("targetSizeSide", targetSizeSide.id);
+        tag.putInt("targetSize", size);
+    }
+
+    public ImageFrame.TargetSizeType getTargetSizeType(ItemStack stack) {
+        CompoundTag tag = stack.getOrCreateTag();
+        byte value = tag.getByte("targetSizeSide");
+        return ImageFrame.TargetSizeType.getForId(value);
+    }
+
+    public int getTargetSize(ItemStack stack) {
+        CompoundTag tag = stack.getOrCreateTag();
+        int value = tag.getInt("targetSize");
+        if (value == 0) {
+            return DEFAULT_IMAGE_WIDTH.get();
+        }
+        return value;
     }
 }

@@ -46,8 +46,8 @@ import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.DEFAULT_IMAGE
 public class ImageFrame extends HangingEntity {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final long NO_IMAGE = -1L;
-    private int size = DEFAULT_IMAGE_WIDTH.get();
-    private TargetSizeSide targetSizeSide = TargetSizeSide.WIDTH;
+    private final int targetSize = DEFAULT_IMAGE_WIDTH.get();
+    private final TargetSizeType targetSizeType = TargetSizeType.WIDTH;
     public static final float frameThickness = 0.031F;
     private boolean initialized = false;
     private static final EntityDataAccessor<Long> DATA_IMAGE_ID = SynchedEntityData.defineId(ImageFrame.class, EntityDataSerializers.LONG);
@@ -174,11 +174,11 @@ public class ImageFrame extends HangingEntity {
 
         float xSize;
         float ySize;
-        if (targetSizeSide == TargetSizeSide.WIDTH) {
-            xSize = this.size;
+        if (targetSizeType == TargetSizeType.WIDTH) {
+            xSize = this.targetSize;
             ySize = xSize / aspectRatio;
         } else {
-            ySize = this.size;
+            ySize = this.targetSize;
             xSize = ySize * aspectRatio;
         }
 
@@ -281,14 +281,22 @@ public class ImageFrame extends HangingEntity {
         getEntityData().set(DATA_IMAGE_ID, imageId);
     }
 
-    public enum TargetSizeSide {
+    public enum TargetSizeType {
         WIDTH(1),
         HEIGHT(2);
 
         public final byte id;
 
-        TargetSizeSide(int id) {
+        TargetSizeType(int id) {
             this.id = (byte) id;
+        }
+
+        public static TargetSizeType getForId(byte id) {
+            //noinspection SwitchStatementWithTooFewBranches
+            return switch (id) {
+                case 2 -> HEIGHT;
+                default -> WIDTH;
+            };
         }
     }
 }

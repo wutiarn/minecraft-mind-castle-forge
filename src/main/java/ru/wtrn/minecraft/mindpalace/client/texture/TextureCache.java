@@ -36,7 +36,7 @@ public class TextureCache {
     }
 
     @SubscribeEvent
-    public static void tick(TickEvent.RenderTickEvent event) {
+    public static void tick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.START) {
             return;
         }

@@ -97,10 +97,8 @@ public abstract class CachedTexture {
                 LOGGER.error("Failed to delete texture {} for image {}", textureId, url);
             }
         }
-        textureId = NO_TEXTURE;
         downloadFuture = null;
         preparedImage = null;
-        LOGGER.info("Cleanup completed for image {}", url);
     }
 
     protected abstract void loadImage() throws Exception;

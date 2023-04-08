@@ -139,8 +139,7 @@ public class ImageFrame extends HangingEntity {
 
     @Override
     public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
-        ItemStack mainHandItem = pPlayer.getMainHandItem();
-        if (mainHandItem.is(Items.STICK)) {
+        if (pPlayer.isShiftKeyDown()) {
             kill();
             dropItem(pPlayer);
         }

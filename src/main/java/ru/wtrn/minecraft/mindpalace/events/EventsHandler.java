@@ -7,7 +7,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import ru.wtrn.minecraft.mindpalace.WtrnMindPalaceMod;
 import ru.wtrn.minecraft.mindpalace.client.renderer.ImageFrameEntityRenderer;
-import ru.wtrn.minecraft.mindpalace.commands.GiveImageFrameCommand;
+import ru.wtrn.minecraft.mindpalace.commands.ImageFrameCommand;
 import ru.wtrn.minecraft.mindpalace.items.ModItems;
 
 public class EventsHandler {
@@ -24,7 +24,7 @@ public class EventsHandler {
     public static class ServerModBusEvents {
         @SubscribeEvent
         public static void registerCommands(final RegisterCommandsEvent event) {
-            GiveImageFrameCommand.register(event.getDispatcher());
+            ImageFrameCommand.register(event.getDispatcher());
         }
     }
 }

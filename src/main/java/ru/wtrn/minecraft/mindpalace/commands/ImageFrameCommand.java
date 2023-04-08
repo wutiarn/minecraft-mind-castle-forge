@@ -8,26 +8,25 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.server.command.EnumArgument;
 import ru.wtrn.minecraft.mindpalace.items.ImageFrame;
 import ru.wtrn.minecraft.mindpalace.items.ImageFrameItem;
 import ru.wtrn.minecraft.mindpalace.items.ModItems;
 
-public class GiveImageFrameCommand {
+public class ImageFrameCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
                 Commands.literal("i")
                         .then(
-                                Commands.argument("image_id", LongArgumentType.longArg()).executes(GiveImageFrameCommand::giveImage)
+                                Commands.argument("image_id", LongArgumentType.longArg()).executes(ImageFrameCommand::giveImage)
                         )
                         .then(
                                 Commands.argument("orientation", EnumArgument.enumArgument(Orientation.class))
                                         .then(
                                                 Commands.argument("size", IntegerArgumentType.integer(0, 100))
-                                                        .executes(GiveImageFrameCommand::setImageSize)
+                                                        .executes(ImageFrameCommand::setImageSize)
                                         )
 
                         )

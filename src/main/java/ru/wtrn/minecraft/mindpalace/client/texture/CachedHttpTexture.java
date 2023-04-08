@@ -1,8 +1,8 @@
 package ru.wtrn.minecraft.mindpalace.client.texture;
 
 import net.minecraft.client.Minecraft;
+import ru.wtrn.minecraft.mindpalace.util.ImageLoader;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -23,7 +23,7 @@ public class CachedHttpTexture extends CachedTexture {
             httpURLConnection.connect();
 
             InputStream inputStream = httpURLConnection.getInputStream();
-            BufferedImage image = ImageIO.read(inputStream);
+            BufferedImage image = ImageLoader.loadImage(inputStream, httpURLConnection.getContentLength());
             this.preparedImage = prepareImage(image);
         } catch (Exception e) {
             this.fallbackSupplier = TextureCache.ERROR_TEXTURE;

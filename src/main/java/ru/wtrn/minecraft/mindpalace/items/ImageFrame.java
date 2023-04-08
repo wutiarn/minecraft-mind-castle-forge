@@ -1,8 +1,6 @@
 package ru.wtrn.minecraft.mindpalace.items;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -24,7 +22,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
@@ -35,6 +32,8 @@ import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Facing;
 import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
 import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
+
+import java.util.function.Supplier;
 
 import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.DEFAULT_IMAGE_WIDTH;
 
@@ -49,7 +48,7 @@ public class ImageFrame extends HangingEntity {
     private int checkIntervalCounter = 0;
 
     @OnlyIn(Dist.CLIENT)
-    private CachedTexture cachedTexture = TextureCache.LOADING_TEXTURE;
+    private Supplier<CachedTexture> cachedTextureSupplier = () -> TextureCache.get(TextureCache.LOADING_TEXTURE);
 
     private int lastTextureId = CachedTexture.NO_TEXTURE;
 
@@ -74,10 +73,10 @@ public class ImageFrame extends HangingEntity {
     public int getTextureId() {
         long imageId = getImageId();
         if (imageId != this.lastTextureImageId) {
-            CachedTexture texture = TextureCache.get("http://100.64.1.3:8094/storage/i/" + imageId);
-            setTexture(imageId, texture);
+            String textureKey = "http://100.64.1.3:8094/storage/i/" + imageId;
+            setTexture(imageId, textureKey);
         }
-        int textureId = cachedTexture.getTextureId();
+        int textureId = cachedTextureSupplier.get().getTextureId();
         if (initialized && textureId != this.lastTextureId) {
             LOGGER.info("Texture id changed to {}", textureId);
             this.lastTextureId = textureId;
@@ -131,15 +130,15 @@ public class ImageFrame extends HangingEntity {
         this.setBoundingBox(getBox().getBB(getPos()));
     }
 
-    private synchronized void setTexture(long imageId, CachedTexture texture) {
-        cachedTexture = texture;
+    private synchronized void setTexture(long imageId, String textureKey) {
+        cachedTextureSupplier = () -> TextureCache.get(textureKey);
         lastTextureImageId = imageId;
     }
 
     public AlignedBox getBox() {
         float aspectRatio;
-        if (level.isClientSide && this.cachedTexture != null) {
-            aspectRatio = cachedTexture.getAspectRatio();
+        if (level.isClientSide && this.cachedTextureSupplier != null) {
+            aspectRatio = cachedTextureSupplier.get().getAspectRatio();
         } else {
             aspectRatio = 16 / 9f;
         }

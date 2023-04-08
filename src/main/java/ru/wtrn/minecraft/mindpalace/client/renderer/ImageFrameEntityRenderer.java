@@ -47,9 +47,6 @@ public class ImageFrameEntityRenderer extends EntityRenderer<ImageFrame> {
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 //        RenderSystem.setShaderColor(frame.brightness, frame.brightness, frame.brightness, frame.alpha);
         int textureId = entity.getTextureId();
-        if (textureId == CachedTexture.NO_TEXTURE) {
-            return;
-        }
 
         RenderSystem.bindTexture(textureId);
         RenderSystem.setShaderTexture(0, textureId);

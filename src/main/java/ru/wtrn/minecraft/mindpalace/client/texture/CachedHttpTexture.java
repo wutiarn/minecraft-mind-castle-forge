@@ -11,7 +11,7 @@ import java.net.URL;
 public class CachedHttpTexture extends CachedTexture {
     public CachedHttpTexture(String url) {
         super(url);
-        this.fallback = TextureCache.LOADING_TEXTURE;
+        this.fallbackSupplier = () -> TextureCache.get(TextureCache.LOADING_TEXTURE);
     }
 
     @Override
@@ -26,7 +26,7 @@ public class CachedHttpTexture extends CachedTexture {
             BufferedImage image = ImageIO.read(inputStream);
             this.preparedImage = prepareImage(image);
         } catch (Exception e) {
-            this.fallback = TextureCache.ERROR_TEXTURE;
+            this.fallbackSupplier = () -> TextureCache.get(TextureCache.LOADING_TEXTURE);
             throw e;
         } finally {
             httpURLConnection.disconnect();

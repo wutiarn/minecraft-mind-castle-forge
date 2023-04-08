@@ -11,11 +11,8 @@ import org.slf4j.Logger;
 
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
-import java.util.Objects;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static ru.wtrn.minecraft.mindpalace.config.ModClientConfigs.IMAGES_CLEANUP_DELAY_SECONDS;
+import java.util.function.Supplier;
 
 public abstract class CachedTexture {
     public static final int NO_TEXTURE = -1;
@@ -27,7 +24,7 @@ public abstract class CachedTexture {
     protected final String url;
     protected volatile PreparedImage preparedImage = null;
     protected volatile int textureId = NO_TEXTURE;
-    protected volatile CachedTexture fallback = null;
+    protected volatile Supplier<CachedTexture> fallbackSupplier = null;
     private volatile Future<?> downloadFuture = null;
     private volatile boolean cleanup = false;
 
@@ -38,8 +35,11 @@ public abstract class CachedTexture {
     }
 
     public int getTextureId() {
+        if (cleanup) {
+            LOGGER.warn("Attempt to use unloaded texture for image {}", url);
+            return NO_TEXTURE;
+        }
         lastUsageTimestamp = System.currentTimeMillis();
-        cleanup = false;
         if (textureId != NO_TEXTURE) {
             return textureId;
         }
@@ -57,8 +57,8 @@ public abstract class CachedTexture {
                 }
             });
         }
-        if (fallback != null) {
-            return fallback.getTextureId();
+        if (fallbackSupplier != null) {
+            return fallbackSupplier.get().getTextureId();
         }
         return NO_TEXTURE;
     }
@@ -70,12 +70,16 @@ public abstract class CachedTexture {
         return 16 / 9f;
     }
 
-    public void tryCleanup() {
+    public boolean tryCleanup() {
+        if (this.cleanup) {
+            return true;
+        }
         long now = System.currentTimeMillis();
         if (now - lastUsageTimestamp < 10 * 1000) {
-            return;
+            return false;
         }
         cleanup();
+        return true;
     }
 
     public synchronized void cleanup() {

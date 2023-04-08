@@ -58,7 +58,7 @@ public class ImageFrameEntityRenderer extends EntityRenderer<ImageFrame> {
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 
-        AlignedBox box = entity.getBox(-0.5f);
+        AlignedBox box = entity.getBox(true);
         Facing facing = Facing.get(entity.getDirection());
         box.grow(facing.axis, 0.01F);
         BoxFace face = BoxFace.get(facing);

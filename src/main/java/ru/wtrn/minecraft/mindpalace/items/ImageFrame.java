@@ -1,6 +1,8 @@
 package ru.wtrn.minecraft.mindpalace.items;
 
 import com.mojang.logging.LogUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -22,6 +24,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
@@ -140,7 +143,7 @@ public class ImageFrame extends HangingEntity {
         }
     }
 
-    public void resetTexture() {
+    private void resetTexture() {
         if (lastTextureImageId == NO_IMAGE) {
             return;
         }
@@ -159,9 +162,19 @@ public class ImageFrame extends HangingEntity {
     @Override
     public void tick() {
         super.tick();
+        if (!this.level.isClientSide) {
+            return;
+        }
         this.checkIntervalCounter++;
         if (this.checkIntervalCounter < 100) {
             return;
+        }
+        checkIntervalCounter = 0;
+        LocalPlayer player = Minecraft.getInstance().player;
+        assert player != null;
+        Vec3 playerPosition = player.position();
+        if (!playerPosition.closerThan(this.position(), 100)) {
+            resetTexture();
         }
     }
 

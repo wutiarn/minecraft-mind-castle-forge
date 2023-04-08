@@ -164,7 +164,7 @@ public class ImageFrame extends HangingEntity {
             super.recalculateBoundingBox();
             return;
         }
-        this.setBoundingBox(getBox().getBB(getPos()));
+        this.setBoundingBox(getBox(0).getBB(getPos()));
     }
 
     private synchronized void setTexture(long imageId, String textureKey) {
@@ -172,7 +172,7 @@ public class ImageFrame extends HangingEntity {
         lastTextureImageId = imageId;
     }
 
-    public AlignedBox getBox() {
+    public AlignedBox getBox(float margin) {
         float aspectRatio;
         if (level.isClientSide && this.cachedTextureSupplier != null) {
             aspectRatio = cachedTextureSupplier.get().getAspectRatio();
@@ -195,8 +195,6 @@ public class ImageFrame extends HangingEntity {
 
         AlignedBox box = new AlignedBox();
         box.setMax(facing.axis, frameThickness);
-
-        float margin = -0.5f;
 
         Vec2f min = new Vec2f(margin, margin);
         Vec2f max = new Vec2f(xSize + margin, ySize + margin);

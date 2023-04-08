@@ -27,6 +27,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import ru.wtrn.minecraft.mindpalace.client.texture.CachedTexture;
@@ -46,8 +47,6 @@ import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.DEFAULT_IMAGE
 public class ImageFrame extends HangingEntity {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final long NO_IMAGE = -1L;
-    //    private final int targetSize = DEFAULT_IMAGE_WIDTH.get();
-//    private final TargetSizeType targetSizeType = TargetSizeType.WIDTH;
     public static final float frameThickness = 0.031F;
     private boolean initialized = false;
     private static final EntityDataAccessor<Long> DATA_IMAGE_ID = SynchedEntityData.defineId(ImageFrame.class, EntityDataSerializers.LONG);
@@ -58,7 +57,8 @@ public class ImageFrame extends HangingEntity {
         return null;
     });
 
-    private final CachedAction<Long> getImageIdAction = new CachedAction<>(Duration.ofSeconds(1), () -> getEntityData().get(DATA_IMAGE_ID));
+    private final CachedAction<Long> getImageIdAction = new CachedAction<>(Duration.ofSeconds(30), () -> getEntityData().get(DATA_IMAGE_ID));
+    private final CachedAction<AlignedBox> getBoxAction = new CachedAction<>(Duration.ofSeconds(30), this::doGetBox);
 
     @OnlyIn(Dist.CLIENT)
     private Supplier<CachedTexture> cachedTextureSupplier = TextureCache.LOADING_TEXTURE;
@@ -153,8 +153,14 @@ public class ImageFrame extends HangingEntity {
     }
 
     @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
-        recalculateBoundingBox();
+    public void onSyncedDataUpdated(@NotNull EntityDataAccessor<?> pKey) {
+        if (DATA_TARGET_SIZE_TYPE.equals(pKey) || DATA_TARGET_SIZE.equals(pKey)) {
+            recalculateBoundingBox();
+            return;
+        }
+        if (DATA_IMAGE_ID.equals(pKey)) {
+            getImageIdAction.invalidate();
+        }
     }
 
     @Override
@@ -163,6 +169,7 @@ public class ImageFrame extends HangingEntity {
             super.recalculateBoundingBox();
             return;
         }
+        getBoxAction.invalidate();
         this.setBoundingBox(getBox().getBB(position()));
     }
 
@@ -172,6 +179,11 @@ public class ImageFrame extends HangingEntity {
     }
 
     public AlignedBox getBox() {
+        AlignedBox cached = getBoxAction.invoke();
+        return new AlignedBox(cached);
+    }
+
+    public AlignedBox doGetBox() {
         float margin = -0.5f;
         float aspectRatio;
         if (level.isClientSide && this.cachedTextureSupplier != null) {

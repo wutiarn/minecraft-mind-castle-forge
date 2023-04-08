@@ -25,4 +25,8 @@ public class CachedAction<T> {
         cachedResult = delegate.get();
         return cachedResult;
     }
+
+    public void invalidate() {
+        this.lastExecutionTimestamp = 0;
+    }
 }

@@ -63,16 +63,22 @@ public class ImageFrame extends HangingEntity {
     private final CachedAction<AlignedBox> getBoxAction = new CachedAction<>(Duration.ofSeconds(30), this::doGetBox);
 
     @OnlyIn(Dist.CLIENT)
-    private Supplier<CachedTexture> cachedTextureSupplier = TextureCache.LOADING_TEXTURE;
-
-    private int lastTextureId = CachedTexture.NO_TEXTURE;
+    private Supplier<CachedTexture> cachedTextureSupplier;
 
     @OnlyIn(Dist.CLIENT)
-    private long lastTextureImageId = NO_IMAGE;
+    private int lastTextureId;
+
+    @OnlyIn(Dist.CLIENT)
+    private long lastTextureImageId;
 
 
     public ImageFrame(EntityType<ImageFrame> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
+        if (pLevel.isClientSide) {
+            cachedTextureSupplier = TextureCache.LOADING_TEXTURE;
+            lastTextureId = CachedTexture.NO_TEXTURE;
+            lastTextureImageId = NO_IMAGE;
+        }
     }
 
     /**
@@ -175,6 +181,7 @@ public class ImageFrame extends HangingEntity {
         this.setBoundingBox(getBox().getBB(position()));
     }
 
+    @OnlyIn(Dist.CLIENT)
     private synchronized void setTexture(long imageId, String textureKey) {
         cachedTextureSupplier = TextureCache.getSupplier(textureKey);
         lastTextureImageId = imageId;

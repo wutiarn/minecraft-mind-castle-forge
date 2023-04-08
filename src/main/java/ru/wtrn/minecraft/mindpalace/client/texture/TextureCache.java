@@ -44,6 +44,7 @@ public class TextureCache {
         if (cleanupTickCounter < 100) {
             return;
         }
+        cleanupTickCounter = 0;
 
         ArrayList<String> cleanedUpTextures = new ArrayList<>();
 

@@ -70,6 +70,10 @@ public abstract class CachedTexture {
         return 16 / 9f;
     }
 
+    public boolean isActive() {
+        return !this.cleanup;
+    }
+
     public boolean tryCleanup() {
         if (this.cleanup) {
             return true;
@@ -82,7 +86,7 @@ public abstract class CachedTexture {
         return true;
     }
 
-    public synchronized void cleanup() {
+    public void cleanup() {
         cleanup = true;
         boolean onRenderThread = RenderSystem.isOnRenderThread();
         LOGGER.info("Running cleanup for image {} (isLoaded={}, onRenderThread={})", url, textureId != NO_TEXTURE, onRenderThread);

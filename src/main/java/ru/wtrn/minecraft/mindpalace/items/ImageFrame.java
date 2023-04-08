@@ -48,7 +48,7 @@ public class ImageFrame extends HangingEntity {
     private int checkIntervalCounter = 0;
 
     @OnlyIn(Dist.CLIENT)
-    private Supplier<CachedTexture> cachedTextureSupplier = () -> TextureCache.get(TextureCache.LOADING_TEXTURE);
+    private Supplier<CachedTexture> cachedTextureSupplier = TextureCache.LOADING_TEXTURE;
 
     private int lastTextureId = CachedTexture.NO_TEXTURE;
 

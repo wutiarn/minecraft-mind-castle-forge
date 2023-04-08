@@ -10,20 +10,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 public class TextureCache {
     private static final ConcurrentHashMap<String, CachedTexture> cached = new ConcurrentHashMap<>();
     private static int cleanupTickCounter = 0;
-    public static ResourceLocation LOADING_TEXTURE = new ResourceLocation(WtrnMindPalaceMod.MOD_ID, "textures/loading.png");
-    public static ResourceLocation ERROR_TEXTURE = new ResourceLocation(WtrnMindPalaceMod.MOD_ID, "textures/error.png");
+    public static Supplier<CachedTexture> LOADING_TEXTURE = getSupplier(new ResourceLocation(WtrnMindPalaceMod.MOD_ID, "textures/loading.png").toString());
+    public static Supplier<CachedTexture> ERROR_TEXTURE = getSupplier(new ResourceLocation(WtrnMindPalaceMod.MOD_ID, "textures/error.png").toString());
 
     public static CachedTexture get(String url) {
         return cached.computeIfAbsent(url, CachedHttpTexture::new);
     }
 
-    public static CachedTexture get(ResourceLocation resourceLocation) {
-        String url = resourceLocation.toString();
-        return cached.computeIfAbsent(url, CachedResourceTexture::new);
+    public static Supplier<CachedTexture> getSupplier(String url) {
+        return new CachedTextureSupplier(get(url));
     }
 
     @SubscribeEvent

@@ -43,6 +43,7 @@ public class ImageFrame extends HangingEntity {
     public static final float frameThickness = 0.031F;
     private boolean initialized = false;
     private static final EntityDataAccessor<Long> DATA_IMAGE_ID = SynchedEntityData.defineId(ImageFrame.class, EntityDataSerializers.LONG);
+    private int checkIntervalCounter = 0;
 
     @OnlyIn(Dist.CLIENT)
     private CachedTexture cachedTexture = null;
@@ -153,6 +154,15 @@ public class ImageFrame extends HangingEntity {
         }
         cachedTexture = texture;
         lastTextureImageId = imageId;
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        this.checkIntervalCounter++;
+        if (this.checkIntervalCounter < 100) {
+            return;
+        }
     }
 
     public AlignedBox getBox() {

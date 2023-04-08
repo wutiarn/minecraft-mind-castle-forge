@@ -14,6 +14,8 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 
+import static ru.wtrn.minecraft.mindpalace.config.ModClientConfigs.IMAGES_CLEANUP_DELAY_SECONDS;
+
 public abstract class CachedTexture {
     public static final int NO_TEXTURE = -1;
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -79,7 +81,7 @@ public abstract class CachedTexture {
             return true;
         }
         long now = System.currentTimeMillis();
-        if (now - lastUsageTimestamp < 10 * 1000) {
+        if (now - lastUsageTimestamp < IMAGES_CLEANUP_DELAY_SECONDS.get() * 1000) {
             return false;
         }
         cleanup();

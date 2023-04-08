@@ -40,6 +40,7 @@ import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
 import java.time.Duration;
 import java.util.function.Supplier;
 
+import static ru.wtrn.minecraft.mindpalace.config.ModClientConfigs.IMAGES_LOAD_DISTANCE;
 import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.DEFAULT_IMAGE_WIDTH;
 
 public class ImageFrame extends HangingEntity {
@@ -50,7 +51,7 @@ public class ImageFrame extends HangingEntity {
     public static final float frameThickness = 0.031F;
     private boolean initialized = false;
     private static final EntityDataAccessor<Long> DATA_IMAGE_ID = SynchedEntityData.defineId(ImageFrame.class, EntityDataSerializers.LONG);
-    private final CachedAction<?> doTickAction = new CachedAction<>(Duration.ofSeconds(5), () -> {
+    private final CachedAction<?> doTickAction = new CachedAction<>(Duration.ofSeconds(1), () -> {
         this.doTick();
         return null;
     });
@@ -91,7 +92,7 @@ public class ImageFrame extends HangingEntity {
         LocalPlayer player = Minecraft.getInstance().player;
         assert player != null;
         Vec3 playerPosition = player.position();
-        if (!playerPosition.closerThan(this.position(), 100)) {
+        if (!playerPosition.closerThan(this.position(), IMAGES_LOAD_DISTANCE.get())) {
              return;
         }
         // Prepare texture if user is close to entity, even if it is not rendered yet

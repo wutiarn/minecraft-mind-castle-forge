@@ -24,6 +24,8 @@ import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
 import ru.wtrn.minecraft.mindpalace.util.math.box.BoxCorner;
 import ru.wtrn.minecraft.mindpalace.util.math.box.BoxFace;
 
+import static ru.wtrn.minecraft.mindpalace.config.ModClientConfigs.IMAGES_RENDER_DISTANCE;
+
 public class ImageFrameEntityRenderer extends EntityRenderer<ImageFrame> {
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -39,7 +41,7 @@ public class ImageFrameEntityRenderer extends EntityRenderer<ImageFrame> {
         }
         Vec3 cameraPosition = new Vec3(pCamX, pCamY, pCamZ);
         Vec3 selfPosition = pLivingEntity.position();
-        return cameraPosition.closerThan(selfPosition, 30);
+        return cameraPosition.closerThan(selfPosition, IMAGES_RENDER_DISTANCE.get());
     }
 
     @Override

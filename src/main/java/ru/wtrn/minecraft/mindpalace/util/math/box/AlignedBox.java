@@ -3,6 +3,7 @@ package ru.wtrn.minecraft.mindpalace.util.math.box;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.joml.Vector3d;
@@ -117,6 +118,10 @@ public class AlignedBox {
     
     public AABB getBB(BlockPos pos) {
         return new AABB(minX + pos.getX(), minY + pos.getY(), minZ + pos.getZ(), maxX + pos.getX(), maxY + pos.getY(), maxZ + pos.getZ());
+    }
+
+    public AABB getBB(Vec3 pos) {
+        return new AABB(minX + pos.x, minY + pos.y, minZ + pos.z, maxX + pos.x, maxY + pos.y, maxZ + pos.z);
     }
     
     public VoxelShape voxelShape() {

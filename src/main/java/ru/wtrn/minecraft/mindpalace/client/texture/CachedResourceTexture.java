@@ -57,14 +57,4 @@ public class CachedResourceTexture extends CachedTexture {
             this.preparedImage = prepareImage(image);
         }
     }
-
-    @Override
-    public synchronized void incrementUsageCounter() {
-        // ignore
-    }
-
-    @Override
-    public synchronized void decrementUsageCounter() {
-        // ignore
-    }
 }

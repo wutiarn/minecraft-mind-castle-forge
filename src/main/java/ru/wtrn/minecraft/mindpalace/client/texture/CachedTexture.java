@@ -28,15 +28,18 @@ public abstract class CachedTexture {
     protected volatile PreparedImage preparedImage = null;
     protected volatile int textureId = NO_TEXTURE;
     protected volatile CachedTexture fallback = null;
-    private final AtomicInteger usageCounter = new AtomicInteger();
     private volatile Future<?> downloadFuture = null;
-    private volatile ScheduledFuture<?> cleanupFuture = null;
+    private volatile boolean cleanup = false;
+
+    private long lastUsageTimestamp = System.currentTimeMillis();
 
     public CachedTexture(String url) {
         this.url = url;
     }
 
     public int getTextureId() {
+        lastUsageTimestamp = System.currentTimeMillis();
+        cleanup = false;
         if (textureId != NO_TEXTURE) {
             return textureId;
         }
@@ -67,38 +70,16 @@ public abstract class CachedTexture {
         return 16 / 9f;
     }
 
-    public synchronized void incrementUsageCounter() {
-        usageCounter.incrementAndGet();
-        if (cleanupFuture != null) {
-            cleanupFuture.cancel(false);
-            cleanupFuture = null;
+    public void tryCleanup() {
+        long now = System.currentTimeMillis();
+        if (now - lastUsageTimestamp < 10 * 1000) {
+            return;
         }
-    }
-
-    public synchronized void decrementUsageCounter() {
-        int counterValue = usageCounter.decrementAndGet();
-        if (counterValue <= 0) {
-            if (counterValue < 0) {
-                LOGGER.warn("Illegal counter value {} for url {}. Resetting to 0", counterValue, url);
-                usageCounter.addAndGet(counterValue * -1);
-            }
-            if (cleanupFuture != null) {
-                cleanupFuture.cancel(false);
-            }
-            LOGGER.info("Scheduled cleanup for image {}", url);
-            cleanupFuture = executor.schedule(this::cleanup, IMAGES_CLEANUP_DELAY_SECONDS.get(), TimeUnit.SECONDS);
-            if (textureId != NO_TEXTURE) {
-                try {
-                    GlStateManager._deleteTexture(textureId);
-                    textureId = NO_TEXTURE;
-                } catch (Exception e) {
-                    LOGGER.error("Failed to delete texture {} for image {}", textureId, url);
-                }
-            }
-        }
+        cleanup();
     }
 
     public synchronized void cleanup() {
+        cleanup = true;
         boolean onRenderThread = RenderSystem.isOnRenderThread();
         LOGGER.info("Running cleanup for image {} (isLoaded={}, onRenderThread={})", url, textureId != NO_TEXTURE, onRenderThread);
         if (downloadFuture != null && !downloadFuture.isDone()) {
@@ -115,7 +96,6 @@ public abstract class CachedTexture {
         textureId = NO_TEXTURE;
         downloadFuture = null;
         preparedImage = null;
-        usageCounter.set(0);
         LOGGER.info("Cleanup completed for image {}", url);
     }
 
@@ -155,9 +135,8 @@ public abstract class CachedTexture {
     }
 
     protected void uploadTexture(PreparedImage image) {
-        if (cleanupFuture != null) {
-            LOGGER.warn("Aborting texture upload due to pending cleanup for image {}", url);
-            textureId = NO_TEXTURE;
+        if (cleanup) {
+            LOGGER.warn("Aborting texture upload due to cleanup for image {}", url);
             return;
         }
         int textureId = GlStateManager._genTexture(); //Generate texture ID

@@ -49,19 +49,16 @@ public class ImageFrame extends HangingEntity {
     private int checkIntervalCounter = 0;
 
     @OnlyIn(Dist.CLIENT)
-    private CachedTexture cachedTexture = null;
+    private CachedTexture cachedTexture = TextureCache.LOADING_TEXTURE;
 
     private int lastTextureId = CachedTexture.NO_TEXTURE;
 
     @OnlyIn(Dist.CLIENT)
-    private long lastTextureImageId = 0;
+    private long lastTextureImageId = NO_IMAGE;
 
 
     public ImageFrame(EntityType<ImageFrame> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        if (pLevel.isClientSide) {
-            resetTexture();
-        }
     }
 
     /**
@@ -134,48 +131,9 @@ public class ImageFrame extends HangingEntity {
         this.setBoundingBox(getBox().getBB(getPos()));
     }
 
-    @Override
-    public void remove(RemovalReason pReason) {
-        super.remove(pReason);
-        if (level.isClientSide) {
-            cachedTexture.decrementUsageCounter();
-            cachedTexture = TextureCache.LOADING_TEXTURE;
-        }
-    }
-
-    private void resetTexture() {
-        if (lastTextureImageId == NO_IMAGE) {
-            return;
-        }
-        setTexture(NO_IMAGE, TextureCache.LOADING_TEXTURE);
-    }
-
     private synchronized void setTexture(long imageId, CachedTexture texture) {
-        texture.incrementUsageCounter();
-        if (cachedTexture != null) {
-            cachedTexture.decrementUsageCounter();
-        }
         cachedTexture = texture;
         lastTextureImageId = imageId;
-    }
-
-    @Override
-    public void tick() {
-        super.tick();
-        if (!this.level.isClientSide) {
-            return;
-        }
-        this.checkIntervalCounter++;
-        if (this.checkIntervalCounter < 100) {
-            return;
-        }
-        checkIntervalCounter = 0;
-        LocalPlayer player = Minecraft.getInstance().player;
-        assert player != null;
-        Vec3 playerPosition = player.position();
-        if (!playerPosition.closerThan(this.position(), 100)) {
-            resetTexture();
-        }
     }
 
     public AlignedBox getBox() {

@@ -7,6 +7,8 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.server.command.EnumArgument;
 import ru.wtrn.minecraft.mindpalace.items.ImageFrame;
@@ -22,9 +24,12 @@ public class GiveImageFrameCommand {
                                 Commands.argument("image_id", LongArgumentType.longArg()).executes(GiveImageFrameCommand::giveImage)
                         )
                         .then(
-                                Commands.argument("orientation", EnumArgument.enumArgument(ImageFrame.TargetSizeSide.class))
-                                        .then(Commands.argument("size", IntegerArgumentType.integer(0, 100)))
-                                        .executes(GiveImageFrameCommand::setImageSize)
+                                Commands.argument("orientation", EnumArgument.enumArgument(Orientation.class))
+                                        .then(
+                                                Commands.argument("size", IntegerArgumentType.integer(0, 100))
+                                                        .executes(GiveImageFrameCommand::setImageSize)
+                                        )
+
                         )
         );
     }
@@ -40,8 +45,28 @@ public class GiveImageFrameCommand {
     }
 
     public static int setImageSize(CommandContext<CommandSourceStack> context) {
-        ImageFrame.TargetSizeSide orientation = context.getArgument("orientation", ImageFrame.TargetSizeSide.class);
+        Orientation orientation = context.getArgument("orientation", Orientation.class);
         long size = context.getArgument("size", Integer.class);
+
+        ServerPlayer player = context.getSource().getPlayer();
+        ItemStack stack = player.getMainHandItem();
+
+        if (!stack.is(ModItems.IMAGE_FRAME_ITEM.get())) {
+            context.getSource().sendFailure(Component.literal("Image frame must be in main hand"));
+            return 1;
+        }
+
         return 0;
+    }
+
+    enum Orientation {
+        w(ImageFrame.TargetSizeSide.WIDTH),
+        h(ImageFrame.TargetSizeSide.HEIGHT);
+
+        ImageFrame.TargetSizeSide targetSizeSide;
+
+        Orientation(ImageFrame.TargetSizeSide targetSizeSide) {
+            this.targetSizeSide = targetSizeSide;
+        }
     }
 }

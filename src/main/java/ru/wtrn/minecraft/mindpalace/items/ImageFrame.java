@@ -208,10 +208,7 @@ public class ImageFrame extends HangingEntity {
         Facing facing = Facing.get(direction);
 
         AlignedBox box = new AlignedBox();
-        if (facing.positive)
-            box.setMax(facing.axis, frameThickness);
-        else
-            box.setMin(facing.axis, 1 - frameThickness);
+        box.setMax(facing.axis, frameThickness);
 
         Vec2f min = new Vec2f(margin, margin);
         Vec2f max = new Vec2f(xSize + margin, ySize + margin);

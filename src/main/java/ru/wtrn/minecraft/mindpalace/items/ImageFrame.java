@@ -32,8 +32,11 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
+import retrofit2.Call;
 import ru.wtrn.minecraft.mindpalace.client.texture.CachedTexture;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
+import ru.wtrn.minecraft.mindpalace.http.MciMetadataHttpService;
+import ru.wtrn.minecraft.mindpalace.http.model.MciImageMetadata;
 import ru.wtrn.minecraft.mindpalace.util.CachedAction;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Facing;
@@ -45,6 +48,7 @@ import java.util.function.Supplier;
 
 import static ru.wtrn.minecraft.mindpalace.config.ModClientConfigs.IMAGES_LOAD_DISTANCE;
 import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.DEFAULT_IMAGE_WIDTH;
+import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.MCI_SERVER_URL;
 
 public class ImageFrame extends HangingEntity {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -113,7 +117,7 @@ public class ImageFrame extends HangingEntity {
     public int getTextureId() {
         long imageId = getImageIdAction.invoke();
         if (imageId != this.lastTextureImageId) {
-            String textureKey = "http://100.64.1.3:8094/storage/i/" + imageId;
+            String textureKey = MCI_SERVER_URL.get() + "/storage/i/" + imageId;
             setTexture(imageId, textureKey);
         }
         int textureId = cachedTextureSupplier.get().getTextureId();
@@ -150,12 +154,17 @@ public class ImageFrame extends HangingEntity {
         if (pPlayer.isShiftKeyDown()) {
             kill();
             dropItem(pPlayer);
+            return InteractionResult.SUCCESS;
         }
-        if (!pPlayer.isLocalPlayer()) {
+        if (pPlayer.isLocalPlayer()) {
             long imageId = getImageId();
-            MutableComponent component = Component.literal("Image ID: " + getImageId())
-                    .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://mci.wtrn.ru/i/" + imageId)));
-            pPlayer.sendSystemMessage(component);
+            try {
+                Call<MciImageMetadata> metadata = MciMetadataHttpService.INSTANCE.getImageMetadata(imageId);
+                MutableComponent component = metadata.execute().body().toChatInfo();
+                pPlayer.sendSystemMessage(component);
+            } catch (Exception e) {
+                LOGGER.error("Failed to get image {} metadata", imageId, e);
+            }
         }
         return InteractionResult.SUCCESS;
     }

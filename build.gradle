@@ -154,6 +154,10 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
     library("com.drewnoakes:metadata-extractor:2.18.0")
+    library("com.squareup.retrofit2:retrofit:2.9.0")
+    library("com.squareup.retrofit2:converter-gson:2.9.0") {
+        exclude group: 'com.google.code.gson', module: 'gson'
+    }
 }
 
 // Example for how to get properties into the manifest for reading at runtime.

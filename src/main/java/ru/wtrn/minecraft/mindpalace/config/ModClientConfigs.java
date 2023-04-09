@@ -18,5 +18,8 @@ public class ModClientConfigs {
     public static final ForgeConfigSpec.ConfigValue<Integer> IMAGES_LOAD_DISTANCE = BUILDER
             .define("images_load_distance", 300);
 
+    public static final ForgeConfigSpec.ConfigValue<Boolean> IMAGES_RENDER_BOTH_SIDES = BUILDER
+            .define("images_render_both_sides", false);
+
     public static final ForgeConfigSpec SPEC = BUILDER.build();
 }

@@ -22,6 +22,7 @@ import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
 import ru.wtrn.minecraft.mindpalace.util.math.box.BoxCorner;
 import ru.wtrn.minecraft.mindpalace.util.math.box.BoxFace;
 
+import static ru.wtrn.minecraft.mindpalace.config.ModClientConfigs.IMAGES_RENDER_BOTH_SIDES;
 import static ru.wtrn.minecraft.mindpalace.config.ModClientConfigs.IMAGES_RENDER_DISTANCE;
 
 public class ImageFrameEntityRenderer extends EntityRenderer<ImageFrame> {
@@ -78,15 +79,17 @@ public class ImageFrameEntityRenderer extends EntityRenderer<ImageFrame> {
                     .normal(mat3f, normal.getX(), normal.getY(), normal.getZ()).endVertex();
         tesselator.end();
 
-        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
+        if (IMAGES_RENDER_BOTH_SIDES.get()) {
+            builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
 
-        for (int i = face.corners.length - 1; i >= 0; i--) {
-            BoxCorner corner = face.corners[i];
-            builder.vertex(mat, box.get(corner.x), box.get(corner.y), box.get(corner.z))
-                    .uv(corner.isFacing(face.getTexU()) ? 0 : 1, corner.isFacing(face.getTexV()) ? 1 : 0).color(-1)
-                    .normal(mat3f, normal.getX(), normal.getY(), normal.getZ()).endVertex();
+            for (int i = face.corners.length - 1; i >= 0; i--) {
+                BoxCorner corner = face.corners[i];
+                builder.vertex(mat, box.get(corner.x), box.get(corner.y), box.get(corner.z))
+                        .uv(corner.isFacing(face.getTexU()) ? 0 : 1, corner.isFacing(face.getTexV()) ? 1 : 0).color(-1)
+                        .normal(mat3f, normal.getX(), normal.getY(), normal.getZ()).endVertex();
+            }
+            tesselator.end();
         }
-        tesselator.end();
 
         pose.popPose();
     }

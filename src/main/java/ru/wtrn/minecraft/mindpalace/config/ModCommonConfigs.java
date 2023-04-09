@@ -7,7 +7,7 @@ public class ModCommonConfigs {
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     public static final ForgeConfigSpec.ConfigValue<String> MCI_SERVER_URL = BUILDER.comment("MCI Server URL")
-            .define("mci_url", "https://mci.wtrn.ru");
+            .define("mci_url", "http://100.64.1.3:8094");
 
     public static final ForgeConfigSpec.ConfigValue<Integer> DEFAULT_IMAGE_WIDTH = BUILDER.comment("Default width for new images")
             .define("default_image_width", 3);

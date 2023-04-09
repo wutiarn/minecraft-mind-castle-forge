@@ -11,18 +11,22 @@ import org.slf4j.Logger;
 
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 import static ru.wtrn.minecraft.mindpalace.config.ModClientConfigs.IMAGES_CLEANUP_DELAY_SECONDS;
+import static ru.wtrn.minecraft.mindpalace.config.ModClientConfigs.IMAGES_WORKER_THREADS_COUNT;
 
 public abstract class CachedTexture {
     public static final int NO_TEXTURE = -1;
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(0,
+    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(IMAGES_WORKER_THREADS_COUNT.get(), IMAGES_WORKER_THREADS_COUNT.get(),
+            30, TimeUnit.SECONDS, new LinkedBlockingQueue<>(),
             new ThreadFactoryBuilder().setNameFormat("mci-texture-worker-%d").setDaemon(true).build());
+
+    static {
+        executor.allowCoreThreadTimeOut(true);
+    }
 
 
     protected final String url;

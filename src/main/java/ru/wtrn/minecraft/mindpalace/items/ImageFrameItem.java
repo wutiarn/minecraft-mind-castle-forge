@@ -14,6 +14,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.Nullable;
+import ru.wtrn.minecraft.mindpalace.entity.ModEntities;
 
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class ImageFrameItem extends Item {
             return InteractionResult.FAIL;
         } else {
             Level level = pContext.getLevel();
-            EntityType<ImageFrame> entityType = ModItems.IMAGE_FRAME_ENTITY.get();
+            EntityType<ImageFrame> entityType = ModEntities.IMAGE_FRAME_ENTITY.get();
             ImageFrameItem item = ModItems.IMAGE_FRAME_ITEM.get();
             ImageFrame frame = new ImageFrame(entityType, level, blockpos1, direction);
 

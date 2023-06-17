@@ -8,6 +8,7 @@ import net.minecraftforge.fml.common.Mod;
 import ru.wtrn.minecraft.mindpalace.WtrnMindPalaceMod;
 import ru.wtrn.minecraft.mindpalace.client.renderer.ImageFrameEntityRenderer;
 import ru.wtrn.minecraft.mindpalace.commands.ImageFrameCommand;
+import ru.wtrn.minecraft.mindpalace.entity.ModEntities;
 import ru.wtrn.minecraft.mindpalace.items.ModItems;
 
 public class EventsHandler {
@@ -15,7 +16,7 @@ public class EventsHandler {
     public static class ClientModBusEvents {
         @SubscribeEvent
         public static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event) {
-            event.registerEntityRenderer(ModItems.IMAGE_FRAME_ENTITY.get(),
+            event.registerEntityRenderer(ModEntities.IMAGE_FRAME_ENTITY.get(),
                     ImageFrameEntityRenderer::new);
         }
     }

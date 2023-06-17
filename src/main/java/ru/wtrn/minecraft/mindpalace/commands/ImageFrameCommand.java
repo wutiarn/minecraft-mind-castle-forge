@@ -19,8 +19,9 @@ public class ImageFrameCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
                 Commands.literal("i")
+                        .executes(ImageFrameCommand::giveLatestImage)
                         .then(
-                                Commands.argument("image_id", LongArgumentType.longArg()).executes(ImageFrameCommand::giveImage)
+                                Commands.argument("imageId", LongArgumentType.longArg()).executes(ImageFrameCommand::giveImage)
                         )
                         .then(
                                 Commands.argument("targetSide", EnumArgument.enumArgument(TargetSide.class))
@@ -33,14 +34,23 @@ public class ImageFrameCommand {
         );
     }
 
+    public static int giveLatestImage(CommandContext<CommandSourceStack> context) {
+        doGiveImage(context, 0);
+        return 0;
+    }
+
     public static int giveImage(CommandContext<CommandSourceStack> context) {
-        long image_id = context.getArgument("image_id", Long.class);
+        long imageId = context.getArgument("imageId", Long.class);
+        doGiveImage(context, imageId);
+        return 0;
+    }
+
+    private static void doGiveImage(CommandContext<CommandSourceStack> context, long imageId) {
         ImageFrameItem item = ModItems.IMAGE_FRAME_ITEM.get();
         ItemStack stack = new ItemStack(item, 1);
-        item.setImageId(stack, image_id);
+        item.setImageId(stack, imageId);
         context.getSource().getPlayer().getInventory().add(stack);
         context.getSource().sendSuccess(Component.literal("Given " + item.getName(stack).getString()), true);
-        return 0;
     }
 
     public static int setImageSize(CommandContext<CommandSourceStack> context) {

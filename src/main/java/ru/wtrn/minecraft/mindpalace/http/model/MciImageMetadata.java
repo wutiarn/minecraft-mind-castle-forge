@@ -1,14 +1,14 @@
 package ru.wtrn.minecraft.mindpalace.http.model;
 
-import com.google.gson.annotations.JsonAdapter;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-import static net.minecraft.network.chat.Style.FORMATTING_CODEC;
 import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.MCI_SERVER_URL;
 
 public class MciImageMetadata {

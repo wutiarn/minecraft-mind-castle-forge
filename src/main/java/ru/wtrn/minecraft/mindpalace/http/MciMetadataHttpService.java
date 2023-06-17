@@ -1,5 +1,7 @@
 package ru.wtrn.minecraft.mindpalace.http;
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.GsonBuilder;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -12,7 +14,11 @@ import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.MCI_SERVER_UR
 public interface MciMetadataHttpService {
     MciMetadataHttpService INSTANCE = new Retrofit.Builder()
             .baseUrl(MCI_SERVER_URL.get())
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(
+                    new GsonBuilder()
+                            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                            .create()
+            ))
             .build()
             .create(MciMetadataHttpService.class);
 

@@ -141,9 +141,11 @@ public class ImageFrame extends HangingEntity {
         ItemStack stack = new ItemStack(item, 1);
         item.setImageId(stack, getImageId());
         item.setTargetSize(stack, getTargetSizeType(), getTargetSize());
-        if (pBrokenEntity instanceof Player) {
-            Inventory inventory = ((Player) pBrokenEntity).getInventory();
-            inventory.add(stack);
+        if (pBrokenEntity instanceof Player player) {
+            if (player.getMainHandItem().isEmpty()) {
+                Inventory inventory = player.getInventory();
+                inventory.add(stack);
+            }
         } else {
             this.spawnAtLocation(stack);
         }
@@ -151,13 +153,16 @@ public class ImageFrame extends HangingEntity {
 
     @Override
     public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
+        long imageId = getImageId();
         if (pPlayer.isShiftKeyDown()) {
             kill();
             dropItem(pPlayer);
+            if (pPlayer.isLocalPlayer()) {
+                pPlayer.sendSystemMessage(Component.literal("Destroyed image #" + imageId));
+            }
             return InteractionResult.SUCCESS;
         }
         if (pPlayer.isLocalPlayer()) {
-            long imageId = getImageId();
             try {
                 Call<MciImageMetadata> metadata = MciMetadataHttpService.INSTANCE.getImageMetadata(imageId);
                 MutableComponent component = metadata.execute().body().toChatInfo();

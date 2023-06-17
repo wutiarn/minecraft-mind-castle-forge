@@ -84,7 +84,13 @@ public class ImageFrameItem extends Item {
 
     @Override
     public Component getName(ItemStack pStack) {
-        return Component.literal("Image #" + getImageId(pStack));
+        String text;
+        if (isLatestImage(pStack)) {
+            text = "Latest image";
+        } else {
+            text = "Image #" + getImageId(pStack);
+        }
+        return Component.literal(text);
     }
 
     @Override

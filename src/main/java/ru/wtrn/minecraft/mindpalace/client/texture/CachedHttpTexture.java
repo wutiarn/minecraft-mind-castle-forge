@@ -5,6 +5,7 @@ import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import ru.wtrn.minecraft.mindpalace.http.MciHttpService;
 import ru.wtrn.minecraft.mindpalace.util.ImageLoader;
 
 import java.awt.image.BufferedImage;
@@ -13,7 +14,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class CachedHttpTexture extends CachedTexture {
-    private final OkHttpClient okHttpClient = new OkHttpClient();
 
     public CachedHttpTexture(String url) {
         super(url);
@@ -25,7 +25,7 @@ public class CachedHttpTexture extends CachedTexture {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
-        try (Response response = okHttpClient.newCall(request).execute()) {
+        try (Response response = MciHttpService.HTTP_CLIENT.newCall(request).execute()) {
             InputStream inputStream = response.body().byteStream();
             long contentLength = response.body().contentLength();
             BufferedImage image = ImageLoader.loadImage(inputStream, (int) contentLength);

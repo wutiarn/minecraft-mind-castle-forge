@@ -38,6 +38,15 @@ public class ImageFrameCommand {
         );
     }
 
+    public static void registerClientCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(
+                Commands.literal("i")
+                        .then(
+                                Commands.literal("reload").executes(ImageFrameCommand::reloadTextures)
+                        )
+        );
+    }
+
     public static int giveLatestImage(CommandContext<CommandSourceStack> context) {
         doGiveImage(context, 0);
         return 0;
@@ -76,6 +85,7 @@ public class ImageFrameCommand {
 
     public static int reloadTextures(CommandContext<CommandSourceStack> context) {
         TextureCache.forceCleanup();
+        context.getSource().sendSuccess(Component.literal("Image cache cleanup completed"), true);
         return 0;
     }
 

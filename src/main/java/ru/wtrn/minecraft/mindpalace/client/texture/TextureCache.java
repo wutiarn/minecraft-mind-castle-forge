@@ -1,9 +1,11 @@
 package ru.wtrn.minecraft.mindpalace.client.texture;
 
+import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.slf4j.Logger;
 import ru.wtrn.minecraft.mindpalace.WtrnMindPalaceMod;
 
 import java.util.ArrayList;
@@ -12,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public class TextureCache {
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static final ConcurrentHashMap<String, CachedTexture> cached = new ConcurrentHashMap<>();
     private static int cleanupTickCounter = 0;
     public static Supplier<CachedTexture> LOADING_TEXTURE = getSupplier(new ResourceLocation(WtrnMindPalaceMod.MOD_ID, "textures/loading.png").toString());
@@ -35,6 +38,7 @@ public class TextureCache {
     }
 
     public static void forceCleanup() {
+        LOGGER.error("Force cleanup started");
         for (CachedTexture cache : cached.values()) {
             cache.cleanup();
         };

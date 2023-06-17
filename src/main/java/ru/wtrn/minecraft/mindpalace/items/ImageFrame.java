@@ -43,6 +43,7 @@ import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
 import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import static ru.wtrn.minecraft.mindpalace.config.ModClientConfigs.IMAGES_LOAD_DISTANCE;
@@ -226,7 +227,9 @@ public class ImageFrame extends HangingEntity {
     }
 
     public AlignedBox doGetBox() {
-        float margin = -0.5f;
+        float defaultMargin = -0.5f;
+        float xMargin = defaultMargin;
+        float yMargin = defaultMargin;
         float aspectRatio;
         if (level.isClientSide && this.cachedTextureSupplier != null) {
             aspectRatio = cachedTextureSupplier.get().getAspectRatio();
@@ -239,9 +242,11 @@ public class ImageFrame extends HangingEntity {
         if (getTargetSizeType() == TargetSizeType.WIDTH) {
             xSize = this.getTargetSize();
             ySize = xSize / aspectRatio;
+            yMargin += (Math.ceil(ySize) - ySize) / 2;
         } else {
             ySize = this.getTargetSize();
             xSize = ySize * aspectRatio;
+            xMargin += (Math.ceil(xSize) - xSize) / 2;
         }
 
         Direction direction = getDirection();
@@ -250,8 +255,8 @@ public class ImageFrame extends HangingEntity {
         AlignedBox box = new AlignedBox();
         box.setMax(facing.axis, frameThickness);
 
-        Vec2f min = new Vec2f(margin, margin);
-        Vec2f max = new Vec2f(xSize + margin, ySize + margin);
+        Vec2f min = new Vec2f(xMargin, yMargin);
+        Vec2f max = new Vec2f(xSize + xMargin, ySize + yMargin);
 
         Axis one = facing.one();
         Axis two = facing.two();

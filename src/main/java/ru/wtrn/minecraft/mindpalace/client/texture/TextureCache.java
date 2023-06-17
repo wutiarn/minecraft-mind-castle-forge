@@ -34,12 +34,17 @@ public class TextureCache {
         return new CachedTextureSupplier(get(url));
     }
 
+    public static void forceCleanup() {
+        for (CachedTexture cache : cached.values()) {
+            cache.cleanup();
+        };
+        cached.clear();
+    }
+
     @SubscribeEvent
     public static void unload(LevelEvent.Unload event) {
         if (event.getLevel().isClientSide()) {
-            for (CachedTexture cache : cached.values())
-                cache.cleanup();
-            cached.clear();
+            forceCleanup();
         }
     }
 

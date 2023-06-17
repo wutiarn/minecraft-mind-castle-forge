@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.server.command.EnumArgument;
+import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
 import ru.wtrn.minecraft.mindpalace.items.ImageFrame;
 import ru.wtrn.minecraft.mindpalace.items.ImageFrameItem;
 import ru.wtrn.minecraft.mindpalace.items.ModItems;
@@ -30,6 +31,9 @@ public class ImageFrameCommand {
                                                         .executes(ImageFrameCommand::setImageSize)
                                         )
 
+                        )
+                        .then(
+                                Commands.literal("reload").executes(ImageFrameCommand::reloadTextures)
                         )
         );
     }
@@ -67,6 +71,11 @@ public class ImageFrameCommand {
 
         item.setTargetSize(stack, targetSide.targetSizeSide, size);
 
+        return 0;
+    }
+
+    public static int reloadTextures(CommandContext<CommandSourceStack> context) {
+        TextureCache.forceCleanup();
         return 0;
     }
 

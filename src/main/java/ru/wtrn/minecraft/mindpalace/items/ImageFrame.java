@@ -79,9 +79,7 @@ public class ImageFrame extends HangingEntity {
     public ImageFrame(EntityType<ImageFrame> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         if (pLevel.isClientSide) {
-            cachedTextureSupplier = TextureCache.LOADING_TEXTURE;
-            lastTextureId = CachedTexture.NO_TEXTURE;
-            lastTextureImageId = NO_IMAGE;
+            resetTexture();
         }
     }
 
@@ -117,7 +115,7 @@ public class ImageFrame extends HangingEntity {
     public int getTextureId() {
         long imageId = getImageIdAction.invoke();
         if (imageId != this.lastTextureImageId) {
-            String textureKey = MCI_SERVER_URL.get() + "/storage/i/" + imageId;
+            String textureKey = getTextureKey(imageId);
             setTexture(imageId, textureKey);
         }
         int textureId = cachedTextureSupplier.get().getTextureId();
@@ -126,6 +124,17 @@ public class ImageFrame extends HangingEntity {
             recalculateBoundingBox();
         }
         return textureId;
+    }
+
+    private void resetTexture() {
+        cachedTextureSupplier = TextureCache.LOADING_TEXTURE;
+        lastTextureId = CachedTexture.NO_TEXTURE;
+        lastTextureImageId = NO_IMAGE;
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    private static String getTextureKey(long imageId) {
+        return MCI_SERVER_URL.get() + "/storage/i/" + imageId;
     }
 
     @Override
@@ -145,6 +154,12 @@ public class ImageFrame extends HangingEntity {
             if (player.getMainHandItem().isEmpty()) {
                 Inventory inventory = player.getInventory();
                 inventory.add(stack);
+            }
+            if (player.isLocalPlayer()) {
+                Long imageId = getImageIdAction.invoke();
+                String textureKey = getTextureKey(imageId);
+                TextureCache.cleanup(textureKey);
+                resetTexture();
             }
         } else {
             this.spawnAtLocation(stack);

@@ -24,6 +24,12 @@ public class TextureCache {
         return cached.computeIfAbsent(url, CachedResourceTexture::new);
     }
 
+    public static void cleanup(String url) {
+        CachedTexture texture = get(url);
+        texture.cleanup();
+        cached.remove(url);
+    }
+
     public static Supplier<CachedTexture> getSupplier(String url) {
         return new CachedTextureSupplier(get(url));
     }

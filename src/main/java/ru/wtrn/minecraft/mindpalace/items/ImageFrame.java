@@ -25,6 +25,7 @@ import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -178,6 +179,11 @@ public class ImageFrame extends HangingEntity {
             return InteractionResult.SUCCESS;
         }
         if (pPlayer.isLocalPlayer()) {
+            if (pPlayer.getMainHandItem().is(Items.STICK)) {
+                pPlayer.sendSystemMessage(Component.literal("Reloading texture for image #" + imageId));
+                TextureCache.cleanup(getTextureKey(imageId));
+                return InteractionResult.SUCCESS;
+            }
             try {
                 Call<MciImageMetadata> metadata = MciMetadataHttpService.INSTANCE.getImageMetadata(imageId);
                 MutableComponent component = metadata.execute().body().toChatInfo();

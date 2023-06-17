@@ -25,6 +25,7 @@ public interface MciHttpService {
             .build();
     MciHttpService INSTANCE = new Retrofit.Builder()
             .baseUrl(MCI_SERVER_URL.get())
+            .client(HTTP_CLIENT)
             .addConverterFactory(GsonConverterFactory.create(
                     new GsonBuilder()
                             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)

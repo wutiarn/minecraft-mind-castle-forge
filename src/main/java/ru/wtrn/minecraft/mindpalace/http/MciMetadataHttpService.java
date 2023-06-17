@@ -18,4 +18,7 @@ public interface MciMetadataHttpService {
 
     @GET("/i/{imageId}/meta.json")
     Call<MciImageMetadata> getImageMetadata(@Path("imageId") long imageId);
+
+    @GET("/i/latest/meta.json")
+    Call<MciImageMetadata> getLatestImageMetadata();
 }

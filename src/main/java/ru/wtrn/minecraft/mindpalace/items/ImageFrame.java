@@ -152,7 +152,7 @@ public class ImageFrame extends HangingEntity {
         if (pBrokenEntity instanceof Player player) {
             if (player.getMainHandItem().isEmpty()) {
                 Inventory inventory = player.getInventory();
-                inventory.add(stack);
+                inventory.setPickedItem(stack);
             }
             if (player.isLocalPlayer()) {
                 Long imageId = getImageIdAction.invoke();

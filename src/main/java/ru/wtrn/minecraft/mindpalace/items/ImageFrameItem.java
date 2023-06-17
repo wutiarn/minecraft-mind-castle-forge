@@ -14,7 +14,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.Nullable;
-import ru.wtrn.minecraft.mindpalace.http.MciMetadataHttpService;
+import ru.wtrn.minecraft.mindpalace.http.MciHttpService;
 
 import java.io.IOException;
 import java.util.List;
@@ -134,6 +134,6 @@ public class ImageFrameItem extends Item {
     }
 
     private long getLatestImageId() throws IOException {
-        return MciMetadataHttpService.INSTANCE.getLatestImageMetadata().execute().body().id;
+        return MciHttpService.INSTANCE.getLatestImageMetadata().execute().body().id;
     }
 }

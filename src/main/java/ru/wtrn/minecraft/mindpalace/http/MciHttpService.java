@@ -11,8 +11,8 @@ import ru.wtrn.minecraft.mindpalace.http.model.MciImageMetadata;
 
 import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.MCI_SERVER_URL;
 
-public interface MciMetadataHttpService {
-    MciMetadataHttpService INSTANCE = new Retrofit.Builder()
+public interface MciHttpService {
+    MciHttpService INSTANCE = new Retrofit.Builder()
             .baseUrl(MCI_SERVER_URL.get())
             .addConverterFactory(GsonConverterFactory.create(
                     new GsonBuilder()
@@ -20,7 +20,7 @@ public interface MciMetadataHttpService {
                             .create()
             ))
             .build()
-            .create(MciMetadataHttpService.class);
+            .create(MciHttpService.class);
 
     @GET("/i/{imageId}/meta.json")
     Call<MciImageMetadata> getImageMetadata(@Path("imageId") long imageId);

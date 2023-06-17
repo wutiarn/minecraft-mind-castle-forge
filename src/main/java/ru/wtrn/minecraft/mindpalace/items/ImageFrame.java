@@ -6,10 +6,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -36,7 +34,7 @@ import org.slf4j.Logger;
 import retrofit2.Call;
 import ru.wtrn.minecraft.mindpalace.client.texture.CachedTexture;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
-import ru.wtrn.minecraft.mindpalace.http.MciMetadataHttpService;
+import ru.wtrn.minecraft.mindpalace.http.MciHttpService;
 import ru.wtrn.minecraft.mindpalace.http.model.MciImageMetadata;
 import ru.wtrn.minecraft.mindpalace.util.CachedAction;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
@@ -185,7 +183,7 @@ public class ImageFrame extends HangingEntity {
                 return InteractionResult.SUCCESS;
             }
             try {
-                Call<MciImageMetadata> metadata = MciMetadataHttpService.INSTANCE.getImageMetadata(imageId);
+                Call<MciImageMetadata> metadata = MciHttpService.INSTANCE.getImageMetadata(imageId);
                 MutableComponent component = metadata.execute().body().toChatInfo();
                 pPlayer.sendSystemMessage(component);
             } catch (Exception e) {

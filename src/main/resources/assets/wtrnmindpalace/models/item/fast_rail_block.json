@@ -1,3 +1,6 @@
 {
-  "parent": "wtrnmindpalace:block/powered_rail"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "wtrnmindpalace:block/fast_rail_block"
+  }
 }

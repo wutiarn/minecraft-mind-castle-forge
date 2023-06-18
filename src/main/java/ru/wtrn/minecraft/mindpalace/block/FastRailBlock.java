@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -32,11 +33,9 @@ public class FastRailBlock extends PoweredRailBlock {
         final Double baseSpeed = ModCommonConfigs.FAST_RAILS_BASE_SPEED.get();
         final int neighborsToCheck = (int) Math.ceil(highSpeed);
 
-        Vec3 blockPosVec = cart.position();
+        NeighbourRailIterator neighbourRailIterator = new NeighbourRailIterator(cart.position(), level, directionVector, this);
         for (int i = 1; i <= neighborsToCheck; i++) {
-            Vec3 targetPos = blockPosVec.add(directionVector.scale(i));
-            BlockState neigborBlockState = level.getBlockState(new BlockPos(targetPos.x, targetPos.y, targetPos.z));
-            if (!neigborBlockState.is(this)) {
+            if (!neighbourRailIterator.hasNext()) {
                 highSpeed = Math.min(i - 1.0, highSpeed);
                 break;
             }
@@ -54,18 +53,30 @@ public class FastRailBlock extends PoweredRailBlock {
         return true;
     }
 
-    private static double getPlaneSqrtDistance(Vec3 vec) {
-        return Math.sqrt(getPlaneSqrDistance(vec));
-    }
-
-    private static double getPlaneSqrDistance(Vec3 vec) {
-        return vec.x * vec.x + vec.z * vec.z;
-    }
-
     private static Vec3 getUnitDirectionVector(Vec3 cartMotion) {
         if (Math.abs(cartMotion.x) > 0) {
             return new Vec3(Math.signum(cartMotion.x), 0, 0);
         }
         return new Vec3(0, 0, Math.signum(cartMotion.z));
+    }
+
+    private static class NeighbourRailIterator {
+        private final Level level;
+        private final Vec3 startPos;
+        private final Vec3 directionVector;
+        private final Block targetBlockType;
+
+        public NeighbourRailIterator(Vec3 startPos, Level level, Vec3 directionVector, Block targetBlockType) {
+            this.level = level;
+            this.startPos = startPos;
+            this.directionVector = directionVector;
+            this.targetBlockType = targetBlockType;
+        }
+
+        boolean hasNext() {
+            Vec3 targetPos = startPos.add(directionVector);
+            BlockState neigborBlockState = level.getBlockState(new BlockPos(targetPos.x, targetPos.y, targetPos.z));
+            return neigborBlockState.is(targetBlockType);
+        }
     }
 }

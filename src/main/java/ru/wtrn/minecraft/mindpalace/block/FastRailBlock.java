@@ -31,12 +31,12 @@ public class FastRailBlock extends PoweredRailBlock {
 
         float speedFactor = 2.0f;
         Vec3 deltaMovement = cartMotion.multiply(speedFactor, speedFactor, speedFactor);
-        final int neighborsToCheck = (int) Math.ceil(getPlaneSqrtDistance(cartMotion));
+        final int neighborsToCheck = (int) Math.ceil(getPlaneSqrtDistance(cartMotion)) + 2;
 
-        Vec3 blockPosVec = new Vec3(pos.getX(), pos.getY(), pos.getZ());
+        Vec3 blockPosVec = cart.position();
         boolean triggerMove = true;
         for (int i = 1; i <= neighborsToCheck; i++) {
-            Vec3 targetPos = blockPosVec.add(deltaMovement);
+            Vec3 targetPos = blockPosVec.add(directionVector.scale(i));
             BlockState neigborBlockState = level.getBlockState(new BlockPos(targetPos.x, targetPos.y, targetPos.z));
             if (!neigborBlockState.is(this)) {
                 triggerMove = false;
@@ -44,8 +44,11 @@ public class FastRailBlock extends PoweredRailBlock {
             }
         }
 
+        cart.setDeltaMovement(directionVector.scale(0.6));
         if (triggerMove) {
             cart.move(MoverType.SELF, deltaMovement);
+//        } else {
+//            cart.setDeltaMovement(directionVector.scale(0.1));
         }
     }
 

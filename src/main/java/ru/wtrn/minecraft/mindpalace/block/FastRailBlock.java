@@ -34,7 +34,7 @@ public class FastRailBlock extends PoweredRailBlock {
         final Vec3 cartMotion = cart.getDeltaMovement();
 
         Vec3 directionVector = getUnitDirectionVector(cartMotion);
-        if (Vec3.ZERO.equals(directionVector)) {
+        if (Vec3.ZERO.closerThan(directionVector, 0.1)) {
             return;
         }
 
@@ -158,17 +158,5 @@ public class FastRailBlock extends PoweredRailBlock {
             directionVector = new Vec3(directionVector.x, yValue, directionVector.z);
             return currentPos.add(directionVector);
         }
-    }
-
-    @Override
-    public void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pBlock, BlockPos pFromPos, boolean pIsMoving) {
-        if (!pLevel.isClientSide && pLevel.getBlockState(pPos).is(this)) {
-            this.updateState(pState, pLevel, pPos, pBlock);
-        }
-    }
-
-    @Override
-    public boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
-        return true;
     }
 }

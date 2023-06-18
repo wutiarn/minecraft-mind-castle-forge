@@ -104,20 +104,22 @@ public class FastRailBlock extends PoweredRailBlock {
             }
 
             Vec3 delta = targetPos.add(currentPos.scale(-1));
-            double deltaLength = VectorUtils.getLength(delta);
+            double deltaLength = VectorUtils.getHorizontalLength(delta);
             double permittedPathLength = maxPath - accumulatedPath;
 
+            boolean isCompleted = false;
             if (permittedPathLength < deltaLength) {
                 double scaleFactor = permittedPathLength / deltaLength;
                 delta = delta.scale(scaleFactor);
                 deltaLength = deltaLength * scaleFactor;
+                isCompleted = true;
             }
 
             resultPath = resultPath.add(delta);
             accumulatedPath += deltaLength;
 
             currentPos = targetPos;
-            return true;
+            return !isCompleted;
         }
 
         private BlockState getBlockState(Vec3 pos) {

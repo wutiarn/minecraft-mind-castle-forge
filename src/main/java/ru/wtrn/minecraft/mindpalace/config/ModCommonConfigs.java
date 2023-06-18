@@ -17,10 +17,8 @@ public class ModCommonConfigs {
 
     public static final ForgeConfigSpec.ConfigValue<Double> FAST_RAILS_HIGH_SPEED = BUILDER.comment("Fast rails high speed")
             .define("fast_rails_high_speed", 2.0);
-    public static final ForgeConfigSpec.ConfigValue<Double> FAST_RAILS_BASE_SPEED = BUILDER.comment("Fast rails base speed")
-            .define("fast_rails_low_speed", 0.6);
-    public static final ForgeConfigSpec.ConfigValue<Integer> FAST_RAILS_ADDITIONAL_NEIGHBOURS_TO_CHECK = BUILDER
-            .define("fast_rails_neighbours_to_check", 2);
+    public static final ForgeConfigSpec.ConfigValue<Double> FAST_RAILS_BASE_SPEED = BUILDER.comment("Fast rails base speed. 0.4 or less is recommended to avoid slopes and corners traverse issues.")
+            .define("fast_rails_low_speed", 0.4);
 
     public static final ForgeConfigSpec SPEC = BUILDER.build();
 }

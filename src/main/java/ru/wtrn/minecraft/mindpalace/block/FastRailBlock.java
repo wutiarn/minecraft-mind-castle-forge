@@ -28,27 +28,24 @@ public class FastRailBlock extends PoweredRailBlock {
 
         Vec3 directionVector = getUnitDirectionVector(cartMotion);
 
-        final Double highSpeed = ModCommonConfigs.FAST_RAILS_HIGH_SPEED.get();
+        Double highSpeed = ModCommonConfigs.FAST_RAILS_HIGH_SPEED.get();
         final Double baseSpeed = ModCommonConfigs.FAST_RAILS_BASE_SPEED.get();
-        final int neighborsToCheck = (int) Math.ceil(highSpeed) + ModCommonConfigs.FAST_RAILS_ADDITIONAL_NEIGHBOURS_TO_CHECK.get();
+        final int neighborsToCheck = (int) Math.ceil(highSpeed);
 
         Vec3 blockPosVec = cart.position();
-        boolean triggerMove = true;
         for (int i = 1; i <= neighborsToCheck; i++) {
             Vec3 targetPos = blockPosVec.add(directionVector.scale(i));
             BlockState neigborBlockState = level.getBlockState(new BlockPos(targetPos.x, targetPos.y, targetPos.z));
             if (!neigborBlockState.is(this)) {
-                triggerMove = false;
+                highSpeed = Math.min(i - 1.0, highSpeed);
                 break;
             }
         }
 
         cart.setDeltaMovement(directionVector.scale(baseSpeed));
         double additionalMoveSpeed = highSpeed - baseSpeed;
-        if (triggerMove && additionalMoveSpeed > 0) {
+        if (additionalMoveSpeed > 0) {
             cart.move(MoverType.SELF, directionVector.scale(additionalMoveSpeed));
-//        } else {
-//            cart.setDeltaMovement(directionVector.scale(0.1));
         }
     }
 

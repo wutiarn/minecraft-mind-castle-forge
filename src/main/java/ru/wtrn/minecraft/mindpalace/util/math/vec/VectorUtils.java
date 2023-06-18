@@ -19,11 +19,11 @@ public class VectorUtils {
         return new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
 
-    public static double getLength(Vec3 vec3) {
+    public static double getDistance(Vec3 vec3) {
         return Math.sqrt(vec3.x * vec3.x + vec3.y * vec3.y + vec3.z * vec3.z);
     }
 
-    public static double getHorizontalLength(Vec3 vec3) {
+    public static double getHorizontalDistance(Vec3 vec3) {
         return Math.sqrt(vec3.x * vec3.x + vec3.z * vec3.z);
     }
 

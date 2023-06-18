@@ -34,17 +34,13 @@ public class FastRailBlock extends PoweredRailBlock {
         Double highSpeed = ModCommonConfigs.FAST_RAILS_HIGH_SPEED.get();
         final Double baseSpeed = ModCommonConfigs.FAST_RAILS_BASE_SPEED.get();
 
-        Vec3 startBlockVector = VectorUtils.toVec3(pos);
-        double maxPath = highSpeed - baseSpeed;
-        NeighbourRailIterator neighbourRailIterator = new NeighbourRailIterator(startBlockVector, level, directionVector, this, maxPath);
-        Vec3 safeTravelVector = neighbourRailIterator.getSafeTravelVector();
-
-        Vec3 moveVector = startBlockVector
-                .add(safeTravelVector)
-                .add(cart.position().scale(-1))
-                .add(new Vec3(0.5, 0.5, 0.5));
-        if (!safeTravelVector.closerThan(Vec3.ZERO, 0.1)) {
-            cart.move(MoverType.SELF, moveVector);
+        double maxJumpPath = highSpeed - baseSpeed;
+        if (maxJumpPath > 0) {
+            SafeJumpPathFinder safeJumpPathFinder = new SafeJumpPathFinder(cart.position(), level, directionVector, this, maxJumpPath);
+            Vec3 safeTravelVector = safeJumpPathFinder.getSafeTravelVector();
+            if (!safeTravelVector.closerThan(Vec3.ZERO, 0.1)) {
+                cart.move(MoverType.SELF, safeTravelVector);
+            }
         }
         cart.setDeltaMovement(directionVector.scale(baseSpeed));
     }
@@ -61,7 +57,7 @@ public class FastRailBlock extends PoweredRailBlock {
         return new Vec3(0, 0, Math.signum(cartMotion.z));
     }
 
-    private static class NeighbourRailIterator {
+    private static class SafeJumpPathFinder {
         private final Level level;
         private final Vec3 directionVector;
         private final FastRailBlock fastRailBlock;
@@ -70,7 +66,7 @@ public class FastRailBlock extends PoweredRailBlock {
         private Vec3 currentPos;
         private Vec3 resultPath = null;
 
-        public NeighbourRailIterator(Vec3 startPos, Level level, Vec3 directionVector, FastRailBlock fastRailBlock, double maxPath) {
+        public SafeJumpPathFinder(Vec3 startPos, Level level, Vec3 directionVector, FastRailBlock fastRailBlock, double maxPath) {
             this.level = level;
             this.currentPos = startPos;
             this.directionVector = directionVector;
@@ -104,7 +100,7 @@ public class FastRailBlock extends PoweredRailBlock {
             }
 
             Vec3 delta = targetPos.add(currentPos.scale(-1));
-            double deltaLength = VectorUtils.getHorizontalLength(delta);
+            double deltaLength = VectorUtils.getHorizontalDistance(delta);
             double permittedPathLength = maxPath - accumulatedPath;
 
             boolean isCompleted = false;

@@ -36,12 +36,17 @@ public class FastRailBlock extends PoweredRailBlock {
         Double highSpeed = ModCommonConfigs.FAST_RAILS_HIGH_SPEED.get();
         final Double baseSpeed = ModCommonConfigs.FAST_RAILS_BASE_SPEED.get();
 
-        NeighbourRailIterator neighbourRailIterator = new NeighbourRailIterator(cart.position(), level, directionVector, this);
+        Vec3 startBlockVector = VectorUtils.toVec3(pos);
+        NeighbourRailIterator neighbourRailIterator = new NeighbourRailIterator(startBlockVector, level, directionVector, this);
         int safeTravelBlocks = (int) Math.ceil(highSpeed - baseSpeed);
         Vec3 safeTravelVector = neighbourRailIterator.getSafeTravelVector(safeTravelBlocks);
 
+        Vec3 moveVector = startBlockVector
+                .add(safeTravelVector)
+                .add(cart.position().scale(-1))
+                .add(new Vec3(0.5, 0.5, 0.5));
         if (!safeTravelVector.closerThan(Vec3.ZERO, 0.1)) {
-            cart.move(MoverType.SELF, safeTravelVector);
+            cart.move(MoverType.SELF, moveVector);
         }
         cart.setDeltaMovement(directionVector.scale(baseSpeed));
     }
@@ -93,7 +98,8 @@ public class FastRailBlock extends PoweredRailBlock {
             BlockState neigborBlockState = getBlockState(targetPos);
             if (!neigborBlockState.is(fastRailBlock)) {
                 return false;
-            };
+            }
+            ;
             currentPos = targetPos;
             return true;
         }

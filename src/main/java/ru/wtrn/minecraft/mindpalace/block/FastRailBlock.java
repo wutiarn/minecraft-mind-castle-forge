@@ -9,9 +9,12 @@ import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.Vec3;
 import ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs;
+import ru.wtrn.minecraft.mindpalace.util.math.base.Facing;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.VectorUtils;
 
 public class FastRailBlock extends PoweredRailBlock {
     public FastRailBlock() {
@@ -62,21 +65,36 @@ public class FastRailBlock extends PoweredRailBlock {
 
     private static class NeighbourRailIterator {
         private final Level level;
-        private final Vec3 startPos;
+        private final Vec3 currentPos;
         private final Vec3 directionVector;
-        private final Block targetBlockType;
+        private final FastRailBlock fastRailBlock;
 
-        public NeighbourRailIterator(Vec3 startPos, Level level, Vec3 directionVector, Block targetBlockType) {
+        public NeighbourRailIterator(Vec3 startPos, Level level, Vec3 directionVector, FastRailBlock fastRailBlock) {
             this.level = level;
-            this.startPos = startPos;
+            this.currentPos = startPos;
             this.directionVector = directionVector;
-            this.targetBlockType = targetBlockType;
+            this.fastRailBlock = fastRailBlock;
         }
 
         boolean hasNext() {
-            Vec3 targetPos = startPos.add(directionVector);
-            BlockState neigborBlockState = level.getBlockState(new BlockPos(targetPos.x, targetPos.y, targetPos.z));
-            return neigborBlockState.is(targetBlockType);
+            BlockState currentBlockState = getBlockState(currentPos);
+            RailShape railShape = currentBlockState.getValue(fastRailBlock.getShapeProperty());
+
+            Vec3 targetPos = getNeighbourForShape(railShape, currentPos, directionVector);
+            BlockState neigborBlockState = getBlockState(targetPos);
+            return neigborBlockState.is(fastRailBlock);
+        }
+
+        private BlockState getBlockState(Vec3 pos) {
+            BlockPos blockPos = VectorUtils.toBlockPos(pos);
+            return level.getBlockState(blockPos);
+        }
+
+        private static Vec3 getNeighbourForShape(RailShape railShape, Vec3 currentPos, Vec3 directionVector) {
+            if (!railShape.isAscending()) {
+                return currentPos.add(directionVector);
+            }
+            return currentPos.add(directionVector);
         }
     }
 }

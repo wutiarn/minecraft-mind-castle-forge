@@ -10,7 +10,15 @@ import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
 import ru.wtrn.minecraft.mindpalace.util.math.geo.VectorFan;
 
 public class VectorUtils {
-    
+
+    public static BlockPos toBlockPos(Vec3 vec3) {
+        return new BlockPos(vec3.x, vec3.y, vec3.z);
+    }
+
+    public static Vec3 toVec3(BlockPos blockPos) {
+        return new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+    }
+
     public static Vector3d set(Vector3d vec, double value, Axis axis) {
         switch (axis) {
             case X -> new Vector3d(value, vec.y, vec.z);

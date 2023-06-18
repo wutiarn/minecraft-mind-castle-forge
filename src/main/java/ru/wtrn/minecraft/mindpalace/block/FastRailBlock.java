@@ -3,15 +3,14 @@ package ru.wtrn.minecraft.mindpalace.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.Vec3;
+import ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs;
 
 public class FastRailBlock extends PoweredRailBlock {
     public FastRailBlock() {
@@ -29,9 +28,9 @@ public class FastRailBlock extends PoweredRailBlock {
 
         Vec3 directionVector = getUnitDirectionVector(cartMotion);
 
-        float speedFactor = 2.0f;
-        Vec3 deltaMovement = cartMotion.multiply(speedFactor, speedFactor, speedFactor);
-        final int neighborsToCheck = (int) Math.ceil(getPlaneSqrtDistance(cartMotion)) + 2;
+        final Double highSpeed = ModCommonConfigs.FAST_RAILS_HIGH_SPEED.get();
+        final Double baseSpeed = ModCommonConfigs.FAST_RAILS_BASE_SPEED.get();
+        final int neighborsToCheck = (int) Math.ceil(highSpeed) + ModCommonConfigs.FAST_RAILS_ADDITIONAL_NEIGHBOURS_TO_CHECK.get();
 
         Vec3 blockPosVec = cart.position();
         boolean triggerMove = true;
@@ -44,9 +43,10 @@ public class FastRailBlock extends PoweredRailBlock {
             }
         }
 
-        cart.setDeltaMovement(directionVector.scale(0.6));
-        if (triggerMove) {
-            cart.move(MoverType.SELF, deltaMovement);
+        cart.setDeltaMovement(directionVector.scale(baseSpeed));
+        double additionalMoveSpeed = highSpeed - baseSpeed;
+        if (triggerMove && additionalMoveSpeed > 0) {
+            cart.move(MoverType.SELF, directionVector.scale(additionalMoveSpeed));
 //        } else {
 //            cart.setDeltaMovement(directionVector.scale(0.1));
         }

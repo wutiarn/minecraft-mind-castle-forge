@@ -12,14 +12,19 @@ import ru.wtrn.minecraft.mindpalace.WtrnMindPalaceMod;
 import ru.wtrn.minecraft.mindpalace.client.renderer.ImageFrameEntityRenderer;
 import ru.wtrn.minecraft.mindpalace.commands.ImageFrameCommand;
 import ru.wtrn.minecraft.mindpalace.entity.ModEntities;
-import ru.wtrn.minecraft.mindpalace.items.ModItems;
 import ru.wtrn.minecraft.mindpalace.tags.ModBlockTagsProvider;
 
 public class EventsHandler {
     @Mod.EventBusSubscriber(modid = WtrnMindPalaceMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ModBusEvents {
         @SubscribeEvent
-        public void gatherData(GatherDataEvent event) {
+        public static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event) {
+            event.registerEntityRenderer(ModEntities.IMAGE_FRAME_ENTITY.get(),
+                    ImageFrameEntityRenderer::new);
+        }
+
+        @SubscribeEvent
+        public static void gatherData(GatherDataEvent event) {
             event.getGenerator().addProvider(
                     event.includeServer(),
                     (DataProvider.Factory<ModBlockTagsProvider>) output -> new ModBlockTagsProvider(
@@ -29,15 +34,6 @@ public class EventsHandler {
                             event.getExistingFileHelper()
                     )
             );
-        }
-    }
-
-    @Mod.EventBusSubscriber(modid = WtrnMindPalaceMod.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
-    public static class ClientModBusEvents {
-        @SubscribeEvent
-        public static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event) {
-            event.registerEntityRenderer(ModEntities.IMAGE_FRAME_ENTITY.get(),
-                    ImageFrameEntityRenderer::new);
         }
     }
 

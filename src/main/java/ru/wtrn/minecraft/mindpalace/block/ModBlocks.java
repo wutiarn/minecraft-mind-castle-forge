@@ -16,6 +16,8 @@ public class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS =
             DeferredRegister.create(ForgeRegistries.BLOCKS, WtrnMindPalaceMod.MOD_ID);
 
+    public static final RegistryObject<Block> FAST_RAIL_BLOCK = registerBlock("fast_rail_block", FastRailBlock::new);
+
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block) {
         RegistryObject<T> toReturn = BLOCKS.register(name, block);
         registerBlockItem(name, toReturn);

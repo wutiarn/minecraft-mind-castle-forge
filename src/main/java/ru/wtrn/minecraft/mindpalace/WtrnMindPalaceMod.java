@@ -18,10 +18,10 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 import ru.wtrn.minecraft.mindpalace.block.ModBlocks;
-import ru.wtrn.minecraft.mindpalace.block.entity.ModBlockEntities;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
 import ru.wtrn.minecraft.mindpalace.config.ModClientConfigs;
 import ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs;
+import ru.wtrn.minecraft.mindpalace.entity.ModEntities;
 import ru.wtrn.minecraft.mindpalace.items.ModCreativeModeTab;
 import ru.wtrn.minecraft.mindpalace.items.ModItems;
 
@@ -41,7 +41,7 @@ public class WtrnMindPalaceMod {
 
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
-        ModBlockEntities.register(modEventBus);
+        ModEntities.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
@@ -63,6 +63,7 @@ public class WtrnMindPalaceMod {
     private void addCreative(CreativeModeTabEvent.BuildContents event) {
         if (event.getTab() == ModCreativeModeTab.MIND_PALACE_TAB) {
             event.accept(ModItems.IMAGE_FRAME_ITEM);
+            event.accept(ModBlocks.FAST_RAIL_BLOCK.get());
         }
     }
 

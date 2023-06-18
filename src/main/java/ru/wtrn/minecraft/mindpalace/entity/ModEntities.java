@@ -22,13 +22,6 @@ public class ModEntities {
                 return builder.build("image_frame_entity");
             });
 
-    public static final RegistryObject<EntityType<SubwayMinecart>> SUBWAY_MINECART_ENTITY = ENTITY_TYPES.register("subway_minecart_entity",
-            () -> {
-                EntityType.Builder<SubwayMinecart> builder = EntityType.Builder.<SubwayMinecart>of(SubwayMinecart::new, MobCategory.MISC)
-                        .sized(0.98F, 0.7F).clientTrackingRange(8);
-                return builder.build("subway_minecart_entity");
-            });
-
 
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);

@@ -35,21 +35,15 @@ public class FastRailBlock extends PoweredRailBlock {
 
         Double highSpeed = ModCommonConfigs.FAST_RAILS_HIGH_SPEED.get();
         final Double baseSpeed = ModCommonConfigs.FAST_RAILS_BASE_SPEED.get();
-        final int neighborsToCheck = (int) Math.ceil(highSpeed) + 5;
 
         NeighbourRailIterator neighbourRailIterator = new NeighbourRailIterator(cart.position(), level, directionVector, this);
-        for (int i = 1; i <= neighborsToCheck; i++) {
-            if (!neighbourRailIterator.hasNext()) {
-                highSpeed = Math.min(i - 1.0, highSpeed);
-                break;
-            }
-        }
+        int safeTravelBlocks = (int) Math.ceil(highSpeed - baseSpeed);
+        Vec3 safeTravelVector = neighbourRailIterator.getSafeTravelVector(safeTravelBlocks);
 
-        cart.setDeltaMovement(directionVector.scale(baseSpeed));
-        double additionalMoveSpeed = highSpeed - baseSpeed;
-        if (additionalMoveSpeed > 0) {
-            cart.move(MoverType.SELF, directionVector.scale(additionalMoveSpeed));
+        if (!safeTravelVector.closerThan(Vec3.ZERO, 0.1)) {
+            cart.move(MoverType.SELF, safeTravelVector);
         }
+        cart.setDeltaMovement(directionVector.scale(baseSpeed));
     }
 
     @Override
@@ -68,16 +62,27 @@ public class FastRailBlock extends PoweredRailBlock {
         private final Level level;
         private final Vec3 directionVector;
         private final FastRailBlock fastRailBlock;
+        private Vec3 startPos;
         private Vec3 currentPos;
 
         public NeighbourRailIterator(Vec3 startPos, Level level, Vec3 directionVector, FastRailBlock fastRailBlock) {
             this.level = level;
+            this.startPos = startPos;
             this.currentPos = startPos;
             this.directionVector = directionVector;
             this.fastRailBlock = fastRailBlock;
         }
 
-        boolean hasNext() {
+        public Vec3 getSafeTravelVector(int blocksLimit) {
+            for (int i = 0; i < blocksLimit; i++) {
+                if (!findNext()) {
+                    break;
+                }
+            }
+            return currentPos.add(startPos.scale(-1));
+        }
+
+        boolean findNext() {
             BlockState currentBlockState = getBlockState(currentPos);
             if (!currentBlockState.is(fastRailBlock)) {
                 return false;
@@ -86,8 +91,11 @@ public class FastRailBlock extends PoweredRailBlock {
 
             Vec3 targetPos = getNeighbourForShape(railShape, currentPos, directionVector);
             BlockState neigborBlockState = getBlockState(targetPos);
+            if (!neigborBlockState.is(fastRailBlock)) {
+                return false;
+            };
             currentPos = targetPos;
-            return neigborBlockState.is(fastRailBlock);
+            return true;
         }
 
         private BlockState getBlockState(Vec3 pos) {

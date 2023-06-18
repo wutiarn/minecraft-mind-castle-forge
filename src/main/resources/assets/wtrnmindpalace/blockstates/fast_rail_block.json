@@ -1,18 +1,25 @@
 {
   "variants": {
-    "powered=false,shape=east_west": {
+    "shape=east_west": {
       "model": "wtrnmindpalace:block/fast_rail_block",
       "y": 90
     },
-    "powered=false,shape=north_south": {
+    "shape=north_south": {
       "model": "wtrnmindpalace:block/fast_rail_block"
     },
-    "powered=true,shape=east_west": {
-      "model": "wtrnmindpalace:block/fast_rail_block",
+    "shape=ascending_east": {
+      "model": "wtrnmindpalace:block/fast_rail_raised_ne",
       "y": 90
     },
-    "powered=true,shape=north_south": {
-      "model": "wtrnmindpalace:block/fast_rail_block"
+    "shape=ascending_north": {
+      "model": "wtrnmindpalace:block/fast_rail_raised_ne"
+    },
+    "shape=ascending_south": {
+      "model": "wtrnmindpalace:block/fast_rail_raised_sw"
+    },
+    "shape=ascending_west": {
+      "model": "wtrnmindpalace:block/fast_rail_raised_sw",
+      "y": 90
     }
   }
 }

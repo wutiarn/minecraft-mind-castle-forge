@@ -2,9 +2,13 @@ package ru.wtrn.minecraft.mindpalace.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -154,5 +158,17 @@ public class FastRailBlock extends PoweredRailBlock {
             directionVector = new Vec3(directionVector.x, yValue, directionVector.z);
             return currentPos.add(directionVector);
         }
+    }
+
+    @Override
+    public void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pBlock, BlockPos pFromPos, boolean pIsMoving) {
+        if (!pLevel.isClientSide && pLevel.getBlockState(pPos).is(this)) {
+            this.updateState(pState, pLevel, pPos, pBlock);
+        }
+    }
+
+    @Override
+    public boolean canSurvive(BlockState pState, LevelReader pLevel, BlockPos pPos) {
+        return true;
     }
 }

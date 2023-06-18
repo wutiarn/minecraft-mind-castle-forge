@@ -19,6 +19,10 @@ public class VectorUtils {
         return new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
 
+    public static double getLength(Vec3 vec3) {
+        return Math.sqrt(vec3.x * vec3.x + vec3.y * vec3.y + vec3.z * vec3.z);
+    }
+
     public static Vector3d set(Vector3d vec, double value, Axis axis) {
         switch (axis) {
             case X -> new Vector3d(value, vec.y, vec.z);
@@ -27,7 +31,7 @@ public class VectorUtils {
         }
         throw new IllegalArgumentException();
     }
-    
+
     public static Vec3 set(Vec3 vec, double value, Axis axis) {
         switch (axis) {
             case X:
@@ -39,7 +43,7 @@ public class VectorUtils {
         }
         throw new IllegalArgumentException();
     }
-    
+
     public static void set(MutableBlockPos vec, int value, Axis axis) {
         switch (axis) {
             case X:
@@ -54,7 +58,7 @@ public class VectorUtils {
         }
         throw new IllegalArgumentException();
     }
-    
+
     public static BlockPos set(BlockPos vec, int value, Axis axis) {
         switch (axis) {
             case X:
@@ -66,27 +70,27 @@ public class VectorUtils {
         }
         return null;
     }
-    
+
     public static double get(Axis axis, Vector3d vec) {
         return get(axis, vec.x, vec.y, vec.z);
     }
-    
+
     public static double get(Axis axis, Vec3 vec) {
         return get(axis, vec.x, vec.y, vec.z);
     }
-    
+
     public static double get(net.minecraft.core.Direction.Axis axis, Vec3 vec) {
         return get(axis, vec.x, vec.y, vec.z);
     }
-    
+
     public static float get(Axis axis, Vector3f vec) {
         return get(axis, vec.x(), vec.y(), vec.z());
     }
-    
+
     public static int get(Axis axis, Vec3i vec) {
         return get(axis, vec.getX(), vec.getY(), vec.getZ());
     }
-    
+
     public static float get(Axis axis, float x, float y, float z) {
         switch (axis) {
             case X:
@@ -98,7 +102,7 @@ public class VectorUtils {
         }
         return 0;
     }
-    
+
     public static double get(Axis axis, double x, double y, double z) {
         switch (axis) {
             case X:
@@ -110,7 +114,7 @@ public class VectorUtils {
         }
         return 0;
     }
-    
+
     public static int get(Axis axis, int x, int y, int z) {
         switch (axis) {
             case X:
@@ -122,7 +126,7 @@ public class VectorUtils {
         }
         return 0;
     }
-    
+
     public static float get(net.minecraft.core.Direction.Axis axis, float x, float y, float z) {
         switch (axis) {
             case X:
@@ -134,7 +138,7 @@ public class VectorUtils {
         }
         return 0;
     }
-    
+
     public static double get(net.minecraft.core.Direction.Axis axis, double x, double y, double z) {
         switch (axis) {
             case X:
@@ -146,7 +150,7 @@ public class VectorUtils {
         }
         return 0;
     }
-    
+
     public static int get(net.minecraft.core.Direction.Axis axis, int x, int y, int z) {
         switch (axis) {
             case X:
@@ -158,21 +162,21 @@ public class VectorUtils {
         }
         return 0;
     }
-    
+
     public static boolean isZero(double number) {
         return number > -VectorFan.EPSILON && number < VectorFan.EPSILON;
     }
-    
+
     public static boolean isZero(float number) {
         return number > -VectorFan.EPSILON && number < VectorFan.EPSILON;
     }
-    
+
     public static boolean equals(double number, double number2) {
         return number - number2 > -VectorFan.EPSILON && number - number2 < VectorFan.EPSILON;
     }
-    
+
     public static boolean equals(float number, float number2) {
         return number - number2 > -VectorFan.EPSILON && number - number2 < VectorFan.EPSILON;
     }
-    
+
 }

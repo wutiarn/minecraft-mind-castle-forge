@@ -5,7 +5,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -14,7 +13,6 @@ import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.Vec3;
 import ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs;
-import ru.wtrn.minecraft.mindpalace.util.math.base.Facing;
 import ru.wtrn.minecraft.mindpalace.util.math.vec.VectorUtils;
 
 public class FastRailBlock extends PoweredRailBlock {
@@ -37,9 +35,9 @@ public class FastRailBlock extends PoweredRailBlock {
         final Double baseSpeed = ModCommonConfigs.FAST_RAILS_BASE_SPEED.get();
 
         Vec3 startBlockVector = VectorUtils.toVec3(pos);
-        NeighbourRailIterator neighbourRailIterator = new NeighbourRailIterator(startBlockVector, level, directionVector, this);
-        int safeTravelBlocks = (int) Math.ceil(highSpeed - baseSpeed);
-        Vec3 safeTravelVector = neighbourRailIterator.getSafeTravelVector(safeTravelBlocks);
+        double maxPath = highSpeed - baseSpeed;
+        NeighbourRailIterator neighbourRailIterator = new NeighbourRailIterator(startBlockVector, level, directionVector, this, maxPath);
+        Vec3 safeTravelVector = neighbourRailIterator.getSafeTravelVector();
 
         Vec3 moveVector = startBlockVector
                 .add(safeTravelVector)
@@ -67,27 +65,32 @@ public class FastRailBlock extends PoweredRailBlock {
         private final Level level;
         private final Vec3 directionVector;
         private final FastRailBlock fastRailBlock;
-        private Vec3 startPos;
+        private final double maxPath;
+        private double accumulatedPath = 0;
         private Vec3 currentPos;
+        private Vec3 resultPath = null;
 
-        public NeighbourRailIterator(Vec3 startPos, Level level, Vec3 directionVector, FastRailBlock fastRailBlock) {
+        public NeighbourRailIterator(Vec3 startPos, Level level, Vec3 directionVector, FastRailBlock fastRailBlock, double maxPath) {
             this.level = level;
-            this.startPos = startPos;
             this.currentPos = startPos;
             this.directionVector = directionVector;
             this.fastRailBlock = fastRailBlock;
+            this.maxPath = maxPath;
         }
 
-        public Vec3 getSafeTravelVector(int blocksLimit) {
-            for (int i = 0; i < blocksLimit; i++) {
-                if (!findNext()) {
-                    break;
-                }
+        public Vec3 getSafeTravelVector() {
+            if (resultPath != null) {
+                // Don't repeat calculations
+                return resultPath;
             }
-            return currentPos.add(startPos.scale(-1));
+            resultPath = Vec3.ZERO;
+            while (true) {
+                if (!processNextBlock()) break;
+            }
+            return resultPath;
         }
 
-        boolean findNext() {
+        boolean processNextBlock() {
             BlockState currentBlockState = getBlockState(currentPos);
             if (!currentBlockState.is(fastRailBlock)) {
                 return false;
@@ -99,7 +102,20 @@ public class FastRailBlock extends PoweredRailBlock {
             if (!neigborBlockState.is(fastRailBlock)) {
                 return false;
             }
-            ;
+
+            Vec3 delta = targetPos.add(currentPos.scale(-1));
+            double deltaLength = VectorUtils.getLength(delta);
+            double permittedPathLength = maxPath - accumulatedPath;
+
+            if (permittedPathLength < deltaLength) {
+                double scaleFactor = permittedPathLength / deltaLength;
+                delta = delta.scale(scaleFactor);
+                deltaLength = deltaLength * scaleFactor;
+            }
+
+            resultPath = resultPath.add(delta);
+            accumulatedPath += deltaLength;
+
             currentPos = targetPos;
             return true;
         }

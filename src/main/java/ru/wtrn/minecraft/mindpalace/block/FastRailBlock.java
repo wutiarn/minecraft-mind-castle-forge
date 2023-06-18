@@ -26,18 +26,27 @@ public class FastRailBlock extends PoweredRailBlock {
 
     protected void controlSpeed(AbstractMinecart cart, Level level, BlockPos pos) {
         final Vec3 cartMotion = cart.getDeltaMovement();
-        final double cartDistance = getPlaneSqrtDistance(cartMotion);
-//        cart.setDeltaMovement(cartMotion.add(cartMotion.x / cartDistance * 0.06D, 0.0D, cartMotion.z / cartDistance * 0.06D));
+
+        Vec3 directionVector = getUnitDirectionVector(cartMotion);
+
         float speedFactor = 2.0f;
         Vec3 deltaMovement = cartMotion.multiply(speedFactor, speedFactor, speedFactor);
-        Vec3 targetPos = cart.position().add(deltaMovement);
-        BlockState targetBlockState = level.getBlockState(new BlockPos(targetPos.x, targetPos.y, targetPos.z));
-        if (!BaseRailBlock.isRail(targetBlockState)) {
-            // Fallback to default implementation
-            deltaMovement = cartMotion.multiply(0.1, 0.1, 0.1);
-        };
-        cart.setDeltaMovement(deltaMovement);
-        cart.move(MoverType.SELF, deltaMovement);
+        final int neighborsToCheck = (int) Math.ceil(getPlaneSqrtDistance(cartMotion));
+
+        Vec3 blockPosVec = new Vec3(pos.getX(), pos.getY(), pos.getZ());
+        boolean triggerMove = true;
+        for (int i = 1; i <= neighborsToCheck; i++) {
+            Vec3 targetPos = blockPosVec.add(deltaMovement);
+            BlockState neigborBlockState = level.getBlockState(new BlockPos(targetPos.x, targetPos.y, targetPos.z));
+            if (!neigborBlockState.is(this)) {
+                triggerMove = false;
+                break;
+            }
+        }
+
+        if (triggerMove) {
+            cart.move(MoverType.SELF, deltaMovement);
+        }
     }
 
     @Override
@@ -51,5 +60,12 @@ public class FastRailBlock extends PoweredRailBlock {
 
     private static double getPlaneSqrDistance(Vec3 vec) {
         return vec.x * vec.x + vec.z * vec.z;
+    }
+
+    private static Vec3 getUnitDirectionVector(Vec3 cartMotion) {
+        if (Math.abs(cartMotion.x) > 0) {
+            return new Vec3(Math.signum(cartMotion.x), 0, 0);
+        }
+        return new Vec3(0, 0, Math.signum(cartMotion.z));
     }
 }

@@ -6,10 +6,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -25,6 +23,7 @@ import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -35,7 +34,7 @@ import org.slf4j.Logger;
 import retrofit2.Call;
 import ru.wtrn.minecraft.mindpalace.client.texture.CachedTexture;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
-import ru.wtrn.minecraft.mindpalace.http.MciMetadataHttpService;
+import ru.wtrn.minecraft.mindpalace.http.MciHttpService;
 import ru.wtrn.minecraft.mindpalace.http.model.MciImageMetadata;
 import ru.wtrn.minecraft.mindpalace.util.CachedAction;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
@@ -44,6 +43,7 @@ import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
 import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import static ru.wtrn.minecraft.mindpalace.config.ModClientConfigs.IMAGES_LOAD_DISTANCE;
@@ -79,9 +79,7 @@ public class ImageFrame extends HangingEntity {
     public ImageFrame(EntityType<ImageFrame> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         if (pLevel.isClientSide) {
-            cachedTextureSupplier = TextureCache.LOADING_TEXTURE;
-            lastTextureId = CachedTexture.NO_TEXTURE;
-            lastTextureImageId = NO_IMAGE;
+            resetTexture();
         }
     }
 
@@ -117,7 +115,7 @@ public class ImageFrame extends HangingEntity {
     public int getTextureId() {
         long imageId = getImageIdAction.invoke();
         if (imageId != this.lastTextureImageId) {
-            String textureKey = MCI_SERVER_URL.get() + "/storage/i/" + imageId;
+            String textureKey = getTextureKey(imageId);
             setTexture(imageId, textureKey);
         }
         int textureId = cachedTextureSupplier.get().getTextureId();
@@ -126,6 +124,17 @@ public class ImageFrame extends HangingEntity {
             recalculateBoundingBox();
         }
         return textureId;
+    }
+
+    private void resetTexture() {
+        cachedTextureSupplier = TextureCache.LOADING_TEXTURE;
+        lastTextureId = CachedTexture.NO_TEXTURE;
+        lastTextureImageId = NO_IMAGE;
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    private static String getTextureKey(long imageId) {
+        return MCI_SERVER_URL.get() + "/storage/i/" + imageId;
     }
 
     @Override
@@ -141,9 +150,17 @@ public class ImageFrame extends HangingEntity {
         ItemStack stack = new ItemStack(item, 1);
         item.setImageId(stack, getImageId());
         item.setTargetSize(stack, getTargetSizeType(), getTargetSize());
-        if (pBrokenEntity instanceof Player) {
-            Inventory inventory = ((Player) pBrokenEntity).getInventory();
-            inventory.add(stack);
+        if (pBrokenEntity instanceof Player player) {
+            if (player.getMainHandItem().isEmpty()) {
+                Inventory inventory = player.getInventory();
+                inventory.setPickedItem(stack);
+            }
+            if (player.isLocalPlayer()) {
+                Long imageId = getImageIdAction.invoke();
+                String textureKey = getTextureKey(imageId);
+                TextureCache.cleanup(textureKey);
+                resetTexture();
+            }
         } else {
             this.spawnAtLocation(stack);
         }
@@ -151,15 +168,23 @@ public class ImageFrame extends HangingEntity {
 
     @Override
     public InteractionResult interact(Player pPlayer, InteractionHand pHand) {
+        long imageId = getImageId();
         if (pPlayer.isShiftKeyDown()) {
             kill();
             dropItem(pPlayer);
+            if (pPlayer.isLocalPlayer()) {
+                pPlayer.sendSystemMessage(Component.literal("Destroyed image #" + imageId));
+            }
             return InteractionResult.SUCCESS;
         }
         if (pPlayer.isLocalPlayer()) {
-            long imageId = getImageId();
+            if (pPlayer.getMainHandItem().is(Items.STICK)) {
+                pPlayer.sendSystemMessage(Component.literal("Reloading texture for image #" + imageId));
+                TextureCache.cleanup(getTextureKey(imageId));
+                return InteractionResult.SUCCESS;
+            }
             try {
-                Call<MciImageMetadata> metadata = MciMetadataHttpService.INSTANCE.getImageMetadata(imageId);
+                Call<MciImageMetadata> metadata = MciHttpService.INSTANCE.getImageMetadata(imageId);
                 MutableComponent component = metadata.execute().body().toChatInfo();
                 pPlayer.sendSystemMessage(component);
             } catch (Exception e) {
@@ -202,7 +227,9 @@ public class ImageFrame extends HangingEntity {
     }
 
     public AlignedBox doGetBox() {
-        float margin = -0.5f;
+        float defaultMargin = -0.5f;
+        float xMargin = defaultMargin;
+        float yMargin = defaultMargin;
         float aspectRatio;
         if (level.isClientSide && this.cachedTextureSupplier != null) {
             aspectRatio = cachedTextureSupplier.get().getAspectRatio();
@@ -215,9 +242,11 @@ public class ImageFrame extends HangingEntity {
         if (getTargetSizeType() == TargetSizeType.WIDTH) {
             xSize = this.getTargetSize();
             ySize = xSize / aspectRatio;
+            yMargin += (Math.ceil(ySize) - ySize) / 2;
         } else {
             ySize = this.getTargetSize();
             xSize = ySize * aspectRatio;
+            xMargin += (Math.ceil(xSize) - xSize) / 2;
         }
 
         Direction direction = getDirection();
@@ -226,8 +255,8 @@ public class ImageFrame extends HangingEntity {
         AlignedBox box = new AlignedBox();
         box.setMax(facing.axis, frameThickness);
 
-        Vec2f min = new Vec2f(margin, margin);
-        Vec2f max = new Vec2f(xSize + margin, ySize + margin);
+        Vec2f min = new Vec2f(xMargin, yMargin);
+        Vec2f max = new Vec2f(xSize + xMargin, ySize + yMargin);
 
         Axis one = facing.one();
         Axis two = facing.two();

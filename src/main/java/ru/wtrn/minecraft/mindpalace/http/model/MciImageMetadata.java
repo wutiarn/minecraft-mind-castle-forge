@@ -1,9 +1,14 @@
 package ru.wtrn.minecraft.mindpalace.http.model;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 
-import static net.minecraft.network.chat.Style.FORMATTING_CODEC;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
 import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.MCI_SERVER_URL;
 
 public class MciImageMetadata {
@@ -15,10 +20,13 @@ public class MciImageMetadata {
     public String mimetype;
 
     public MutableComponent toChatInfo() {
+        String timestamp = Instant.ofEpochSecond(createdAt).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.RFC_1123_DATE_TIME);
         return Component.literal(
-                "Image #" + id + "\n" +
+                "---"+ "\n" +
                         "Resolution: " + width + "x" + height + "\n" +
-                        "Description: " + description
+                        "Description: " + description + "\n" +
+                        "Timestamp: " + timestamp + "\n" +
+                        "ID #" + id + "\n"
                 )
                 .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, MCI_SERVER_URL.get() + "/i/" + id)));
     }

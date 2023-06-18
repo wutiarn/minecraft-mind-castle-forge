@@ -75,7 +75,10 @@ public abstract class CachedTexture {
         if (preparedImage != null) {
             return preparedImage.width / (float) preparedImage.height;
         }
-        return 16 / 9f;
+        if (fallbackSupplier != null) {
+            return fallbackSupplier.get().getAspectRatio();
+        }
+        return 1f;
     }
 
     public boolean isActive() {

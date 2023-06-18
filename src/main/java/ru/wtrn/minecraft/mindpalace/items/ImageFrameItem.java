@@ -14,8 +14,10 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.Nullable;
+import ru.wtrn.minecraft.mindpalace.http.MciHttpService;
 import ru.wtrn.minecraft.mindpalace.entity.ModEntities;
 
+import java.io.IOException;
 import java.util.List;
 
 import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.DEFAULT_IMAGE_WIDTH;
@@ -44,7 +46,20 @@ public class ImageFrameItem extends Item {
             ImageFrame frame = new ImageFrame(entityType, level, blockpos1, direction);
 
             if (frame.survives()) {
-                long imageId = item.getImageId(itemstack);
+                long imageId;
+                boolean isLatestImage = isLatestImage(itemstack);
+                if (isLatestImage) {
+                    try {
+                        imageId = getLatestImageId();
+                    } catch (Exception e) {
+                        pContext.getPlayer().sendSystemMessage(
+                                Component.literal("Failed to retrieve latest image id from server: " + e)
+                        );
+                        return InteractionResult.FAIL;
+                    }
+                } else {
+                    imageId = item.getImageId(itemstack);
+                }
                 frame.setImageId(imageId);
                 frame.setTargetSize(getTargetSizeType(itemstack), getTargetSize(itemstack));
 
@@ -54,7 +69,9 @@ public class ImageFrameItem extends Item {
                     level.addFreshEntity(frame);
                 }
 
-                player.getInventory().removeItem(itemstack);
+                if (!isLatestImage) {
+                    player.getInventory().removeItem(itemstack);
+                }
                 return InteractionResult.sidedSuccess(level.isClientSide);
             } else {
                 return InteractionResult.CONSUME;
@@ -68,7 +85,13 @@ public class ImageFrameItem extends Item {
 
     @Override
     public Component getName(ItemStack pStack) {
-        return Component.literal("Image #" + getImageId(pStack));
+        String text;
+        if (isLatestImage(pStack)) {
+            text = "Latest image";
+        } else {
+            text = "Image #" + getImageId(pStack);
+        }
+        return Component.literal(text);
     }
 
     @Override
@@ -105,5 +128,13 @@ public class ImageFrameItem extends Item {
             return DEFAULT_IMAGE_WIDTH.get();
         }
         return value;
+    }
+
+    public boolean isLatestImage(ItemStack stack) {
+        return getImageId(stack) == 0;
+    }
+
+    private long getLatestImageId() throws IOException {
+        return MciHttpService.INSTANCE.getLatestImageMetadata().execute().body().id;
     }
 }

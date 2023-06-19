@@ -227,9 +227,8 @@ public class ImageFrame extends HangingEntity {
     }
 
     public AlignedBox doGetBox() {
-        float defaultMargin = -0.5f;
-        float xMargin = defaultMargin;
-        float yMargin = defaultMargin;
+        float xMargin = -0.5f;
+        float yMargin = 0.5f;
         float aspectRatio;
         if (level.isClientSide && this.cachedTextureSupplier != null) {
             aspectRatio = cachedTextureSupplier.get().getAspectRatio();
@@ -242,7 +241,6 @@ public class ImageFrame extends HangingEntity {
         if (getTargetSizeType() == TargetSizeType.WIDTH) {
             xSize = this.getTargetSize();
             ySize = xSize / aspectRatio;
-            yMargin += (Math.ceil(ySize) - ySize) / 2;
         } else {
             ySize = this.getTargetSize();
             xSize = ySize * aspectRatio;
@@ -255,8 +253,8 @@ public class ImageFrame extends HangingEntity {
         AlignedBox box = new AlignedBox();
         box.setMax(facing.axis, frameThickness);
 
-        Vec2f min = new Vec2f(xMargin, yMargin);
-        Vec2f max = new Vec2f(xSize + xMargin, ySize + yMargin);
+        Vec2f min = new Vec2f(xMargin, -ySize + yMargin);
+        Vec2f max = new Vec2f(xSize + xMargin, yMargin);
 
         Axis one = facing.one();
         Axis two = facing.two();

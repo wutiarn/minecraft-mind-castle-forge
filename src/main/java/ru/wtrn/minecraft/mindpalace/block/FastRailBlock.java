@@ -4,11 +4,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -38,6 +36,11 @@ public class FastRailBlock extends PoweredRailBlock {
             return;
         }
 
+        if (!isOccupiedByPlayer(cart)) {
+            cart.kill();
+            return;
+        }
+
         Double highSpeed = ModCommonConfigs.FAST_RAILS_HIGH_SPEED.get();
         final Double baseSpeed = ModCommonConfigs.FAST_RAILS_BASE_SPEED.get();
 
@@ -55,6 +58,15 @@ public class FastRailBlock extends PoweredRailBlock {
             return;
         }
         cart.move(MoverType.SELF, safeTravelVector);
+    }
+
+    private boolean isOccupiedByPlayer(AbstractMinecart cart) {
+        for (Entity passenger : cart.getPassengers()) {
+            if (passenger instanceof Player) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

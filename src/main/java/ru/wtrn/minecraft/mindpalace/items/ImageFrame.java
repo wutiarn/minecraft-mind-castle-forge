@@ -95,7 +95,7 @@ public class ImageFrame extends HangingEntity {
     @Override
     public void tick() {
         super.tick();
-        if (this.level.isClientSide) {
+        if (this.level().isClientSide) {
             doTickAction.invoke();
         }
     }
@@ -230,7 +230,7 @@ public class ImageFrame extends HangingEntity {
         float xMargin = -0.5f;
         float yMargin = 0.5f;
         float aspectRatio;
-        if (level.isClientSide && this.cachedTextureSupplier != null) {
+        if (level().isClientSide && this.cachedTextureSupplier != null) {
             aspectRatio = cachedTextureSupplier.get().getAspectRatio();
         } else {
             aspectRatio = 16 / 9f;

@@ -2,10 +2,11 @@ package ru.wtrn.minecraft.mindpalace;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -22,7 +23,6 @@ import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
 import ru.wtrn.minecraft.mindpalace.config.ModClientConfigs;
 import ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs;
 import ru.wtrn.minecraft.mindpalace.entity.ModEntities;
-import ru.wtrn.minecraft.mindpalace.items.ModCreativeModeTab;
 import ru.wtrn.minecraft.mindpalace.items.ModItems;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -60,8 +60,8 @@ public class WtrnMindPalaceMod {
         LOGGER.info("DIRT BLOCK >> {}", ForgeRegistries.BLOCKS.getKey(Blocks.DIRT));
     }
 
-    private void addCreative(CreativeModeTabEvent.BuildContents event) {
-        if (event.getTab() == ModCreativeModeTab.MIND_PALACE_TAB) {
+    private void addCreative(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() == CreativeModeTabs.REDSTONE_BLOCKS) {
             event.accept(ModItems.IMAGE_FRAME_ITEM);
             event.accept(ModBlocks.FAST_RAIL_BLOCK.get());
         }

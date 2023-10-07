@@ -174,7 +174,7 @@ public class AlignedBox {
     }
     
     public BlockPos getOffset() {
-        return new BlockPos(minX, minY, minZ);
+        return new BlockPos((int) minX, (int) minY, (int) minZ);
     }
     
     public float get(Facing facing) {

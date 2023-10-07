@@ -12,14 +12,13 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.Vec3;
 import ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs;
 import ru.wtrn.minecraft.mindpalace.util.math.vec.VectorUtils;
 
 public class FastRailBlock extends PoweredRailBlock {
     public FastRailBlock() {
-        super(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL), true);
+        super(BlockBehaviour.Properties.of().noCollission().strength(0.7F).sound(SoundType.METAL), true);
     }
 
     @Override
@@ -160,7 +159,7 @@ public class FastRailBlock extends PoweredRailBlock {
                 case ASCENDING_SOUTH -> railDirection = Direction.SOUTH;
             }
 
-            Direction destinationDirection = Direction.fromNormal((int) directionVector.x, (int) directionVector.y, (int) directionVector.z);
+            Direction destinationDirection = Direction.fromDelta((int) directionVector.x, (int) directionVector.y, (int) directionVector.z);
 
             int yValue = 1;
             if (destinationDirection != railDirection) {

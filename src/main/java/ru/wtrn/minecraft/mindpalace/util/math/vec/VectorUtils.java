@@ -12,7 +12,7 @@ import ru.wtrn.minecraft.mindpalace.util.math.geo.VectorFan;
 public class VectorUtils {
 
     public static BlockPos toBlockPos(Vec3 vec3) {
-        return new BlockPos(vec3.x, vec3.y, vec3.z);
+        return new BlockPos((int) vec3.x, (int) vec3.y, (int) vec3.z);
     }
 
     public static Vec3 toVec3(BlockPos blockPos) {

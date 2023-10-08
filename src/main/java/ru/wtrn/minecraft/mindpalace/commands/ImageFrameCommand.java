@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.server.command.EnumArgument;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
-import ru.wtrn.minecraft.mindpalace.items.ImageFrame;
+import ru.wtrn.minecraft.mindpalace.entity.ImageFrame;
 import ru.wtrn.minecraft.mindpalace.items.ImageFrameItem;
 import ru.wtrn.minecraft.mindpalace.items.ModItems;
 

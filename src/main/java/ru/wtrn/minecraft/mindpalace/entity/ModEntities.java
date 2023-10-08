@@ -2,15 +2,12 @@ package ru.wtrn.minecraft.mindpalace.entity;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import ru.wtrn.minecraft.mindpalace.WtrnMindPalaceMod;
-import ru.wtrn.minecraft.mindpalace.items.ImageFrame;
-import ru.wtrn.minecraft.mindpalace.items.ImageFrameItem;
 
 import static ru.wtrn.minecraft.mindpalace.block.ModBlocks.ROUTING_RAIL_BLOCK;
 

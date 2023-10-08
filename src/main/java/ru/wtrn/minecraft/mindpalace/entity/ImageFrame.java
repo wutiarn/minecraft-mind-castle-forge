@@ -1,4 +1,4 @@
-package ru.wtrn.minecraft.mindpalace.items;
+package ru.wtrn.minecraft.mindpalace.entity;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
@@ -36,6 +36,8 @@ import ru.wtrn.minecraft.mindpalace.client.texture.CachedTexture;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
 import ru.wtrn.minecraft.mindpalace.http.MciHttpService;
 import ru.wtrn.minecraft.mindpalace.http.model.MciImageMetadata;
+import ru.wtrn.minecraft.mindpalace.items.ImageFrameItem;
+import ru.wtrn.minecraft.mindpalace.items.ModItems;
 import ru.wtrn.minecraft.mindpalace.util.CachedAction;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Facing;
@@ -43,7 +45,6 @@ import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
 import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
 
 import java.time.Duration;
-import java.util.Map;
 import java.util.function.Supplier;
 
 import static ru.wtrn.minecraft.mindpalace.config.ModClientConfigs.IMAGES_LOAD_DISTANCE;

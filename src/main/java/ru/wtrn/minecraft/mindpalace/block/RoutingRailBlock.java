@@ -1,6 +1,7 @@
 package ru.wtrn.minecraft.mindpalace.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import ru.wtrn.minecraft.mindpalace.entity.RoutingRailBlockEntity;
+import ru.wtrn.minecraft.mindpalace.util.RailTraverser;
 
 public class RoutingRailBlock extends RailBlock implements EntityBlock {
     public RoutingRailBlock() {
@@ -54,7 +56,28 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
         if (pLevel.isClientSide() || pHand != InteractionHand.MAIN_HAND) {
             return InteractionResult.PASS;
         }
-        pPlayer.sendSystemMessage(Component.literal("Routing report from server"));
+
+        Direction direction = pPlayer.getDirection();
+        RailTraverser.NextBlock neighbour = findNeighbourRoutingRail(pPos, direction, pLevel);
+        String foundNeighbourDetails = null;
+        if (neighbour != null) {
+            foundNeighbourDetails = neighbour.pos.toString();
+        }
+
+        pPlayer.sendSystemMessage(Component.literal("Routing report. Direction %s. Found: %s".formatted(direction, foundNeighbourDetails)));
         return InteractionResult.PASS;
+    }
+
+    @Nullable
+    private RailTraverser.NextBlock findNeighbourRoutingRail(BlockPos pPos, Direction direction, Level level) {
+        RailTraverser railTraverser = new RailTraverser(pPos, direction, level);
+        RailTraverser.NextBlock result = null;
+        for (RailTraverser.NextBlock nextBlock : railTraverser) {
+            if (nextBlock.block instanceof RoutingRailBlock) {
+                result = nextBlock;
+                break;
+            }
+        }
+        return result;
     }
 }

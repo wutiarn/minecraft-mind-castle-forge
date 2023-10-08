@@ -31,7 +31,7 @@ public class FastRailBlock extends RailBlock {
     protected void controlSpeed(AbstractMinecart cart, Level level, BlockPos pos) {
         final Vec3 cartMotion = cart.getDeltaMovement();
 
-        if (Vec3.ZERO.closerThan(cartMotion, 0.1)) {
+        if (Vec3.ZERO.closerThan(cartMotion, 0.01)) {
             return;
         }
         Vec3 directionVector = getUnitDirectionVector(cartMotion);

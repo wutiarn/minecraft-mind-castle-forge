@@ -57,7 +57,7 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
         BlockPos currentPos = null;
         for (BlockPos connection : prevConnections) {
             Direction connectionDirection = getDirection(previousPos, connection);
-            if (connectionDirection == direction) {
+            if (connectionDirection != direction.getOpposite()) {
                 currentPos = connection;
                 break;
             }

@@ -64,6 +64,7 @@ public class WtrnMindPalaceMod {
         if (event.getTabKey() == CreativeModeTabs.REDSTONE_BLOCKS) {
             event.accept(ModItems.IMAGE_FRAME_ITEM);
             event.accept(ModBlocks.FAST_RAIL_BLOCK.get());
+            event.accept(ModBlocks.ROUTING_RAIL_BLOCK.get());
         }
     }
 

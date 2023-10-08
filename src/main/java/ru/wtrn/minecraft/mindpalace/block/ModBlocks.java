@@ -1,10 +1,8 @@
 package ru.wtrn.minecraft.mindpalace.block;
 
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.Tags;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -19,6 +17,7 @@ public class ModBlocks {
             DeferredRegister.create(ForgeRegistries.BLOCKS, WtrnMindPalaceMod.MOD_ID);
 
     public static final RegistryObject<Block> FAST_RAIL_BLOCK = registerBlock("fast_rail_block", FastRailBlock::new);
+    public static final RegistryObject<Block> ROUTING_RAIL_BLOCK = registerBlock("routing_rail_block", RoutingRailBlock::new);
 
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block) {
         RegistryObject<T> toReturn = BLOCKS.register(name, block);

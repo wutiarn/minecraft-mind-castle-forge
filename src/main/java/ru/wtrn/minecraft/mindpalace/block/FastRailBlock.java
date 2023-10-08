@@ -6,20 +6,20 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.PoweredRailBlock;
+import net.minecraft.world.level.block.RailBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.Vec3;
 import ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs;
 import ru.wtrn.minecraft.mindpalace.util.RailTraverser;
 import ru.wtrn.minecraft.mindpalace.util.math.vec.VectorUtils;
 
-public class FastRailBlock extends PoweredRailBlock {
+public class FastRailBlock extends RailBlock {
     public FastRailBlock() {
-        super(BlockBehaviour.Properties.of().noCollission().strength(0.7F).sound(SoundType.METAL), true);
+        super(BlockBehaviour.Properties.of().noCollission().strength(0.7F).sound(SoundType.METAL));
     }
 
     @Override
@@ -103,8 +103,8 @@ public class FastRailBlock extends PoweredRailBlock {
     }
 
     @Override
-    protected boolean findPoweredRailSignal(Level pLevel, BlockPos pPos, BlockState pState, boolean pSearchForward, int pRecursionCount) {
-        return true;
+    public boolean isFlexibleRail(BlockState state, BlockGetter world, BlockPos pos) {
+        return false;
     }
 
     private static Vec3 getUnitDirectionVector(Vec3 cartMotion) {

@@ -7,10 +7,13 @@ import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.RailState;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
-public class RailTraverser {
+public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterator<RailTraverser.NextBlock> {
     private BlockPos previousPos;
     private Direction direction;
     private final Level level;
@@ -21,20 +24,26 @@ public class RailTraverser {
         this.level = level;
     }
 
+    @Override
+    public boolean hasNext() {
+        return direction != null;
+    }
+
+    @Override
     public NextBlock next() {
         if (direction == null) {
-            return null;
+            throw new NoSuchElementException();
         }
         BlockState prevBlockState = level.getBlockState(previousPos);
         if (!(prevBlockState.getBlock() instanceof BaseRailBlock prevBlock)) {
-            return null;
+            throw new NoSuchElementException();
         }
 
         RailState prevRailState = new RailState(level, previousPos, prevBlockState);
         List<BlockPos> prevConnections = prevRailState.getConnections();
 
         if (prevConnections.isEmpty()) {
-            return null;
+            throw new NoSuchElementException();
         }
 
         BlockPos currentPos = null;
@@ -46,14 +55,14 @@ public class RailTraverser {
             }
         }
         if (currentPos == null) {
-            return null;
+            throw new NoSuchElementException();
         }
 
         Vec3 prevDelta = previousPos.getCenter().subtract(currentPos.getCenter());
 
         BlockState currentBlockState = level.getBlockState(previousPos);
         if (!(currentBlockState.getBlock() instanceof BaseRailBlock currentBlock)) {
-            return null;
+            throw new NoSuchElementException();
         }
 
         RailState currentRailState = new RailState(level, previousPos, prevBlockState);
@@ -85,6 +94,12 @@ public class RailTraverser {
 
     private static Direction getDirection(BlockPos currentPos, BlockPos nextPos) {
         return Direction.fromDelta(nextPos.getX() - currentPos.getX(),0, nextPos.getZ() - currentPos.getZ());
+    }
+
+    @NotNull
+    @Override
+    public Iterator<NextBlock> iterator() {
+        return this;
     }
 
     public static class NextBlock {

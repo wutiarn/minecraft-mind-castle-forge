@@ -36,6 +36,7 @@ public class ModEntities {
 
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);
+        BLOCK_ENTITY_TYPES.register(eventBus);
     }
 
 }

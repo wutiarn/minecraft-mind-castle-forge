@@ -1,15 +1,23 @@
 package ru.wtrn.minecraft.mindpalace.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RailBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import org.jetbrains.annotations.Nullable;
+import ru.wtrn.minecraft.mindpalace.entity.RoutingRailBlockEntity;
 
-public class RoutingRailBlock extends RailBlock {
+public class RoutingRailBlock extends RailBlock implements EntityBlock {
     public RoutingRailBlock() {
         super(Properties.of().noCollission().strength(0.7F).sound(SoundType.METAL));
     }
@@ -32,5 +40,16 @@ public class RoutingRailBlock extends RailBlock {
     @Override
     public boolean canMakeSlopes(BlockState state, BlockGetter level, BlockPos pos) {
         return false;
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
+        return new RoutingRailBlockEntity(pPos, pState);
+    }
+
+    @Override
+    public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
+        return InteractionResult.PASS;
     }
 }

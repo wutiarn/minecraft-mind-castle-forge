@@ -26,24 +26,32 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
 
     @Override
     public boolean hasNext() {
-        return direction != null;
+        return nextImpl(false) != null;
     }
 
     @Override
     public NextBlock next() {
-        if (direction == null) {
+        NextBlock nextBlock = nextImpl(true);
+        if (nextBlock == null) {
             throw new NoSuchElementException();
+        }
+        return nextBlock;
+    }
+
+    private NextBlock nextImpl(boolean updateState) {
+        if (direction == null) {
+            return null;
         }
         BlockState prevBlockState = level.getBlockState(previousPos);
         if (!(prevBlockState.getBlock() instanceof BaseRailBlock prevBlock)) {
-            throw new NoSuchElementException();
+            return null;
         }
 
         RailState prevRailState = new RailState(level, previousPos, prevBlockState);
         List<BlockPos> prevConnections = prevRailState.getConnections();
 
         if (prevConnections.isEmpty()) {
-            throw new NoSuchElementException();
+            return null;
         }
 
         BlockPos currentPos = null;
@@ -55,14 +63,14 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
             }
         }
         if (currentPos == null) {
-            throw new NoSuchElementException();
+            return null;
         }
 
         Vec3 prevDelta = currentPos.getCenter().subtract(previousPos.getCenter());
 
         BlockState currentBlockState = level.getBlockState(previousPos);
         if (!(currentBlockState.getBlock() instanceof BaseRailBlock currentBlock)) {
-            throw new NoSuchElementException();
+            return null;
         }
 
         RailState currentRailState = new RailState(level, currentPos, prevBlockState);
@@ -86,14 +94,16 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
         result.nextDirection = nextDirection;
         result.deltaFromPrevious = prevDelta;
 
-        this.previousPos = currentPos;
-        this.direction = nextDirection;
+        if (updateState) {
+            this.previousPos = currentPos;
+            this.direction = nextDirection;
+        }
 
         return result;
     }
 
     private static Direction getDirection(BlockPos currentPos, BlockPos nextPos) {
-        return Direction.fromDelta(nextPos.getX() - currentPos.getX(),0, nextPos.getZ() - currentPos.getZ());
+        return Direction.fromDelta(nextPos.getX() - currentPos.getX(), 0, nextPos.getZ() - currentPos.getZ());
     }
 
     @NotNull

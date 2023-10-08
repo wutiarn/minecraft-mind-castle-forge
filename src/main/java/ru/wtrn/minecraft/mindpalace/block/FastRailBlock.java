@@ -30,10 +30,11 @@ public class FastRailBlock extends PoweredRailBlock {
     protected void controlSpeed(AbstractMinecart cart, Level level, BlockPos pos) {
         final Vec3 cartMotion = cart.getDeltaMovement();
 
-        Vec3 directionVector = getUnitDirectionVector(cartMotion);
-        if (Vec3.ZERO.closerThan(directionVector, 0.1)) {
+        if (Vec3.ZERO.closerThan(cartMotion, 0.1)) {
             return;
         }
+        Vec3 directionVector = getUnitDirectionVector(cartMotion);
+        Direction direction = VectorUtils.toHorizontalDirection(directionVector);
 
         if (!isOccupiedByPlayer(cart)) {
             cart.kill();
@@ -66,6 +67,11 @@ public class FastRailBlock extends PoweredRailBlock {
             }
         }
         return false;
+    }
+
+    private Vec3 findSafePath() {
+//        new RailTraverser()
+        return null;
     }
 
     @Override

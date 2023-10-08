@@ -42,8 +42,8 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
         if (direction == null) {
             return null;
         }
-        BlockState prevBlockState = level.getBlockState(previousPos);
-        if (!(prevBlockState.getBlock() instanceof BaseRailBlock prevBlock)) {
+        BlockState prevBlockState = getRailBlockState(previousPos, level);
+        if (prevBlockState == null) {
             return null;
         }
 
@@ -68,8 +68,8 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
 
         Vec3 prevDelta = currentPos.getCenter().subtract(previousPos.getCenter());
 
-        BlockState currentBlockState = level.getBlockState(previousPos);
-        if (!(currentBlockState.getBlock() instanceof BaseRailBlock currentBlock)) {
+        BlockState currentBlockState = getRailBlockState(currentPos, level);
+        if (currentBlockState == null) {
             return null;
         }
 
@@ -88,7 +88,7 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
 
         NextBlock result = new NextBlock();
         result.pos = currentPos;
-        result.block = currentBlock;
+        result.block = (BaseRailBlock) currentBlockState.getBlock();
         result.state = currentBlockState;
         result.prevDirection = direction;
         result.nextDirection = nextDirection;
@@ -104,6 +104,20 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
 
     private static Direction getDirection(BlockPos currentPos, BlockPos nextPos) {
         return Direction.fromDelta(nextPos.getX() - currentPos.getX(), 0, nextPos.getZ() - currentPos.getZ());
+    }
+
+    private BlockState getRailBlockState(BlockPos pos, Level level) {
+        BlockState blockState = level.getBlockState(pos);
+        if ((blockState.getBlock() instanceof BaseRailBlock)) {
+            return blockState;
+        }
+
+        // Check one block below due to strange implementation of net.minecraft.world.level.block.RailState.getConnections
+        blockState = level.getBlockState(pos.below());
+        if ((blockState.getBlock() instanceof BaseRailBlock)) {
+            return blockState;
+        }
+        return null;
     }
 
     @NotNull

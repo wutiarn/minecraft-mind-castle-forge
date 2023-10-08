@@ -58,20 +58,20 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
             throw new NoSuchElementException();
         }
 
-        Vec3 prevDelta = previousPos.getCenter().subtract(currentPos.getCenter());
+        Vec3 prevDelta = currentPos.getCenter().subtract(previousPos.getCenter());
 
         BlockState currentBlockState = level.getBlockState(previousPos);
         if (!(currentBlockState.getBlock() instanceof BaseRailBlock currentBlock)) {
             throw new NoSuchElementException();
         }
 
-        RailState currentRailState = new RailState(level, previousPos, prevBlockState);
+        RailState currentRailState = new RailState(level, currentPos, prevBlockState);
         Direction nextDirection = null;
         List<BlockPos> currentRailConnections = currentRailState.getConnections();
         if (currentRailConnections.size() == 2) {
             // Rail has only two connections, one of which must be previous block. And another is the next one.
             for (BlockPos connection : currentRailConnections) {
-                if (connection.equals(previousPos)) {
+                if (connection.getX() == previousPos.getX() && connection.getZ() == previousPos.getZ()) {
                     continue;
                 }
                 nextDirection = getDirection(currentPos, connection);

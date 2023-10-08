@@ -20,6 +20,7 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
     private Direction direction;
     private final Level level;
     private HashSet<BlockPos> visitedBlocks = new HashSet<>();
+    private NextBlock precalculatedNext = null;
 
     public RailTraverser(BlockPos startPos, Direction direction, Level level) {
         this.previousPos = startPos;
@@ -29,19 +30,28 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
 
     @Override
     public boolean hasNext() {
-        return nextImpl(false) != null;
+        if (precalculatedNext != null) {
+            return true;
+        }
+        precalculatedNext = nextImpl();
+        return precalculatedNext != null;
     }
 
     @Override
     public NextBlock next() {
-        NextBlock nextBlock = nextImpl(true);
-        if (nextBlock == null) {
+        if (precalculatedNext != null) {
+            NextBlock result = precalculatedNext;
+            precalculatedNext = null;
+            return result;
+        }
+        NextBlock result = nextImpl();
+        if (result == null) {
             throw new NoSuchElementException();
         }
-        return nextBlock;
+        return result;
     }
 
-    private NextBlock nextImpl(boolean updateState) {
+    private NextBlock nextImpl() {
         if (direction == null) {
             return null;
         }
@@ -109,12 +119,10 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
         result.nextDirection = nextDirection;
         result.deltaFromPrevious = prevDelta;
 
-        if (updateState) {
-            this.previousPos = currentPos;
-            this.direction = nextDirection;
-            switch (railDirection) {
-                case SOUTH_EAST, SOUTH_WEST, NORTH_WEST, NORTH_EAST -> visitedBlocks.add(currentPos);
-            }
+        this.previousPos = currentPos;
+        this.direction = nextDirection;
+        switch (railDirection) {
+            case SOUTH_EAST, SOUTH_WEST, NORTH_WEST, NORTH_EAST -> visitedBlocks.add(currentPos);
         }
 
         return result;

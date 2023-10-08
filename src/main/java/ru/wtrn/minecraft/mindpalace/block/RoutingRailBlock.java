@@ -57,6 +57,8 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
             return InteractionResult.PASS;
         }
 
+        long startTimestamp = System.currentTimeMillis();
+
         Direction direction = pPlayer.getDirection();
         RailTraverser.NextBlock neighbour = findNeighbourRoutingRail(pPos, direction, pLevel);
         String foundNeighbourDetails = null;
@@ -64,7 +66,9 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
             foundNeighbourDetails = neighbour.pos.toString();
         }
 
-        pPlayer.sendSystemMessage(Component.literal("Routing report. Direction %s. Found: %s".formatted(direction, foundNeighbourDetails)));
+        long duration = System.currentTimeMillis() - startTimestamp;
+
+        pPlayer.sendSystemMessage(Component.literal("Routing report completed in %dms. Direction %s. Found: %s.".formatted(duration, direction, foundNeighbourDetails)));
         return InteractionResult.PASS;
     }
 

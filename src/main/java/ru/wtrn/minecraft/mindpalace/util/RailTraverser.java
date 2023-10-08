@@ -6,9 +6,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.RailState;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -17,6 +19,7 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
     private BlockPos previousPos;
     private Direction direction;
     private final Level level;
+    private HashSet<BlockPos> visitedBlocks = new HashSet<>();
 
     public RailTraverser(BlockPos startPos, Direction direction, Level level) {
         this.previousPos = startPos;
@@ -42,10 +45,14 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
         if (direction == null) {
             return null;
         }
-        BlockState prevBlockState = getRailBlockState(previousPos, level);
-        if (prevBlockState == null) {
+        BlockPos previousPos = this.previousPos;
+        FoundBaseRailBlock foundPrevBlock = getRailBlockState(previousPos, level);
+        if (foundPrevBlock == null) {
             return null;
         }
+        BlockState prevBlockState = foundPrevBlock.state;
+        previousPos = foundPrevBlock.pos;
+
 
         RailState prevRailState = new RailState(level, previousPos, prevBlockState);
         List<BlockPos> prevConnections = prevRailState.getConnections();
@@ -57,7 +64,7 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
         BlockPos currentPos = null;
         for (BlockPos connection : prevConnections) {
             Direction connectionDirection = getDirection(previousPos, connection);
-            if (connectionDirection != direction.getOpposite()) {
+            if (connectionDirection == direction) {
                 currentPos = connection;
                 break;
             }
@@ -65,15 +72,21 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
         if (currentPos == null) {
             return null;
         }
-
-        Vec3 prevDelta = currentPos.getCenter().subtract(previousPos.getCenter());
-
-        BlockState currentBlockState = getRailBlockState(currentPos, level);
-        if (currentBlockState == null) {
+        if (visitedBlocks.contains(currentPos)) {
             return null;
         }
 
-        RailState currentRailState = new RailState(level, currentPos, prevBlockState);
+        Vec3 prevDelta = currentPos.getCenter().subtract(previousPos.getCenter());
+
+        FoundBaseRailBlock foundCurrentBlock = getRailBlockState(currentPos, level);
+        if (foundCurrentBlock == null) {
+            return null;
+        }
+        BlockState currentBlockState = foundCurrentBlock.state;
+        currentPos = foundCurrentBlock.pos;
+
+
+        RailState currentRailState = new RailState(level, currentPos, currentBlockState);
         Direction nextDirection = null;
         List<BlockPos> currentRailConnections = currentRailState.getConnections();
         if (currentRailConnections.size() == 2) {
@@ -85,10 +98,12 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
                 nextDirection = getDirection(currentPos, connection);
             }
         }
+        BaseRailBlock currentBlock = (BaseRailBlock) currentBlockState.getBlock();
+        RailShape railDirection = (currentBlock).getRailDirection(currentBlockState, level, currentPos, null);
 
         NextBlock result = new NextBlock();
         result.pos = currentPos;
-        result.block = (BaseRailBlock) currentBlockState.getBlock();
+        result.block = currentBlock;
         result.state = currentBlockState;
         result.prevDirection = direction;
         result.nextDirection = nextDirection;
@@ -97,6 +112,9 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
         if (updateState) {
             this.previousPos = currentPos;
             this.direction = nextDirection;
+            switch (railDirection) {
+                case SOUTH_EAST, SOUTH_WEST, NORTH_WEST, NORTH_EAST -> visitedBlocks.add(currentPos);
+            }
         }
 
         return result;
@@ -106,16 +124,17 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
         return Direction.fromDelta(nextPos.getX() - currentPos.getX(), 0, nextPos.getZ() - currentPos.getZ());
     }
 
-    private BlockState getRailBlockState(BlockPos pos, Level level) {
+    private FoundBaseRailBlock getRailBlockState(BlockPos pos, Level level) {
         BlockState blockState = level.getBlockState(pos);
         if ((blockState.getBlock() instanceof BaseRailBlock)) {
-            return blockState;
+            return new FoundBaseRailBlock(pos, blockState);
         }
 
         // Check one block below due to strange implementation of net.minecraft.world.level.block.RailState.getConnections
-        blockState = level.getBlockState(pos.below());
+        pos = pos.below();
+        blockState = level.getBlockState(pos);
         if ((blockState.getBlock() instanceof BaseRailBlock)) {
-            return blockState;
+            return new FoundBaseRailBlock(pos, blockState);
         }
         return null;
     }
@@ -134,5 +153,15 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
         public Direction prevDirection;
         public Direction nextDirection;
         public Vec3 deltaFromPrevious;
+    }
+
+    static class FoundBaseRailBlock {
+        BlockPos pos;
+        BlockState state;
+
+        public FoundBaseRailBlock(BlockPos pos, BlockState state) {
+            this.pos = pos;
+            this.state = state;
+        }
     }
 }

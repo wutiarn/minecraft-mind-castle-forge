@@ -28,8 +28,6 @@ public class RailTraverser {
             return null;
         }
 
-        RailShape railDirection = currentBlock.getRailDirection(currentBlockState, level, previousPos, null);
-
         RailState railState = new RailState(level, currentPos, currentBlockState);
         List<BlockPos> connections = railState.getConnections();
 

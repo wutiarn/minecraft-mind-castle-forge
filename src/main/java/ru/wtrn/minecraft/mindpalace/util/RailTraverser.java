@@ -6,7 +6,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.RailState;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.RailShape;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
@@ -22,40 +22,78 @@ public class RailTraverser {
     }
 
     public NextBlock next() {
-        BlockPos currentPos = previousPos.relative(direction);
-        BlockState currentBlockState = level.getBlockState(currentPos);
+        if (direction == null) {
+            return null;
+        }
+        BlockState prevBlockState = level.getBlockState(previousPos);
+        if (!(prevBlockState.getBlock() instanceof BaseRailBlock prevBlock)) {
+            return null;
+        }
+
+        RailState prevRailState = new RailState(level, previousPos, prevBlockState);
+        List<BlockPos> prevConnections = prevRailState.getConnections();
+
+        if (prevConnections.isEmpty()) {
+            return null;
+        }
+
+        BlockPos currentPos = null;
+        for (BlockPos connection : prevConnections) {
+            Direction connectionDirection = getDirection(previousPos, connection);
+            if (connectionDirection == direction) {
+                currentPos = connection;
+                break;
+            }
+        }
+        if (currentPos == null) {
+            return null;
+        }
+
+        Vec3 prevDelta = previousPos.getCenter().subtract(currentPos.getCenter());
+
+        BlockState currentBlockState = level.getBlockState(previousPos);
         if (!(currentBlockState.getBlock() instanceof BaseRailBlock currentBlock)) {
             return null;
         }
 
-        RailState railState = new RailState(level, currentPos, currentBlockState);
-        List<BlockPos> connections = railState.getConnections();
-
-        if (connections.size() != 2) {
-            return null;
+        RailState currentRailState = new RailState(level, previousPos, prevBlockState);
+        Direction nextDirection = null;
+        List<BlockPos> currentRailConnections = currentRailState.getConnections();
+        if (currentRailConnections.size() == 2) {
+            // Rail has only two connections, one of which must be previous block. And another is the next one.
+            for (BlockPos connection : currentRailConnections) {
+                if (connection.equals(previousPos)) {
+                    continue;
+                }
+                nextDirection = getDirection(currentPos, connection);
+            }
         }
 
-        //noinspection OptionalGetWithoutIsPresent
-        BlockPos nextBlockPos = connections.stream().filter(it -> it.equals(previousPos)).findFirst().get();
-        Direction nextDirection = getNextDirection(currentPos, nextBlockPos);
+        NextBlock result = new NextBlock();
+        result.pos = currentPos;
+        result.block = currentBlock;
+        result.state = currentBlockState;
+        result.prevDirection = direction;
+        result.nextDirection = nextDirection;
+        result.deltaFromPrevious = prevDelta;
 
         this.previousPos = currentPos;
         this.direction = nextDirection;
 
-        return new NextBlock(currentPos, currentBlockState);
+        return result;
     }
 
-    private static Direction getNextDirection(BlockPos currentPos, BlockPos nextPos) {
-        return Direction.fromDelta(nextPos.getX() - currentPos.getX(),nextPos.getY() - currentPos.getY(), nextPos.getZ() - currentPos.getZ());
+    private static Direction getDirection(BlockPos currentPos, BlockPos nextPos) {
+        return Direction.fromDelta(nextPos.getX() - currentPos.getX(),0, nextPos.getZ() - currentPos.getZ());
     }
 
     public static class NextBlock {
         public BlockPos pos;
-        public BlockState state;
 
-        public NextBlock(BlockPos pos, BlockState state) {
-            this.pos = pos;
-            this.state = state;
-        }
+        public BaseRailBlock block;
+        public BlockState state;
+        public Direction prevDirection;
+        public Direction nextDirection;
+        public Vec3 deltaFromPrevious;
     }
 }

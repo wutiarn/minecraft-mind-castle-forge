@@ -51,7 +51,7 @@ public class FastRailBlock extends PoweredRailBlock {
     }
 
     private void performJump(double maxJumpPath, AbstractMinecart cart, Level level, Vec3 directionVector) {
-        SafeJumpPathFinder safeJumpPathFinder = new SafeJumpPathFinder(cart.position(), level, directionVector, this, maxJumpPath);
+        SafeJumpPathFinder safeJumpPathFinder = new SafeJumpPathFinder(VectorUtils.toVec3(cart.blockPosition()), level, directionVector, this, maxJumpPath);
         Vec3 safeTravelVector = safeJumpPathFinder.getSafeTravelVector();
         if (Vec3.ZERO.closerThan(safeTravelVector, 0.1)) {
             return;

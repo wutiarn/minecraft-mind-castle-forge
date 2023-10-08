@@ -16,7 +16,7 @@ public class ModCommonConfigs {
             .define("default_image_width", 3);
 
     public static final ForgeConfigSpec.ConfigValue<Double> FAST_RAILS_HIGH_SPEED = BUILDER.comment("Fast rails high speed")
-            .define("fast_rails_high_speed", 2.0);
+            .define("fast_rails_high_speed", 1.0);
     public static final ForgeConfigSpec.ConfigValue<Double> FAST_RAILS_BASE_SPEED = BUILDER.comment("Fast rails base speed. 0.4 or less is recommended to avoid slopes and corners traverse issues.")
             .define("fast_rails_low_speed", 0.4);
 

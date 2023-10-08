@@ -1,6 +1,7 @@
 package ru.wtrn.minecraft.mindpalace.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -50,6 +51,10 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
 
     @Override
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
+        if (pLevel.isClientSide() || pHand != InteractionHand.MAIN_HAND) {
+            return InteractionResult.PASS;
+        }
+        pPlayer.sendSystemMessage(Component.literal("Routing report from server"));
         return InteractionResult.PASS;
     }
 }

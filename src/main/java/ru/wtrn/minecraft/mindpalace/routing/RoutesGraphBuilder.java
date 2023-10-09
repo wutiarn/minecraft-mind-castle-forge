@@ -43,7 +43,7 @@ public class RoutesGraphBuilder {
             }
             boolean newNodeDiscovered = !discoveredNodes.containsKey(found.pos);
             RoutingNode foundNode = discoveredNodes.computeIfAbsent(found.pos, RoutingNode::new);
-            node.addConnection(direction, foundNode);
+            node.addConnection(direction, new RoutingNode.Connection(foundNode, found.traversedBlocksCount));
             if (newNodeDiscovered) {
                 pendingNodes.add(foundNode);
             }

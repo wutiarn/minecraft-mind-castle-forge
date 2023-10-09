@@ -21,6 +21,7 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
     private final Level level;
     private HashSet<BlockPos> visitedBlocks = new HashSet<>();
     private NextBlock precalculatedNext = null;
+    private int traversedBlocksCount = 0;
 
     public RailTraverser(BlockPos startPos, Direction direction, Level level) {
         this.previousPos = startPos;
@@ -118,6 +119,7 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
         result.prevDirection = direction;
         result.nextDirection = nextDirection;
         result.deltaFromPrevious = prevDelta;
+        result.traversedBlocksCount = ++traversedBlocksCount;
 
         this.previousPos = currentPos;
         this.direction = nextDirection;
@@ -161,6 +163,7 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
         public Direction prevDirection;
         public Direction nextDirection;
         public Vec3 deltaFromPrevious;
+        public int traversedBlocksCount;
     }
 
     static class FoundBaseRailBlock {

@@ -73,7 +73,7 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
     }
 
     @Nullable
-    private RailTraverser.NextBlock findNeighbourRoutingRail(BlockPos pPos, Direction direction, Level level) {
+    public RailTraverser.NextBlock findNeighbourRoutingRail(BlockPos pPos, Direction direction, Level level) {
         RailTraverser railTraverser = new RailTraverser(pPos, direction, level);
         RailTraverser.NextBlock result = null;
         for (RailTraverser.NextBlock nextBlock : railTraverser) {

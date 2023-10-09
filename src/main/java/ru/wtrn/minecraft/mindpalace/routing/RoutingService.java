@@ -12,6 +12,8 @@ import ru.wtrn.minecraft.mindpalace.block.ModBlocks;
 import ru.wtrn.minecraft.mindpalace.block.RoutingRailBlock;
 
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RoutingService {
@@ -70,6 +72,24 @@ public class RoutingService {
             return false;
         }
 
+        return true;
+    }
+
+    public boolean listStations(BlockPos pos, CommandSourceStack source) {
+        if (state == null) {
+            source.sendFailure(Component.literal("Routing state is not initialized"));
+            return false;
+        }
+        String stationsList = state.getStations()
+                .entrySet()
+                .stream()
+                .sorted(Comparator.comparing(Map.Entry::getKey))
+                .map(it -> {
+                    BlockPos stationPos = it.getValue().pos;
+                    return "%s @ %s/%s/%s".formatted(it.getKey(), stationPos.getX(), stationPos.getY(), stationPos.getZ());
+                })
+                .collect(Collectors.joining("\n"));
+        source.sendSystemMessage(Component.literal("Stations list:\n" + stationsList));
         return true;
     }
 

@@ -45,6 +45,10 @@ public class RoutingServiceState {
         return nodesByName.get(name);
     }
 
+    public HashMap<String, RoutingNode> getStations() {
+        return nodesByName;
+    }
+
     public Collection<RoutingNode> getNodes() {
         return nodesByPosition.values();
     }

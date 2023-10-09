@@ -32,7 +32,7 @@ public class RoutesCommand {
                                 Commands.literal("setName")
                                         .then(
                                                 Commands.argument("name", StringArgumentType.string())
-                                                        .executes(RoutesCommand::refreshRoutes)
+                                                        .executes(RoutesCommand::setStationName)
                                         )
 
                         )
@@ -48,24 +48,26 @@ public class RoutesCommand {
         }
 
         long startTime = System.currentTimeMillis();
-        RoutingService.INSTANCE.rebuildGraph(startBlockPos, source.getLevel(), player);
+        RoutingService.INSTANCE.rebuildGraph(startBlockPos, source);
         long duration = System.currentTimeMillis() - startTime;
-        context.getSource().sendSuccess(() -> Component.literal("Routes rebuild completed in %sms".formatted(duration)), true);
+        source.sendSuccess(() -> Component.literal("Routes rebuild completed in %sms".formatted(duration)), true);
         return 0;
     }
 
     public static int setStationName(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
 
-        BlockPos startBlockPos = getTargetedRoutingRailBlockPos(source);
-        if (startBlockPos == null) {
+        BlockPos pos = getTargetedRoutingRailBlockPos(source);
+        if (pos == null) {
             return 1;
         }
 
-        boolean success = RoutingService.INSTANCE.setName(startBlockPos, context.getArgument("name", String.class), source);
+        String name = context.getArgument("name", String.class);
+        boolean success = RoutingService.INSTANCE.setName(pos, name, source);
         if (!success) {
             return 1;
         }
+        source.sendSuccess(() -> Component.literal("Station name set to " + name), true);
         return 0;
     }
 
@@ -73,12 +75,16 @@ public class RoutesCommand {
         CommandSourceStack source = context.getSource();
         ServerPlayer player = source.getPlayer();
 
-        BlockPos startBlockPos = getTargetedRoutingRailBlockPos(source);
-        if (startBlockPos == null) {
+        BlockPos pos = getTargetedRoutingRailBlockPos(source);
+        if (pos == null) {
             return 1;
         }
 
-        RoutingService.INSTANCE.rebuildGraph(startBlockPos, source.getLevel(), player);
+        boolean success = RoutingService.INSTANCE.listStations(pos, source);
+        if (!success) {
+            return 1;
+        }
+        return 0;
     }
 
 

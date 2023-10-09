@@ -21,6 +21,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import ru.wtrn.minecraft.mindpalace.entity.RoutingRailBlockEntity;
+import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
 import ru.wtrn.minecraft.mindpalace.util.RailTraverser;
 
 public class RoutingRailBlock extends RailBlock implements EntityBlock {
@@ -69,6 +70,19 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
         return new RoutingRailBlockEntity(pPos, pState);
+    }
+
+    @Override
+    public void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+        super.onPlace(pState, pLevel, pPos, pOldState, pIsMoving);
+        RoutingService.INSTANCE.onRoutingRailPlaced(pPos, pLevel);
+    }
+
+
+    @Override
+    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+        super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
+        RoutingService.INSTANCE.onRoutingRailRemoved(pPos, pLevel);
     }
 
     @Override

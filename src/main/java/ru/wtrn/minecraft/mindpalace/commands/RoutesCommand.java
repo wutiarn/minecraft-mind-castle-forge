@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import ru.wtrn.minecraft.mindpalace.block.RoutingRailBlock;
+import ru.wtrn.minecraft.mindpalace.routing.RoutingNode;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
 
 public class RoutesCommand {
@@ -40,7 +41,6 @@ public class RoutesCommand {
 
     public static int refreshRoutes(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
-        ServerPlayer player = source.getPlayer();
 
         BlockPos startBlockPos = getTargetedRoutingRailBlockPos(source);
         if (startBlockPos == null) {
@@ -53,6 +53,36 @@ public class RoutesCommand {
         context.getSource().sendSuccess(() -> Component.literal("Routes rebuild completed in %sms".formatted(duration)), true);
         return 0;
     }
+
+    public static int setStationName(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+        ServerPlayer player = source.getPlayer();
+
+        BlockPos startBlockPos = getTargetedRoutingRailBlockPos(source);
+        if (startBlockPos == null) {
+            return 1;
+        }
+
+        RoutingNode node = RoutingService.INSTANCE.setName(startBlockPos, context.getArgument("name", String.class), source);
+        if (node == null) {
+            return 1;
+        }
+        return 0;
+    }
+
+    public static int listStations(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+        ServerPlayer player = source.getPlayer();
+
+        BlockPos startBlockPos = getTargetedRoutingRailBlockPos(source);
+        if (startBlockPos == null) {
+            return 1;
+        }
+
+        RoutingService.INSTANCE.rebuildGraph(startBlockPos, source.getLevel(), player);
+    }
+
+
 
     private static BlockPos getTargetedRoutingRailBlockPos(CommandSourceStack source) {
         ServerPlayer player = source.getPlayer();
@@ -76,13 +106,5 @@ public class RoutesCommand {
             return null;
         }
         return blockPos;
-    }
-
-    public static int setStationName(CommandContext<CommandSourceStack> context) {
-
-    }
-
-    public static int listStations(CommandContext<CommandSourceStack> context) {
-
     }
 }

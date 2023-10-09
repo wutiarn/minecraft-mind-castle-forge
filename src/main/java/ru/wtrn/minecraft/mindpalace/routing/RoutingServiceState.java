@@ -27,10 +27,10 @@ public class RoutingServiceState {
         }
     }
 
-    public boolean setName(BlockPos pos, String name) {
+    public RoutingNode setName(BlockPos pos, String name) {
         RoutingNode node = nodesByPosition.get(pos);
         if (node == null) {
-            return false;
+            return null;
         }
         RoutingNode existingNode = nodesByName.get(name);
         if (existingNode != null) {
@@ -38,7 +38,7 @@ public class RoutingServiceState {
         }
         node.name = name;
         nodesByName.put(name, node);
-        return true;
+        return node;
     }
 
     public RoutingNode getByName(String name) {

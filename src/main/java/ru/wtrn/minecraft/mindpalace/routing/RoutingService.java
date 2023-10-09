@@ -1,8 +1,10 @@
 package ru.wtrn.minecraft.mindpalace.routing;
 
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -16,20 +18,17 @@ public class RoutingService {
     public static RoutingService INSTANCE = new RoutingService();
     private RoutingServiceState state = null;
 
-    public void rebuildGraph(BlockPos startBlockPos, Level level, Player player) {
-        MinecraftServer server = level.getServer();
-        if (server == null) {
-            return;
-        }
+    public void rebuildGraph(BlockPos startBlockPos, CommandSourceStack source) {
+        ServerLevel level = source.getLevel();
 
         if (!isRoutingBlock(startBlockPos, level)) {
-            server.sendSystemMessage(Component.literal("Targeted block is not RoutingRailBlock"));
+            source.sendFailure(Component.literal("Targeted block is not RoutingRailBlock"));
         }
 
-        player.sendSystemMessage(Component.literal("Rebuilding routes..."));
+        source.sendSystemMessage(Component.literal("Rebuilding routes..."));
         Collection<RoutingNode> discoveredNodes = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlockPos, null);
         String debugString = discoveredNodes.stream().map(RoutingNode::toString).collect(Collectors.joining("\n"));
-        player.sendSystemMessage(Component.literal("Discovered nodes:\n" + debugString));
+        source.sendSystemMessage(Component.literal("Discovered nodes:\n" + debugString));
         state = new RoutingServiceState(discoveredNodes, state);
     }
 
@@ -57,6 +56,21 @@ public class RoutingService {
         if (this.state != null) {
             state.removeNode(pos);
         }
+    }
+
+    public RoutingNode setName(BlockPos pos, String name, CommandSourceStack source) {
+        if (state == null) {
+            source.sendFailure(Component.literal("Routing state is not initialized"));
+            return null;
+        }
+
+        RoutingNode node = state.setName(pos, name);
+        if (node == null) {
+            source.sendFailure(Component.literal("Cannot find routing block at specified location"));
+            return null;
+        }
+
+        return node;
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

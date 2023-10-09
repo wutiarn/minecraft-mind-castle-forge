@@ -58,19 +58,19 @@ public class RoutingService {
         }
     }
 
-    public RoutingNode setName(BlockPos pos, String name, CommandSourceStack source) {
+    public boolean setName(BlockPos pos, String name, CommandSourceStack source) {
         if (state == null) {
             source.sendFailure(Component.literal("Routing state is not initialized"));
-            return null;
+            return false;
         }
 
         RoutingNode node = state.setName(pos, name);
         if (node == null) {
             source.sendFailure(Component.literal("Cannot find routing block at specified location"));
-            return null;
+            return false;
         }
 
-        return node;
+        return true;
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

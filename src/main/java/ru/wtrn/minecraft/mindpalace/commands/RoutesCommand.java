@@ -56,15 +56,14 @@ public class RoutesCommand {
 
     public static int setStationName(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
-        ServerPlayer player = source.getPlayer();
 
         BlockPos startBlockPos = getTargetedRoutingRailBlockPos(source);
         if (startBlockPos == null) {
             return 1;
         }
 
-        RoutingNode node = RoutingService.INSTANCE.setName(startBlockPos, context.getArgument("name", String.class), source);
-        if (node == null) {
+        boolean success = RoutingService.INSTANCE.setName(startBlockPos, context.getArgument("name", String.class), source);
+        if (!success) {
             return 1;
         }
         return 0;

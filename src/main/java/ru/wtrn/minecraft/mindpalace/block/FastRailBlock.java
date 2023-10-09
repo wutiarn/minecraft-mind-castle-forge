@@ -45,20 +45,17 @@ public class FastRailBlock extends RailBlock {
 
         double maxJumpPath = highSpeed - baseSpeed;
         if (maxJumpPath > 0) {
-            cart.noPhysics = true;
             performJump(pos, maxJumpPath, cart, level, directionVector);
-            cart.noPhysics = false;
         }
         cart.setDeltaMovement(directionVector.scale(baseSpeed));
     }
 
     private void performJump(BlockPos startPos, double maxJumpPath, AbstractMinecart cart, Level level, Vec3 directionVector) {
-
         Direction direction = VectorUtils.toHorizontalDirection(directionVector);
         Vec3 safeTravelVector = findSafePath(startPos, direction, level, maxJumpPath);
+        // Avoid collisions if cart is on long fast rails track
+        cart.noPhysics = maxJumpPath - VectorUtils.getHorizontalDistance(safeTravelVector) < 0.01;
 
-//        SafeJumpPathFinder safeJumpPathFinder = new SafeJumpPathFinder(VectorUtils.toVec3(startPos), level, directionVector, this, maxJumpPath);
-//        Vec3 safeTravelVector = safeJumpPathFinder.getSafeTravelVector();
         if (Vec3.ZERO.closerThan(safeTravelVector, 0.1)) {
             return;
         }

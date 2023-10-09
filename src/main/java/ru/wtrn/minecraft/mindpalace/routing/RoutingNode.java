@@ -11,6 +11,7 @@ import java.util.Map;
 public class RoutingNode {
     private final Logger logger = LoggerFactory.getLogger(RoutingNode.class);
     BlockPos pos;
+    String name;
     Map<Direction, Connection> connections = new HashMap<>();
 
     public RoutingNode(BlockPos pos) {

@@ -13,10 +13,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RoutingServiceState {
-    private DefaultDirectedWeightedGraph<RoutingNode, Long> graph = new DefaultDirectedWeightedGraph<>(Long.class);
-    private ShortestPathAlgorithm<RoutingNode, Long> shortestPathFinder = new DijkstraShortestPath<>(graph);
-    private HashMap<String, RoutingNode> nodesByName = new HashMap<>();
-    private HashMap<BlockPos, RoutingNode> nodesByPosition = new HashMap<>();
+    private final DefaultDirectedWeightedGraph<RoutingNode, Long> graph = new DefaultDirectedWeightedGraph<>(Long.class);
+    private final ShortestPathAlgorithm<RoutingNode, Long> shortestPathFinder = new DijkstraShortestPath<>(graph);
+    private final HashMap<String, RoutingNode> nodesByName = new HashMap<>();
+    private final HashMap<BlockPos, RoutingNode> nodesByPosition = new HashMap<>();
 
     public RoutingServiceState(Collection<RoutingNode> nodes, @Nullable RoutingServiceState previous) {
         performUpdate(nodes);

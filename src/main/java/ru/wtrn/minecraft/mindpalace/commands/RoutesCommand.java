@@ -102,12 +102,11 @@ public class RoutesCommand {
             return 1;
         }
 
-        String name = context.getArgument("station", String.class);
-        boolean success = RoutingService.INSTANCE.setName(pos, name, source);
+        String dstStation = context.getArgument("station", String.class);
+        boolean success = RoutingService.INSTANCE.printRoute(pos, dstStation, source);
         if (!success) {
             return 1;
         }
-        source.sendSuccess(() -> Component.literal("Station name set to " + name), true);
         return 0;
     }
 

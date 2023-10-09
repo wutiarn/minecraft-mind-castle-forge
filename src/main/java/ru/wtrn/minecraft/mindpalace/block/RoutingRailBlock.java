@@ -20,9 +20,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.jgrapht.GraphPath;
 import ru.wtrn.minecraft.mindpalace.entity.RoutingRailBlockEntity;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
+import ru.wtrn.minecraft.mindpalace.routing.RoutingServiceState;
 import ru.wtrn.minecraft.mindpalace.util.RailTraverser;
+
+import java.util.List;
 
 public class RoutingRailBlock extends RailBlock implements EntityBlock {
     public RoutingRailBlock() {
@@ -36,6 +40,8 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
             Vec3 travelVector = Vec3.atLowerCornerOf(targetDirection.getNormal());
             cart.move(MoverType.SELF, travelVector);
             cart.setDeltaMovement(travelVector);
+        } else {
+            cart.kill();
         }
     }
 
@@ -44,7 +50,27 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
         if (player == null) {
             return null;
         }
-        return null;
+
+        String destinationStation = RoutingService.INSTANCE.getUserDestination(player.getUUID());
+        if (destinationStation == null) {
+            player.sendSystemMessage(Component.literal("No destination station set. Use /go command."));
+            return null;
+        }
+
+        GraphPath<BlockPos, RoutingServiceState.RouteRailsEdge> path = RoutingService.INSTANCE.calculateRoute(pos, destinationStation, level);
+        if (path == null) {
+            player.sendSystemMessage(Component.literal("Failed to calculate path to station " + destinationStation));
+            return null;
+        }
+
+        List<RoutingServiceState.RouteRailsEdge> edgeList = path.getEdgeList();
+        if (edgeList.isEmpty()) {
+            player.sendSystemMessage(Component.literal("You arrived to " + destinationStation));
+            return null;
+        }
+
+        RoutingServiceState.RouteRailsEdge firstEdge = edgeList.get(0);
+        return firstEdge.getDirection();
     }
 
     private ServerPlayer getPlayerPassenger(AbstractMinecart cart) {

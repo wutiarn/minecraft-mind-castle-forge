@@ -77,6 +77,14 @@ public class RoutingService {
         return true;
     }
 
+    public GraphPath<BlockPos, RoutingServiceState.RouteRailsEdge> calculateRoute(BlockPos src, String dstName, Level level) {
+        GraphPath<BlockPos, RoutingServiceState.RouteRailsEdge> path = state.calculateRoute(src, dstName);
+        if (path == null) {
+            rebuildState(src, level);
+        }
+        return path;
+    }
+
     public boolean printRoute(BlockPos pos, String dstStationName, CommandSourceStack source) {
         GraphPath<BlockPos, RoutingServiceState.RouteRailsEdge> path = state.calculateRoute(pos, dstStationName);
         if (path == null) {

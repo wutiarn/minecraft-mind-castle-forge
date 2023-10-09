@@ -2,7 +2,6 @@ package ru.wtrn.minecraft.mindpalace.routing;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import org.jetbrains.annotations.Nullable;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
@@ -12,62 +11,50 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import java.util.*;
 
 public class RoutingServiceState {
-    private final DefaultDirectedWeightedGraph<RoutingNode, RouteRailsEdge> graph = new DefaultDirectedWeightedGraph<>(RouteRailsEdge.class);
-    private final ShortestPathAlgorithm<RoutingNode, RouteRailsEdge> shortestPathFinder = new DijkstraShortestPath<>(graph);
-    private final HashMap<String, BlockPos> positionsByName = new HashMap<>();
-    private final HashMap<BlockPos, RoutingNode> nodesByPosition = new HashMap<>();
-    private final HashMap<UUID, String> destinationByUserUUID = new HashMap<>();
+    private final DefaultDirectedWeightedGraph<BlockPos, RouteRailsEdge> graph = new DefaultDirectedWeightedGraph<>(RouteRailsEdge.class);
+    private final ShortestPathAlgorithm<BlockPos, RouteRailsEdge> shortestPathFinder = new DijkstraShortestPath<>(graph);
+    private final HashMap<String, BlockPos> stations;
+    private final HashMap<UUID, String> destinationByUserUUID;
 
-    public RoutingServiceState(Collection<RoutingNode> nodes, @Nullable RoutingServiceState previous) {
+    public RoutingServiceState(Collection<RoutingNode> nodes, HashMap<String, BlockPos> stations, HashMap<UUID, String> destinationByUserUUID) {
         for (RoutingNode discoveredNode : nodes) {
-            nodesByPosition.put(discoveredNode.pos, discoveredNode);
-            graph.addVertex(discoveredNode);
+            graph.addVertex(discoveredNode.pos);
             for (Map.Entry<Direction, RoutingNode.Connection> connectionEntry : discoveredNode.connections.entrySet()) {
                 RoutingNode.Connection connection = connectionEntry.getValue();
-                graph.addVertex(connection.peer());
-                graph.addEdge(discoveredNode, connection.peer(), new RouteRailsEdge(discoveredNode, connection.peer(), connectionEntry.getKey(), connection.distance()));
+                graph.addVertex(connection.peer().pos);
+                graph.addEdge(discoveredNode.pos, connection.peer().pos, new RouteRailsEdge(discoveredNode.pos, connection.peer().pos, connectionEntry.getKey(), connection.distance()));
             }
         }
-        if (previous != null) {
-            for (Map.Entry<String, RoutingNode> entry : previous.nodesByName.entrySet()) {
-                setName(entry.getValue().pos, entry.getKey());
-            }
-        }
+        this.stations = stations;
+        this.destinationByUserUUID = destinationByUserUUID;
     }
 
     public void setName(BlockPos pos, String name) {
-        positionsByName.put(name, pos);
+        stations.put(name, pos);
     }
 
-    public RoutingNode getByName(String name) {
-        return nodesByName.get(name);
+    public BlockPos getStationPos(String name) {
+        return stations.get(name);
     }
 
-    public HashMap<String, RoutingNode> getStations() {
-        return nodesByName;
+    public HashMap<String, BlockPos> getStations() {
+        return stations;
     }
 
-    public Collection<RoutingNode> getNodes() {
-        return nodesByPosition.values();
+    public HashMap<UUID, String> getDestinationByUserUUID() {
+        return destinationByUserUUID;
     }
 
-    public boolean removeNode(BlockPos pos) {
-        RoutingNode node = nodesByPosition.get(pos);
-        if (node == null) {
-            return false;
-        }
-        graph.removeVertex(node);
-        nodesByName.remove(node.name);
-        nodesByPosition.remove(pos);
-        return true;
+    public Collection<BlockPos> getNodes() {
+        return graph.vertexSet();
     }
 
-    public GraphPath<RoutingNode, RouteRailsEdge> calculateRoute(BlockPos currentPos, String targetName) {
-        RoutingNode src = nodesByPosition.get(currentPos);
-        if (src == null) {
-            return null;
-        }
-        RoutingNode dst = nodesByName.get(targetName);
+    public void removeNode(BlockPos pos) {
+        graph.removeVertex(pos);
+    }
+
+    public GraphPath<BlockPos, RouteRailsEdge> calculateRoute(BlockPos src, String dstName) {
+        BlockPos dst = stations.get(dstName);
         if (dst == null) {
             return null;
         }
@@ -78,32 +65,28 @@ public class RoutingServiceState {
         destinationByUserUUID.put(userId, dstStationName);
     }
 
-    public RoutingNode getUserDestination(UUID userId) {
-        String stationName = destinationByUserUUID.get(userId);
-        if (stationName == null) {
-            return null;
-        }
-        return nodesByName.get(stationName);
+    public String getUserDestinationStationName(UUID userId) {
+        return destinationByUserUUID.get(userId);
     }
 
     public static class RouteRailsEdge extends DefaultWeightedEdge {
-        private final RoutingNode src;
-        private final RoutingNode dst;
-        private Direction direction;
+        private final BlockPos src;
+        private final BlockPos dst;
+        private final Direction direction;
         private final int distance;
 
-        public RouteRailsEdge(RoutingNode src, RoutingNode dst, Direction direction, int distance) {
+        public RouteRailsEdge(BlockPos src, BlockPos dst, Direction direction, int distance) {
             this.src = src;
             this.dst = dst;
             this.direction = direction;
             this.distance = distance;
         }
 
-        public RoutingNode getSrc() {
+        public BlockPos getSrc() {
             return src;
         }
 
-        public RoutingNode getDst() {
+        public BlockPos getDst() {
             return dst;
         }
 

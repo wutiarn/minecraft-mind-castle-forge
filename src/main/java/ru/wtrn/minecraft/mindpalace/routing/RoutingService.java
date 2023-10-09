@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class RoutingService {
     public static RoutingService INSTANCE = new RoutingService();
-    private RoutingServiceState state = new RoutingServiceState(List.of(), null);
+    private RoutingServiceState state = new RoutingServiceState(List.of(), new HashMap<>(), new HashMap<>());
 
     public void rebuildGraph(BlockPos startBlockPos, CommandSourceStack source) {
         ServerLevel level = source.getLevel();
@@ -26,14 +26,15 @@ public class RoutingService {
         }
 
         source.sendSystemMessage(Component.literal("Rebuilding routes..."));
-        rebuildState(startBlockPos);
-        String debugString = state.getNodes().stream().map(RoutingNode::toString).collect(Collectors.joining("\n"));
+        Collection<RoutingNode> discoveredNodes = rebuildState(startBlockPos, level);
+        String debugString = discoveredNodes.stream().map(RoutingNode::toString).collect(Collectors.joining("\n"));
         source.sendSystemMessage(Component.literal("Discovered nodes:\n" + debugString));
     }
 
-    private void rebuildState(BlockPos startBlockPos) {
+    private Collection<RoutingNode> rebuildState(BlockPos startBlockPos, Level level) {
         Collection<RoutingNode> discoveredNodes = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlockPos, null);
-        state = new RoutingServiceState(discoveredNodes, state);
+        state = new RoutingServiceState(discoveredNodes, state.getStations(), state.getDestinationByUserUUID());
+        return discoveredNodes;
     }
 
     public void onRoutingRailPlaced(BlockPos pos, Level level) {
@@ -45,7 +46,7 @@ public class RoutingService {
             return;
         }
         server.sendSystemMessage(Component.literal("Placed new routing rail at %s...".formatted(pos)));
-        rebuildState(pos);
+        rebuildState(pos, level);
     }
 
     public void onRoutingRailRemoved(BlockPos pos, Level level) {
@@ -56,9 +57,9 @@ public class RoutingService {
         server.sendSystemMessage(Component.literal("Removed routing rail at %s...".formatted(pos)));
         state.removeNode(pos);
         @SuppressWarnings("SimplifyOptionalCallChains")
-        RoutingNode remainingNode = state.getNodes().stream().findFirst().orElse(null);
-        if (remainingNode != null) {
-            rebuildState(remainingNode.pos);
+        BlockPos remainingNodePos = state.getNodes().stream().findFirst().orElse(null);
+        if (remainingNodePos != null) {
+            rebuildState(remainingNodePos, level);
         }
     }
 
@@ -71,9 +72,9 @@ public class RoutingService {
         String stationsList = state.getStations()
                 .entrySet()
                 .stream()
-                .sorted(Comparator.comparing(Map.Entry::getKey))
+                .sorted(Map.Entry.comparingByKey())
                 .map(it -> {
-                    BlockPos stationPos = it.getValue().pos;
+                    BlockPos stationPos = it.getValue();
                     return "%s @ %s/%s/%s".formatted(it.getKey(), stationPos.getX(), stationPos.getY(), stationPos.getZ());
                 })
                 .collect(Collectors.joining("\n"));
@@ -82,7 +83,7 @@ public class RoutingService {
     }
 
     public boolean printRoute(BlockPos pos, String dstStationName, CommandSourceStack source) {
-        GraphPath<RoutingNode, RoutingServiceState.RouteRailsEdge> path = state.calculateRoute(pos, dstStationName);
+        GraphPath<BlockPos, RoutingServiceState.RouteRailsEdge> path = state.calculateRoute(pos, dstStationName);
         if (path == null) {
             source.sendFailure(Component.literal("No path found to " + dstStationName));
             return false;
@@ -92,12 +93,8 @@ public class RoutingService {
 
         List<RoutingServiceState.RouteRailsEdge> vertexList = path.getEdgeList();
         for (RoutingServiceState.RouteRailsEdge edge : vertexList) {
-            RoutingNode dst = edge.getDst();
-            BlockPos dstPos = dst.pos;
+            BlockPos dstPos = edge.getDst();
             sb.append("\n%s %s blocks to %s/%s/%s".formatted(edge.getDirection(), edge.getDistance(), dstPos.getX(), dstPos.getY(), dstPos.getZ()));
-            if (dst.name != null) {
-                sb.append(" (%s)".formatted(dst.name));
-            }
         }
 
         source.sendSystemMessage(Component.literal(sb.toString()));
@@ -105,19 +102,19 @@ public class RoutingService {
     }
 
     public boolean setUserDestination(UUID userId, String dstStationName) {
-        if (state.getByName(dstStationName) == null) {
+        if (state.getStationPos(dstStationName) == null) {
             return false;
         }
         state.setUserDestination(userId, dstStationName);
         return true;
     }
 
-    public RoutingNode getStationByName(String station) {
-        return state.getByName(station);
+    public BlockPos getStationByName(String station) {
+        return state.getStationPos(station);
     }
 
-    public RoutingNode getUserDestination(UUID userId) {
-        return state.getUserDestination(userId);
+    public String getUserDestination(UUID userId) {
+        return state.getUserDestinationStationName(userId);
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

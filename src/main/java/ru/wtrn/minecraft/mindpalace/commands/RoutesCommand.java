@@ -106,10 +106,7 @@ public class RoutesCommand {
                  source.sendFailure(Component.literal("This command can be invoked only by player"));
                  return 1;
              }
-             RoutingNode target = RoutingService.INSTANCE.getUserDestination(player.getUUID());
-             if (target != null) {
-                 dstStation = target.getName();
-             }
+             dstStation = RoutingService.INSTANCE.getUserDestination(player.getUUID());
         };
         if (dstStation == null) {
             source.sendFailure(Component.literal("No destination station specified (in command or using /go command before)"));

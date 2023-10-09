@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.Mod;
 import ru.wtrn.minecraft.mindpalace.WtrnMindPalaceMod;
 import ru.wtrn.minecraft.mindpalace.client.renderer.ImageFrameEntityRenderer;
 import ru.wtrn.minecraft.mindpalace.commands.ImageFrameCommand;
+import ru.wtrn.minecraft.mindpalace.commands.RoutesCommand;
 import ru.wtrn.minecraft.mindpalace.entity.ModEntities;
 import ru.wtrn.minecraft.mindpalace.tags.ModBlockTagsProvider;
 
@@ -50,6 +51,7 @@ public class EventsHandler {
         @SubscribeEvent
         public static void registerCommands(final RegisterCommandsEvent event) {
             ImageFrameCommand.register(event.getDispatcher());
+            RoutesCommand.register(event.getDispatcher());
         }
     }
 }

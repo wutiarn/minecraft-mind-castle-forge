@@ -102,16 +102,23 @@ public class RoutesCommand {
         if (pos == null) {
             return 1;
         }
-
-        String dstStation = context.getArgument("station", String.class);
+        String dstStation = null;
+         try {
+            dstStation = context.getArgument("station", String.class);
+        } catch (Exception e) {
+             ServerPlayer player = source.getPlayer();
+             if (player == null) {
+                 source.sendFailure(Component.literal("This command can be invoked only by player"));
+                 return 1;
+             }
+             RoutingNode target = RoutingService.INSTANCE.getUserDestination(player.getUUID());
+             if (target != null) {
+                 dstStation = target.getName();
+             }
+        };
         if (dstStation == null) {
-            ServerPlayer player = source.getPlayer();
-            if (player == null) {
-                source.sendFailure(Component.literal("This command can be invoked only by player"));
-                return 1;
-            }
-            RoutingNode target = RoutingService.INSTANCE.getUserDestination(player.getUUID());
-            dstStation = target.getName();
+            source.sendFailure(Component.literal("No destination station specified (in command or using /go command before)"));
+            return 1;
         }
         boolean success = RoutingService.INSTANCE.printRoute(pos, dstStation, source);
         if (!success) {

@@ -41,7 +41,12 @@ public class GoCommand {
 
         String dstStationName = context.getArgument("station", String.class);
 
-        RoutingService.INSTANCE.setUserDestination(uuid, dstStationName);
+        boolean success = RoutingService.INSTANCE.setUserDestination(uuid, dstStationName);
+        if (!success) {
+            source.sendFailure(Component.literal("Failed to find station " + dstStationName));
+            return 1;
+        }
+        source.sendSystemMessage(Component.literal("Destination station set to " + dstStationName));
         return 0;
     }
 }

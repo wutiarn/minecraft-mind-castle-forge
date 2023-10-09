@@ -57,7 +57,7 @@ public class RoutingService {
     public boolean setName(BlockPos pos, String name, CommandSourceStack source) {
         RoutingNode node = state.setName(pos, name);
         if (node == null) {
-            source.sendFailure(Component.literal("Cannot find routing block at specified location"));
+            source.sendFailure(Component.literal("Cannot find routing block at specified location. Try refreshing routes."));
             return false;
         }
 
@@ -81,6 +81,7 @@ public class RoutingService {
     public boolean printRoute(BlockPos pos, String dstStationName, CommandSourceStack source) {
         GraphPath<RoutingNode, RoutingServiceState.RouteRailsEdge> path = state.calculateRoute(pos, dstStationName);
         if (path == null) {
+            source.sendFailure(Component.literal("No path found to " + dstStationName));
             return false;
         }
         StringBuilder sb = new StringBuilder();
@@ -94,15 +95,22 @@ public class RoutingService {
             if (dst.name != null) {
                 sb.append(" (%s)".formatted(dst.name));
             }
-            ;
         }
 
         source.sendSystemMessage(Component.literal(sb.toString()));
         return true;
     }
 
-    public void setUserDestination(UUID userId, String dstStationName) {
+    public boolean setUserDestination(UUID userId, String dstStationName) {
+        if (state.getByName(dstStationName) == null) {
+            return false;
+        }
         state.setUserDestination(userId, dstStationName);
+        return true;
+    }
+
+    public RoutingNode getStationByName(String station) {
+        return state.getByName(station);
     }
 
     public RoutingNode getUserDestination(UUID userId) {

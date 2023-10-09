@@ -9,8 +9,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import ru.wtrn.minecraft.mindpalace.block.RoutingRailBlock;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
 import ru.wtrn.minecraft.mindpalace.entity.ImageFrame;
 import ru.wtrn.minecraft.mindpalace.items.ImageFrameItem;
@@ -44,9 +46,16 @@ public class RoutesCommand {
             return 1;
         }
 
-        long startTime = System.currentTimeMillis();
         BlockPos startBlockPos = blockHitResult.getBlockPos();
-        RoutingService.INSTANCE.rebuildGraph(startBlockPos, source);
+
+        BlockState blockState = level.getBlockState(startBlockPos);
+        if (!(blockState.getBlock() instanceof RoutingRailBlock routingRailBlock)) {
+            source.sendFailure(Component.literal("Targeted block is not RoutingRailBlock"));
+            return 1;
+        }
+
+        long startTime = System.currentTimeMillis();
+        RoutingService.INSTANCE.rebuildGraph(startBlockPos, source.getLevel(), player);
 
         long duration = System.currentTimeMillis() - startTime;
 

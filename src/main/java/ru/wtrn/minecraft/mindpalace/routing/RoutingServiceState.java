@@ -2,6 +2,9 @@ package ru.wtrn.minecraft.mindpalace.routing;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import org.jgrapht.GraphPath;
+import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 
 import java.util.Collection;
@@ -10,6 +13,7 @@ import java.util.Map;
 
 public class RoutingServiceState {
     private DefaultDirectedWeightedGraph<RoutingNode, Long> graph = new DefaultDirectedWeightedGraph<>(Long.class);
+    private ShortestPathAlgorithm<RoutingNode, Long> shortestPathFinder = new DijkstraShortestPath<>(graph);
     private HashMap<String, RoutingNode> nodesByName = new HashMap<>();
     private HashMap<BlockPos, RoutingNode> nodesByPosition = new HashMap<>();
 
@@ -47,6 +51,18 @@ public class RoutingServiceState {
         graph.removeVertex(node);
         nodesByName.remove(node.name);
         return true;
+    }
+
+    public GraphPath<RoutingNode, Long> calculateRoute(BlockPos currentPos, String targetName) {
+        RoutingNode src = nodesByPosition.get(currentPos);
+        if (src == null) {
+            return null;
+        }
+        RoutingNode dst = nodesByName.get(targetName);
+        if (dst == null) {
+            return null;
+        }
+        return shortestPathFinder.getPath(src, dst);
     }
 
     public void performUpdate(Collection<RoutingNode> nodes) {

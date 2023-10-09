@@ -65,24 +65,8 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
         previousPos = foundPrevBlock.pos;
 
 
-        RailState prevRailState = new RailState(level, previousPos, prevBlockState);
-        List<BlockPos> prevConnections = prevRailState.getConnections();
 
-        if (prevConnections.isEmpty()) {
-            return null;
-        }
-
-        BlockPos currentPos = null;
-        for (BlockPos connection : prevConnections) {
-            Direction connectionDirection = getDirection(previousPos, connection);
-            if (connectionDirection == direction) {
-                currentPos = connection;
-                break;
-            }
-        }
-        if (currentPos == null) {
-            return null;
-        }
+        BlockPos currentPos = previousPos.relative(direction);
         if (visitedBlocks.contains(currentPos)) {
             return null;
         }
@@ -140,11 +124,16 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
             return new FoundBaseRailBlock(pos, blockState);
         }
 
-        // Check one block below due to strange implementation of net.minecraft.world.level.block.RailState.getConnections
-        pos = pos.below();
-        blockState = level.getBlockState(pos);
+        // Neighbour rails can be one block below...
+        blockState = level.getBlockState(pos.below());
         if ((blockState.getBlock() instanceof BaseRailBlock)) {
-            return new FoundBaseRailBlock(pos, blockState);
+            return new FoundBaseRailBlock(pos.below(), blockState);
+        }
+
+        // ... or one block above
+        blockState = level.getBlockState(pos.above());
+        if ((blockState.getBlock() instanceof BaseRailBlock)) {
+            return new FoundBaseRailBlock(pos.above(), blockState);
         }
         return null;
     }

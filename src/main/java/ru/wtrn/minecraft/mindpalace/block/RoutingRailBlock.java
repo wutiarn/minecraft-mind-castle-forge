@@ -68,7 +68,7 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
 
         long duration = System.currentTimeMillis() - startTimestamp;
 
-        pPlayer.sendSystemMessage(Component.literal("Routing report completed in %dms. Direction %s. Found: %s.".formatted(duration, direction, foundNeighbourDetails)));
+        pPlayer.sendSystemMessage(Component.literal("Direction %s. Found: %s. Duration: %sms".formatted(direction, foundNeighbourDetails, duration)));
         return InteractionResult.PASS;
     }
 

@@ -44,10 +44,13 @@ public class RoutesCommand {
             return 1;
         }
 
+        long startTime = System.currentTimeMillis();
         BlockPos startBlockPos = blockHitResult.getBlockPos();
         RoutingService.INSTANCE.rebuildGraph(startBlockPos, source);
 
-        context.getSource().sendSuccess(() -> Component.literal("Routes rebuild completed"), true);
+        long duration = System.currentTimeMillis() - startTime;
+
+        context.getSource().sendSuccess(() -> Component.literal("Routes rebuild completed in %sms".formatted(duration)), true);
 
         return 0;
     }

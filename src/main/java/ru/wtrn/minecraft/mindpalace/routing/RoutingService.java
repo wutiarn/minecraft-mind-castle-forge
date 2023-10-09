@@ -81,12 +81,13 @@ public class RoutingService {
         GraphPath<BlockPos, RoutingServiceState.RouteRailsEdge> path = state.calculateRoute(src, dstName);
         if (path == null) {
             rebuildState(src, level);
+            path = state.calculateRoute(src, dstName);
         }
         return path;
     }
 
     public boolean printRoute(BlockPos pos, String dstStationName, CommandSourceStack source) {
-        GraphPath<BlockPos, RoutingServiceState.RouteRailsEdge> path = state.calculateRoute(pos, dstStationName);
+        GraphPath<BlockPos, RoutingServiceState.RouteRailsEdge> path = calculateRoute(pos, dstStationName, source.getLevel());
         if (path == null) {
             source.sendFailure(Component.literal("No path found to " + dstStationName));
             return false;

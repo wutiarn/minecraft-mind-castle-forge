@@ -7,10 +7,13 @@ import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class RoutingServiceState {
+    private final Logger logger = LoggerFactory.getLogger(RoutingServiceState.class);
     private final DefaultDirectedWeightedGraph<BlockPos, RouteRailsEdge> graph = new DefaultDirectedWeightedGraph<>(RouteRailsEdge.class);
     private final ShortestPathAlgorithm<BlockPos, RouteRailsEdge> shortestPathFinder = new DijkstraShortestPath<>(graph);
     private final HashMap<String, BlockPos> stations;
@@ -58,7 +61,12 @@ public class RoutingServiceState {
         if (dst == null) {
             return null;
         }
-        return shortestPathFinder.getPath(src, dst);
+        try {
+            return shortestPathFinder.getPath(src, dst);
+        } catch (Exception e) {
+            logger.warn("Route calculation from {} to {} failed", src, dst, e);
+            return null;
+        }
     }
 
     public void setUserDestination(UUID userId, String dstStationName) {

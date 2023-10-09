@@ -3,11 +3,13 @@ package ru.wtrn.minecraft.mindpalace.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EntityBlock;
@@ -16,6 +18,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import ru.wtrn.minecraft.mindpalace.entity.RoutingRailBlockEntity;
 import ru.wtrn.minecraft.mindpalace.util.RailTraverser;
@@ -27,12 +30,29 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
 
     @Override
     public void onMinecartPass(BlockState state, Level level, BlockPos pos, AbstractMinecart cart) {
-        super.onMinecartPass(state, level, pos, cart);
+        Direction targetDirection = getTargetDirection(pos, level, cart);
+        if (targetDirection != null) {
+            Vec3 travelVector = Vec3.atLowerCornerOf(targetDirection.getNormal());
+            cart.move(MoverType.SELF, travelVector);
+            cart.setDeltaMovement(travelVector);
+        }
     }
 
-    @Override
-    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-        return super.getStateForPlacement(pContext);
+    private Direction getTargetDirection(BlockPos pos, Level level, AbstractMinecart cart) {
+        ServerPlayer player = getPlayerPassenger(cart);
+        if (player == null) {
+            return null;
+        }
+        return null;
+    }
+
+    private ServerPlayer getPlayerPassenger(AbstractMinecart cart) {
+        for (Entity passenger : cart.getPassengers()) {
+            if (passenger instanceof ServerPlayer player) {
+                return player;
+            }
+        }
+        return null;
     }
 
     @Override

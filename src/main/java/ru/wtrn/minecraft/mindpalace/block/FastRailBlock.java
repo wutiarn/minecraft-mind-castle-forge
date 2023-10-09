@@ -47,6 +47,7 @@ public class FastRailBlock extends RailBlock {
         if (maxJumpPath > 0) {
             cart.noPhysics = true;
             performJump(pos, maxJumpPath, cart, level, directionVector);
+            cart.noPhysics = false;
         }
         cart.setDeltaMovement(directionVector.scale(baseSpeed));
     }

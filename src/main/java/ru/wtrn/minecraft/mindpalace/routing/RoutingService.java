@@ -100,18 +100,20 @@ public class RoutingService {
             source.sendFailure(Component.literal("Routing state is not initialized"));
             return false;
         }
-        GraphPath<RoutingNode, Long> path = state.calculateRoute(pos, dstStationName);
+        GraphPath<RoutingNode, RoutingServiceState.RouteRailsEdge> path = state.calculateRoute(pos, dstStationName);
         if (path == null) {
             return false;
         }
         StringBuilder sb = new StringBuilder();
-        sb.append("Path to station %s from %s:");
+        sb.append("Path to station %s:".formatted(dstStationName));
 
-        List<RoutingNode> vertexList = path.getVertexList();
-        for (RoutingNode node : vertexList) {
-            sb.append("\n%s/%s/%s".formatted(node.pos.getX(), node.pos.getY(), node.pos.getZ()));
-            if (node.name != null) {
-                sb.append(" (%s)".formatted(node.name));
+        List<RoutingServiceState.RouteRailsEdge> vertexList = path.getEdgeList();
+        for (RoutingServiceState.RouteRailsEdge edge : vertexList) {
+            RoutingNode dst = edge.getDst();
+            BlockPos dstPos = dst.pos;
+            sb.append("\n%s %s blocks to %s/%s/%s".formatted(edge.getDirection(), edge.getDistance(), dstPos.getX(), dstPos.getY(), dstPos.getZ()));
+            if (dst.name != null) {
+                sb.append(" (%s)".formatted(dst.name));
             };
         }
 

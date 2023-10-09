@@ -7,14 +7,15 @@ import org.jgrapht.GraphPath;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
+import org.jgrapht.graph.DefaultWeightedEdge;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class RoutingServiceState {
-    private final DefaultDirectedWeightedGraph<RoutingNode, Long> graph = new DefaultDirectedWeightedGraph<>(Long.class);
-    private final ShortestPathAlgorithm<RoutingNode, Long> shortestPathFinder = new DijkstraShortestPath<>(graph);
+    private final DefaultDirectedWeightedGraph<RoutingNode, RouteRailsEdge> graph = new DefaultDirectedWeightedGraph<>(RouteRailsEdge.class);
+    private final ShortestPathAlgorithm<RoutingNode, RouteRailsEdge> shortestPathFinder = new DijkstraShortestPath<>(graph);
     private final HashMap<String, RoutingNode> nodesByName = new HashMap<>();
     private final HashMap<BlockPos, RoutingNode> nodesByPosition = new HashMap<>();
 
@@ -63,7 +64,7 @@ public class RoutingServiceState {
         return true;
     }
 
-    public GraphPath<RoutingNode, Long> calculateRoute(BlockPos currentPos, String targetName) {
+    public GraphPath<RoutingNode, RouteRailsEdge> calculateRoute(BlockPos currentPos, String targetName) {
         RoutingNode src = nodesByPosition.get(currentPos);
         if (src == null) {
             return null;
@@ -82,8 +83,53 @@ public class RoutingServiceState {
             for (Map.Entry<Direction, RoutingNode.Connection> connectionEntry : discoveredNode.connections.entrySet()) {
                 RoutingNode.Connection connection = connectionEntry.getValue();
                 graph.addVertex(connection.peer());
-                graph.addEdge(discoveredNode, connection.peer(), (long) connection.distance());
+                graph.addEdge(discoveredNode, connection.peer(), new RouteRailsEdge(discoveredNode, connection.peer(), connectionEntry.getKey(), connection.distance()));
             }
+        }
+    }
+
+    public static class RouteRailsEdge extends DefaultWeightedEdge {
+        private final RoutingNode src;
+        private final RoutingNode dst;
+        private Direction direction;
+        private final int distance;
+
+        public RouteRailsEdge(RoutingNode src, RoutingNode dst, Direction direction, int distance) {
+            this.src = src;
+            this.dst = dst;
+            this.direction = direction;
+            this.distance = distance;
+        }
+
+        public RoutingNode getSrc() {
+            return src;
+        }
+
+        public RoutingNode getDst() {
+            return dst;
+        }
+
+        public Direction getDirection() {
+            return direction;
+        }
+
+        public int getDistance() {
+            return distance;
+        }
+
+        @Override
+        protected Object getSource() {
+            return src;
+        }
+
+        @Override
+        protected Object getTarget() {
+            return dst;
+        }
+
+        @Override
+        protected double getWeight() {
+            return distance;
         }
     }
 }

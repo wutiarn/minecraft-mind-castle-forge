@@ -57,21 +57,10 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
             return null;
         }
         BlockPos previousPos = this.previousPos;
-        FoundBaseRailBlock foundPrevBlock = getRailBlockState(previousPos, level);
-        if (foundPrevBlock == null) {
-            return null;
-        }
-        BlockState prevBlockState = foundPrevBlock.state;
-        previousPos = foundPrevBlock.pos;
-
-
-
         BlockPos currentPos = previousPos.relative(direction);
         if (visitedBlocks.contains(currentPos)) {
             return null;
         }
-
-        Vec3 prevDelta = currentPos.getCenter().subtract(previousPos.getCenter());
 
         FoundBaseRailBlock foundCurrentBlock = getRailBlockState(currentPos, level);
         if (foundCurrentBlock == null) {
@@ -79,7 +68,6 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
         }
         BlockState currentBlockState = foundCurrentBlock.state;
         currentPos = foundCurrentBlock.pos;
-
 
         RailState currentRailState = new RailState(level, currentPos, currentBlockState);
         Direction nextDirection = null;
@@ -102,7 +90,7 @@ public class RailTraverser implements Iterable<RailTraverser.NextBlock>, Iterato
         result.state = currentBlockState;
         result.prevDirection = direction;
         result.nextDirection = nextDirection;
-        result.deltaFromPrevious = prevDelta;
+        result.deltaFromPrevious = currentPos.getCenter().subtract(previousPos.getCenter());
         result.traversedBlocksCount = ++traversedBlocksCount;
 
         this.previousPos = currentPos;

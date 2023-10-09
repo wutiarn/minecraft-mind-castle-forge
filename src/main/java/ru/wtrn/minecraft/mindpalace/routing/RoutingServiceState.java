@@ -9,10 +9,7 @@ import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class RoutingServiceState {
     private final DefaultDirectedWeightedGraph<RoutingNode, RouteRailsEdge> graph = new DefaultDirectedWeightedGraph<>(RouteRailsEdge.class);
@@ -144,6 +141,19 @@ public class RoutingServiceState {
         @Override
         protected double getWeight() {
             return distance;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            RouteRailsEdge edge = (RouteRailsEdge) o;
+            return Objects.equals(src, edge.src) && Objects.equals(dst, edge.dst);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(src, dst);
         }
     }
 }

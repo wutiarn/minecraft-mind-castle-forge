@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class RoutingNode {
     private final Logger logger = LoggerFactory.getLogger(RoutingNode.class);
@@ -48,5 +49,18 @@ public class RoutingNode {
     }
 
     public record Connection(RoutingNode peer, int distance) {
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RoutingNode node = (RoutingNode) o;
+        return Objects.equals(pos, node.pos) && Objects.equals(name, node.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pos, name);
     }
 }

@@ -38,6 +38,7 @@ public class RoutesCommand {
                         )
                         .then(
                                 Commands.literal("print")
+                                        .executes(RoutesCommand::printRoute)
                                         .then(
                                                 Commands.argument("station", StringArgumentType.string())
                                                         .executes(RoutesCommand::printRoute)
@@ -103,6 +104,15 @@ public class RoutesCommand {
         }
 
         String dstStation = context.getArgument("station", String.class);
+        if (dstStation == null) {
+            ServerPlayer player = source.getPlayer();
+            if (player == null) {
+                source.sendFailure(Component.literal("This command can be invoked only by player"));
+                return 1;
+            }
+            RoutingNode target = RoutingService.INSTANCE.getUserDestination(player.getUUID());
+            dstStation = target.getName();
+        }
         boolean success = RoutingService.INSTANCE.printRoute(pos, dstStation, source);
         if (!success) {
             return 1;

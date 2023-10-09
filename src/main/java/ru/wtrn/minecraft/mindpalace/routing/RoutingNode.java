@@ -27,6 +27,14 @@ public class RoutingNode {
         connections.put(direction, connection);
     }
 
+    public BlockPos getPos() {
+        return pos;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

@@ -5,22 +5,18 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jgrapht.GraphPath;
 import ru.wtrn.minecraft.mindpalace.block.ModBlocks;
 import ru.wtrn.minecraft.mindpalace.block.RoutingRailBlock;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class RoutingService {
     public static RoutingService INSTANCE = new RoutingService();
-    private RoutingServiceState state = null;
+    private RoutingServiceState state = new RoutingServiceState(List.of(), null);
 
     public void rebuildGraph(BlockPos startBlockPos, CommandSourceStack source) {
         ServerLevel level = source.getLevel();
@@ -45,10 +41,8 @@ public class RoutingService {
             return;
         }
         server.sendSystemMessage(Component.literal("Placed new routing rail at %s...".formatted(pos)));
-        if (this.state != null) {
-            Collection<RoutingNode> discoveredNodes = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(pos, 1);
-            state.performUpdate(discoveredNodes);
-        }
+        Collection<RoutingNode> discoveredNodes = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(pos, 1);
+        state.performUpdate(discoveredNodes);
     }
 
     public void onRoutingRailRemoved(BlockPos pos, Level level) {
@@ -57,17 +51,10 @@ public class RoutingService {
             return;
         }
         server.sendSystemMessage(Component.literal("Removed routing rail at %s...".formatted(pos)));
-        if (this.state != null) {
-            state.removeNode(pos);
-        }
+        state.removeNode(pos);
     }
 
     public boolean setName(BlockPos pos, String name, CommandSourceStack source) {
-        if (state == null) {
-            source.sendFailure(Component.literal("Routing state is not initialized"));
-            return false;
-        }
-
         RoutingNode node = state.setName(pos, name);
         if (node == null) {
             source.sendFailure(Component.literal("Cannot find routing block at specified location"));
@@ -78,10 +65,6 @@ public class RoutingService {
     }
 
     public boolean listStations(BlockPos pos, CommandSourceStack source) {
-        if (state == null) {
-            source.sendFailure(Component.literal("Routing state is not initialized"));
-            return false;
-        }
         String stationsList = state.getStations()
                 .entrySet()
                 .stream()
@@ -96,10 +79,6 @@ public class RoutingService {
     }
 
     public boolean printRoute(BlockPos pos, String dstStationName, CommandSourceStack source) {
-        if (state == null) {
-            source.sendFailure(Component.literal("Routing state is not initialized"));
-            return false;
-        }
         GraphPath<RoutingNode, RoutingServiceState.RouteRailsEdge> path = state.calculateRoute(pos, dstStationName);
         if (path == null) {
             return false;
@@ -114,11 +93,20 @@ public class RoutingService {
             sb.append("\n%s %s blocks to %s/%s/%s".formatted(edge.getDirection(), edge.getDistance(), dstPos.getX(), dstPos.getY(), dstPos.getZ()));
             if (dst.name != null) {
                 sb.append(" (%s)".formatted(dst.name));
-            };
+            }
+            ;
         }
 
         source.sendSystemMessage(Component.literal(sb.toString()));
         return true;
+    }
+
+    public void setUserDestination(UUID userId, String dstStationName) {
+        state.setUserDestination(userId, dstStationName);
+    }
+
+    public RoutingNode getUserDestination(UUID userId) {
+        return state.getUserDestination(userId);
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

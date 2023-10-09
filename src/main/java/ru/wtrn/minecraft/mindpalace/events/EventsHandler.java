@@ -10,6 +10,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import ru.wtrn.minecraft.mindpalace.WtrnMindPalaceMod;
 import ru.wtrn.minecraft.mindpalace.client.renderer.ImageFrameEntityRenderer;
+import ru.wtrn.minecraft.mindpalace.commands.GoCommand;
 import ru.wtrn.minecraft.mindpalace.commands.ImageFrameCommand;
 import ru.wtrn.minecraft.mindpalace.commands.RoutesCommand;
 import ru.wtrn.minecraft.mindpalace.entity.ModEntities;
@@ -52,6 +53,7 @@ public class EventsHandler {
         public static void registerCommands(final RegisterCommandsEvent event) {
             ImageFrameCommand.register(event.getDispatcher());
             RoutesCommand.register(event.getDispatcher());
+            GoCommand.register(event.getDispatcher());
         }
     }
 }

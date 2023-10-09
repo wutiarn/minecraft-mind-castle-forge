@@ -12,12 +12,14 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class RoutingServiceState {
     private final DefaultDirectedWeightedGraph<RoutingNode, RouteRailsEdge> graph = new DefaultDirectedWeightedGraph<>(RouteRailsEdge.class);
     private final ShortestPathAlgorithm<RoutingNode, RouteRailsEdge> shortestPathFinder = new DijkstraShortestPath<>(graph);
     private final HashMap<String, RoutingNode> nodesByName = new HashMap<>();
     private final HashMap<BlockPos, RoutingNode> nodesByPosition = new HashMap<>();
+    private final HashMap<UUID, String> destinationByUserUUID = new HashMap<>();
 
     public RoutingServiceState(Collection<RoutingNode> nodes, @Nullable RoutingServiceState previous) {
         performUpdate(nodes);
@@ -86,6 +88,18 @@ public class RoutingServiceState {
                 graph.addEdge(discoveredNode, connection.peer(), new RouteRailsEdge(discoveredNode, connection.peer(), connectionEntry.getKey(), connection.distance()));
             }
         }
+    }
+
+    public void setUserDestination(UUID userId, String dstStationName) {
+        destinationByUserUUID.put(userId, dstStationName);
+    }
+
+    public RoutingNode getUserDestination(UUID userId) {
+        String stationName = destinationByUserUUID.get(userId);
+        if (stationName == null) {
+            return null;
+        }
+        return nodesByName.get(stationName);
     }
 
     public static class RouteRailsEdge extends DefaultWeightedEdge {

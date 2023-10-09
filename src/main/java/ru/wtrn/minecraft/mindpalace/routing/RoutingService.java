@@ -56,11 +56,6 @@ public class RoutingService {
         }
         server.sendSystemMessage(Component.literal("Removed routing rail at %s...".formatted(pos)));
         state.removeNode(pos);
-        @SuppressWarnings("SimplifyOptionalCallChains")
-        BlockPos remainingNodePos = state.getNodes().stream().findFirst().orElse(null);
-        if (remainingNodePos != null) {
-            rebuildState(remainingNodePos, level);
-        }
     }
 
     public boolean setName(BlockPos pos, String name, CommandSourceStack source) {

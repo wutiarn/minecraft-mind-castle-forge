@@ -36,6 +36,14 @@ public class RoutesCommand {
                                         )
 
                         )
+                        .then(
+                                Commands.literal("print")
+                                        .then(
+                                                Commands.argument("station", StringArgumentType.string())
+                                                        .executes(RoutesCommand::printRoute)
+                                        )
+
+                        )
         );
     }
 
@@ -73,7 +81,6 @@ public class RoutesCommand {
 
     public static int listStations(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
-        ServerPlayer player = source.getPlayer();
 
         BlockPos pos = getTargetedRoutingRailBlockPos(source);
         if (pos == null) {
@@ -87,7 +94,22 @@ public class RoutesCommand {
         return 0;
     }
 
+    public static int printRoute(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
 
+        BlockPos pos = getTargetedRoutingRailBlockPos(source);
+        if (pos == null) {
+            return 1;
+        }
+
+        String name = context.getArgument("station", String.class);
+        boolean success = RoutingService.INSTANCE.setName(pos, name, source);
+        if (!success) {
+            return 1;
+        }
+        source.sendSuccess(() -> Component.literal("Station name set to " + name), true);
+        return 0;
+    }
 
     private static BlockPos getTargetedRoutingRailBlockPos(CommandSourceStack source) {
         ServerPlayer player = source.getPlayer();

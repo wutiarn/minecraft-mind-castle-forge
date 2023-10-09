@@ -8,11 +8,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jgrapht.GraphPath;
 import ru.wtrn.minecraft.mindpalace.block.ModBlocks;
 import ru.wtrn.minecraft.mindpalace.block.RoutingRailBlock;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -90,6 +92,30 @@ public class RoutingService {
                 })
                 .collect(Collectors.joining("\n"));
         source.sendSystemMessage(Component.literal("Stations list:\n" + stationsList));
+        return true;
+    }
+
+    public boolean printRoute(BlockPos pos, String dstStationName, CommandSourceStack source) {
+        if (state == null) {
+            source.sendFailure(Component.literal("Routing state is not initialized"));
+            return false;
+        }
+        GraphPath<RoutingNode, Long> path = state.calculateRoute(pos, dstStationName);
+        if (path == null) {
+            return false;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("Path to station %s from %s:");
+
+        List<RoutingNode> vertexList = path.getVertexList();
+        for (RoutingNode node : vertexList) {
+            sb.append("\n%s/%s/%s".formatted(node.pos.getX(), node.pos.getY(), node.pos.getZ()));
+            if (node.name != null) {
+                sb.append(" (%s)".formatted(node.name));
+            };
+        }
+
+        source.sendSystemMessage(Component.literal(sb.toString()));
         return true;
     }
 

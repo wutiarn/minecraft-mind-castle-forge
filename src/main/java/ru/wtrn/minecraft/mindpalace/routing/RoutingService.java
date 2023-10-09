@@ -63,12 +63,7 @@ public class RoutingService {
     }
 
     public boolean setName(BlockPos pos, String name, CommandSourceStack source) {
-        RoutingNode node = state.setName(pos, name);
-        if (node == null) {
-            source.sendFailure(Component.literal("Cannot find routing block at specified location. Try refreshing routes."));
-            return false;
-        }
-
+        state.setName(pos, name);
         return true;
     }
 

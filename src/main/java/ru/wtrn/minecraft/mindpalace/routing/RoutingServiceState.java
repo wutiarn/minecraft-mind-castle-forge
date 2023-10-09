@@ -14,7 +14,7 @@ import java.util.*;
 public class RoutingServiceState {
     private final DefaultDirectedWeightedGraph<RoutingNode, RouteRailsEdge> graph = new DefaultDirectedWeightedGraph<>(RouteRailsEdge.class);
     private final ShortestPathAlgorithm<RoutingNode, RouteRailsEdge> shortestPathFinder = new DijkstraShortestPath<>(graph);
-    private final HashMap<String, RoutingNode> nodesByName = new HashMap<>();
+    private final HashMap<String, BlockPos> positionsByName = new HashMap<>();
     private final HashMap<BlockPos, RoutingNode> nodesByPosition = new HashMap<>();
     private final HashMap<UUID, String> destinationByUserUUID = new HashMap<>();
 
@@ -35,18 +35,8 @@ public class RoutingServiceState {
         }
     }
 
-    public RoutingNode setName(BlockPos pos, String name) {
-        RoutingNode node = nodesByPosition.get(pos);
-        if (node == null) {
-            return null;
-        }
-        RoutingNode existingNode = nodesByName.get(name);
-        if (existingNode != null) {
-            existingNode.name = null;
-        }
-        node.name = name;
-        nodesByName.put(name, node);
-        return node;
+    public void setName(BlockPos pos, String name) {
+        positionsByName.put(name, pos);
     }
 
     public RoutingNode getByName(String name) {

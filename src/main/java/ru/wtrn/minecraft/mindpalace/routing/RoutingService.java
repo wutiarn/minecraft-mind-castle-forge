@@ -1,19 +1,23 @@
 package ru.wtrn.minecraft.mindpalace.routing;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import ru.wtrn.minecraft.mindpalace.block.ModBlocks;
 import ru.wtrn.minecraft.mindpalace.block.RoutingRailBlock;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RoutingService {
     public static RoutingService INSTANCE = new RoutingService();
+    private DefaultDirectedWeightedGraph<RoutingNode, Long> graph = null;
 
     public void rebuildGraph(BlockPos startBlockPos, Level level, Player player) {
         MinecraftServer server = level.getServer();
@@ -29,6 +33,17 @@ public class RoutingService {
         Collection<RoutingNode> discoveredNodes = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlockPos, null);
         String debugString = discoveredNodes.stream().map(RoutingNode::toString).collect(Collectors.joining("\n"));
         player.sendSystemMessage(Component.literal("Discovered nodes:\n" + debugString));
+
+        DefaultDirectedWeightedGraph<RoutingNode, Long> newGraph = new DefaultDirectedWeightedGraph<>(Long.class);
+        for (RoutingNode discoveredNode : discoveredNodes) {
+            newGraph.addVertex(discoveredNode);
+            for (Map.Entry<Direction, RoutingNode.Connection> connectionEntry : discoveredNode.connections.entrySet()) {
+                RoutingNode.Connection connection = connectionEntry.getValue();
+                newGraph.addVertex(connection.peer());
+                newGraph.addEdge(discoveredNode, connection.peer(), (long) connection.distance());
+            }
+        }
+        this.graph = newGraph;
     }
 
     public void onRoutingRailPlaced(BlockPos pos, Level level) {

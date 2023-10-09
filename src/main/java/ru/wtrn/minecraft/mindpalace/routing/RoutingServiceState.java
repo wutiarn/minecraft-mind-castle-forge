@@ -2,6 +2,7 @@ package ru.wtrn.minecraft.mindpalace.routing;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import org.jetbrains.annotations.Nullable;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
@@ -17,8 +18,13 @@ public class RoutingServiceState {
     private HashMap<String, RoutingNode> nodesByName = new HashMap<>();
     private HashMap<BlockPos, RoutingNode> nodesByPosition = new HashMap<>();
 
-    public RoutingServiceState(Collection<RoutingNode> nodes) {
+    public RoutingServiceState(Collection<RoutingNode> nodes, @Nullable RoutingServiceState previous) {
         performUpdate(nodes);
+        if (previous != null) {
+            for (Map.Entry<String, RoutingNode> entry : previous.nodesByName.entrySet()) {
+                setName(entry.getValue().pos, entry.getKey());
+            }
+        }
     }
 
     public boolean setName(BlockPos pos, String name) {
@@ -43,7 +49,7 @@ public class RoutingServiceState {
         return nodesByPosition.values();
     }
 
-    public boolean deleteNode(BlockPos pos) {
+    public boolean removeNode(BlockPos pos) {
         RoutingNode node = nodesByPosition.get(pos);
         if (node == null) {
             return false;

@@ -83,12 +83,7 @@ public class RoutesCommand {
     public static int listStations(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
 
-        BlockPos pos = getTargetedRoutingRailBlockPos(source);
-        if (pos == null) {
-            return 1;
-        }
-
-        boolean success = RoutingService.INSTANCE.listStations(pos, source);
+        boolean success = RoutingService.INSTANCE.listStations(source);
         if (!success) {
             return 1;
         }

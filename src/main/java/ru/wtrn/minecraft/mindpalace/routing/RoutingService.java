@@ -26,9 +26,13 @@ public class RoutingService {
         }
 
         source.sendSystemMessage(Component.literal("Rebuilding routes..."));
-        Collection<RoutingNode> discoveredNodes = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlockPos, null);
-        String debugString = discoveredNodes.stream().map(RoutingNode::toString).collect(Collectors.joining("\n"));
+        rebuildState(startBlockPos);
+        String debugString = state.getNodes().stream().map(RoutingNode::toString).collect(Collectors.joining("\n"));
         source.sendSystemMessage(Component.literal("Discovered nodes:\n" + debugString));
+    }
+
+    private void rebuildState(BlockPos startBlockPos) {
+        Collection<RoutingNode> discoveredNodes = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlockPos, null);
         state = new RoutingServiceState(discoveredNodes, state);
     }
 
@@ -41,8 +45,7 @@ public class RoutingService {
             return;
         }
         server.sendSystemMessage(Component.literal("Placed new routing rail at %s...".formatted(pos)));
-        Collection<RoutingNode> discoveredNodes = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(pos, 1);
-        state.performUpdate(discoveredNodes);
+        rebuildState(pos);
     }
 
     public void onRoutingRailRemoved(BlockPos pos, Level level) {
@@ -52,6 +55,11 @@ public class RoutingService {
         }
         server.sendSystemMessage(Component.literal("Removed routing rail at %s...".formatted(pos)));
         state.removeNode(pos);
+        @SuppressWarnings("SimplifyOptionalCallChains")
+        RoutingNode remainingNode = state.getNodes().stream().findFirst().orElse(null);
+        if (remainingNode != null) {
+            rebuildState(remainingNode.pos);
+        }
     }
 
     public boolean setName(BlockPos pos, String name, CommandSourceStack source) {
@@ -64,7 +72,7 @@ public class RoutingService {
         return true;
     }
 
-    public boolean listStations(BlockPos pos, CommandSourceStack source) {
+    public boolean listStations(CommandSourceStack source) {
         String stationsList = state.getStations()
                 .entrySet()
                 .stream()

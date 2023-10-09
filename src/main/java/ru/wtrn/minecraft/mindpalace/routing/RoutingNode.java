@@ -56,11 +56,11 @@ public class RoutingNode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RoutingNode node = (RoutingNode) o;
-        return Objects.equals(pos, node.pos) && Objects.equals(name, node.name);
+        return Objects.equals(pos, node.pos);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pos, name);
+        return Objects.hash(pos);
     }
 }

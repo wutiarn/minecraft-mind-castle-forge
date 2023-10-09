@@ -19,7 +19,15 @@ public class RoutingServiceState {
     private final HashMap<UUID, String> destinationByUserUUID = new HashMap<>();
 
     public RoutingServiceState(Collection<RoutingNode> nodes, @Nullable RoutingServiceState previous) {
-        performUpdate(nodes);
+        for (RoutingNode discoveredNode : nodes) {
+            nodesByPosition.put(discoveredNode.pos, discoveredNode);
+            graph.addVertex(discoveredNode);
+            for (Map.Entry<Direction, RoutingNode.Connection> connectionEntry : discoveredNode.connections.entrySet()) {
+                RoutingNode.Connection connection = connectionEntry.getValue();
+                graph.addVertex(connection.peer());
+                graph.addEdge(discoveredNode, connection.peer(), new RouteRailsEdge(discoveredNode, connection.peer(), connectionEntry.getKey(), connection.distance()));
+            }
+        }
         if (previous != null) {
             for (Map.Entry<String, RoutingNode> entry : previous.nodesByName.entrySet()) {
                 setName(entry.getValue().pos, entry.getKey());
@@ -60,6 +68,7 @@ public class RoutingServiceState {
         }
         graph.removeVertex(node);
         nodesByName.remove(node.name);
+        nodesByPosition.remove(pos);
         return true;
     }
 
@@ -73,18 +82,6 @@ public class RoutingServiceState {
             return null;
         }
         return shortestPathFinder.getPath(src, dst);
-    }
-
-    public void performUpdate(Collection<RoutingNode> nodes) {
-        for (RoutingNode discoveredNode : nodes) {
-            nodesByPosition.put(discoveredNode.pos, discoveredNode);
-            graph.addVertex(discoveredNode);
-            for (Map.Entry<Direction, RoutingNode.Connection> connectionEntry : discoveredNode.connections.entrySet()) {
-                RoutingNode.Connection connection = connectionEntry.getValue();
-                graph.addVertex(connection.peer());
-                graph.addEdge(discoveredNode, connection.peer(), new RouteRailsEdge(discoveredNode, connection.peer(), connectionEntry.getKey(), connection.distance()));
-            }
-        }
     }
 
     public void setUserDestination(UUID userId, String dstStationName) {

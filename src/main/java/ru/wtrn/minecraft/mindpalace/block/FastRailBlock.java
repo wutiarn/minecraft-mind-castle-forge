@@ -37,7 +37,7 @@ public class FastRailBlock extends RailBlock {
 
     @Override
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
-        if (pLevel.isClientSide() || pHand != InteractionHand.MAIN_HAND) {
+        if (pLevel.isClientSide() || pHand != InteractionHand.MAIN_HAND || !pPlayer.getMainHandItem().isEmpty()) {
             return InteractionResult.PASS;
         }
 

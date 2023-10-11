@@ -44,7 +44,7 @@ public class DimensionRoutingState {
     public void persistState() {
         try {
             String json = gson.toJson(persistentState);
-            Files.write(getPersistentFile(dimensionId), json.getBytes(), StandardOpenOption.CREATE);
+            Files.write(getPersistentFile(dimensionId), json.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (Exception e) {
             logger.error("Failed to persist routing state", e);
         }

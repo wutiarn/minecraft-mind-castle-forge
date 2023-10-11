@@ -2,6 +2,9 @@ package ru.wtrn.minecraft.mindpalace.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
@@ -12,6 +15,8 @@ import net.minecraft.world.level.block.RailBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs;
 import ru.wtrn.minecraft.mindpalace.util.RailTraverser;
@@ -26,6 +31,20 @@ public class FastRailBlock extends RailBlock {
     public void onMinecartPass(BlockState state, Level level, BlockPos pos, AbstractMinecart cart) {
         super.onMinecartPass(state, level, pos, cart);
         controlSpeed(cart, level, pos);
+    }
+
+    @Override
+    public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
+        if (pLevel.isClientSide() || pHand != InteractionHand.MAIN_HAND) {
+            return InteractionResult.PASS;
+        }
+
+        AbstractMinecart minecart = AbstractMinecart.createMinecart(pLevel, pPos.getX() + 0.5, pPos.getY() + 0.0625, pPos.getZ() + 0.5, AbstractMinecart.Type.RIDEABLE);
+        pLevel.addFreshEntity(minecart);
+        pLevel.gameEvent(GameEvent.ENTITY_PLACE, pPos, GameEvent.Context.of(pPlayer, pLevel.getBlockState(pPos)));
+        minecart.interact(pPlayer, InteractionHand.MAIN_HAND);
+
+        return InteractionResult.PASS;
     }
 
     protected void controlSpeed(AbstractMinecart cart, Level level, BlockPos pos) {

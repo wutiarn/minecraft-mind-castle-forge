@@ -71,8 +71,6 @@ public class FastRailBlock extends RailBlock {
     private void performJump(BlockPos startPos, double maxJumpPath, AbstractMinecart cart, Level level, Vec3 directionVector) {
         Direction direction = VectorUtils.toHorizontalDirection(directionVector);
         Vec3 safeTravelVector = findSafePath(startPos, direction, level, maxJumpPath);
-        // Avoid collisions if cart is on long fast rails track
-//        cart.noPhysics = maxJumpPath - VectorUtils.getHorizontalDistance(safeTravelVector) < 0.01;
 
         if (Vec3.ZERO.closerThan(safeTravelVector, 0.1)) {
             return;
@@ -105,10 +103,6 @@ public class FastRailBlock extends RailBlock {
 
             if (permittedPathLength < deltaLength) {
                 double scaleFactor = permittedPathLength / deltaLength;
-//                if (Math.abs(delta.y) > 0) {
-                    // Avoid partial height changes
-//                    scaleFactor = 0;
-//                }
                 delta = delta.scale(scaleFactor);
                 deltaLength = deltaLength * scaleFactor;
                 isCompleted = true;

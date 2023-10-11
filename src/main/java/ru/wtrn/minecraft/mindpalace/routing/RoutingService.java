@@ -17,7 +17,7 @@ import java.util.*;
 
 public class RoutingService {
     public static RoutingService INSTANCE = new RoutingService();
-    private static final Logger logger = LoggerFactory.getLogger(RoutingNode.class);
+    private static final Logger logger = LoggerFactory.getLogger(RoutingService.class);
     private final RoutingServiceState state = new RoutingServiceState(new HashMap<>(), new HashMap<>());
     private final DefaultDirectedWeightedGraph<BlockPos, RouteRailsEdge> graph = new DefaultDirectedWeightedGraph<>(RouteRailsEdge.class);
     private final ShortestPathAlgorithm<BlockPos, RouteRailsEdge> shortestPathFinder = new DijkstraShortestPath<>(graph);
@@ -26,6 +26,24 @@ public class RoutingService {
         Collection<RoutingNode> discoveredNodes = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlockPos, null);
         updateGraph(discoveredNodes);
         return discoveredNodes;
+    }
+
+    public HashMap<String, BlockPos> getStations() {
+        return state.stations();
+    }
+
+    public GraphPath<BlockPos, RouteRailsEdge> calculateRoute(BlockPos src, String dstName, Level level) {
+        GraphPath<BlockPos, RouteRailsEdge> path = calculateRoute(src, dstName);
+        if (path == null) {
+            rebuildGraph(src, level);
+            path = calculateRoute(src, dstName);
+        }
+        return path;
+    }
+
+    public boolean setStationName(BlockPos pos, String name, CommandSourceStack source) {
+        state.setStationName(pos, name);
+        return true;
     }
 
     public void onRoutingRailPlaced(BlockPos pos, Level level) {
@@ -38,23 +56,16 @@ public class RoutingService {
         graph.removeVertex(pos);
     }
 
-    public HashMap<String, BlockPos> getStations() {
-        return state.stations();
+    public String getUserDestinationStation(UUID userId) {
+        return state.getUserDestinationStationName(userId);
     }
 
-    public boolean setStationName(BlockPos pos, String name, CommandSourceStack source) {
-        state.setStationName(pos, name);
-        return true;
-    }
-
-
-    public GraphPath<BlockPos, RouteRailsEdge> calculateRoute(BlockPos src, String dstName, Level level) {
-        GraphPath<BlockPos, RouteRailsEdge> path = calculateRoute(src, dstName);
-        if (path == null) {
-            rebuildGraph(src, level);
-            path = calculateRoute(src, dstName);
+    public boolean setUserDestination(UUID userId, String dstStationName) {
+        if (state.getStationPos(dstStationName) == null) {
+            return false;
         }
-        return path;
+        state.setUserDestination(userId, dstStationName);
+        return true;
     }
 
     private GraphPath<BlockPos, RouteRailsEdge> calculateRoute(BlockPos src, String dstName) {
@@ -68,18 +79,6 @@ public class RoutingService {
             logger.warn("Route calculation from {} to {} failed", src, dst, e);
             return null;
         }
-    }
-
-    public boolean setUserDestination(UUID userId, String dstStationName) {
-        if (state.getStationPos(dstStationName) == null) {
-            return false;
-        }
-        state.setUserDestination(userId, dstStationName);
-        return true;
-    }
-
-    public String getUserDestinationStation(UUID userId) {
-        return state.getUserDestinationStationName(userId);
     }
 
     private void updateGraph(Collection<RoutingNode> nodes) {

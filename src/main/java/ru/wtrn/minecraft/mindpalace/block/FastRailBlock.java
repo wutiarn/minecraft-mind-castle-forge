@@ -3,7 +3,6 @@ package ru.wtrn.minecraft.mindpalace.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -16,7 +15,6 @@ import net.minecraft.world.level.block.RailBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs;
@@ -74,7 +72,7 @@ public class FastRailBlock extends RailBlock {
         Direction direction = VectorUtils.toHorizontalDirection(directionVector);
         Vec3 safeTravelVector = findSafePath(startPos, direction, level, maxJumpPath);
         // Avoid collisions if cart is on long fast rails track
-        cart.noPhysics = maxJumpPath - VectorUtils.getHorizontalDistance(safeTravelVector) < 0.01;
+//        cart.noPhysics = maxJumpPath - VectorUtils.getHorizontalDistance(safeTravelVector) < 0.01;
 
         if (Vec3.ZERO.closerThan(safeTravelVector, 0.1)) {
             return;
@@ -107,10 +105,10 @@ public class FastRailBlock extends RailBlock {
 
             if (permittedPathLength < deltaLength) {
                 double scaleFactor = permittedPathLength / deltaLength;
-                if (Math.abs(delta.y) > 0) {
+//                if (Math.abs(delta.y) > 0) {
                     // Avoid partial height changes
-                    scaleFactor = 0;
-                }
+//                    scaleFactor = 0;
+//                }
                 delta = delta.scale(scaleFactor);
                 deltaLength = deltaLength * scaleFactor;
                 isCompleted = true;

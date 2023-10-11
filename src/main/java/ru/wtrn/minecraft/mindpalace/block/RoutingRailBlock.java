@@ -44,6 +44,10 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
             cart.move(MoverType.SELF, travelVector);
             cart.setDeltaMovement(travelVector);
         } else {
+            ServerPlayer player = getPlayerPassenger(cart);
+            if (player != null) {
+                player.teleportTo(pos.getX(), pos.getY(), pos.getZ());
+            }
             cart.kill();
         }
     }

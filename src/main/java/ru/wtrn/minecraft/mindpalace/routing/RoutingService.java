@@ -69,6 +69,10 @@ public class RoutingService {
 
     public boolean setUserDestination(UUID userId, String dstStationName, Level level) {
         DimensionRoutingState state = getState(level);
+        if (dstStationName == null) {
+            state.persistentState.setUserDestination(userId, null);
+            return true;
+        }
         if (state.persistentState.getStationPos(dstStationName) == null) {
             return false;
         }

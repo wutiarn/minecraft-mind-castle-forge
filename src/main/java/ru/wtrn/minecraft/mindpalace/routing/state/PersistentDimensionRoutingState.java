@@ -18,6 +18,9 @@ public record PersistentDimensionRoutingState(
     }
 
     public void setUserDestination(UUID userId, String dstStationName) {
+        if (dstStationName == null) {
+            destinationByUserUUID.remove(userId);
+        }
         destinationByUserUUID.put(userId, dstStationName);
     }
 

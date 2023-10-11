@@ -16,6 +16,7 @@ public class GoCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
                 Commands.literal("go")
+                        .executes(GoCommand::clearDestinationStation)
                         .then(
                                 Commands.argument("station", new StationNameArgumentType())
                                         .executes(GoCommand::setDestinationStation)
@@ -41,6 +42,21 @@ public class GoCommand {
             return 1;
         }
         source.sendSystemMessage(Component.literal("Destination station set to " + dstStationName));
+        return 0;
+    }
+
+    public static int clearDestinationStation(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+
+        ServerPlayer player = context.getSource().getPlayer();
+        if (player == null) {
+            source.sendFailure(Component.literal("Failed to get current player"));
+            return -1;
+        }
+        UUID uuid = player.getUUID();
+
+        boolean success = RoutingService.INSTANCE.setUserDestination(uuid, null, source.getLevel());
+        source.sendSystemMessage(Component.literal("Destination station cleared"));
         return 0;
     }
 }

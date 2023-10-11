@@ -26,6 +26,7 @@ import org.jgrapht.GraphPath;
 import ru.wtrn.minecraft.mindpalace.entity.RoutingRailBlockEntity;
 import ru.wtrn.minecraft.mindpalace.routing.RouteRailsEdge;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
+import ru.wtrn.minecraft.mindpalace.util.MinecartUtil;
 import ru.wtrn.minecraft.mindpalace.util.RailTraverser;
 
 import java.util.List;
@@ -68,6 +69,7 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
         List<RouteRailsEdge> edgeList = path.getEdgeList();
         if (edgeList.isEmpty()) {
             player.sendSystemMessage(Component.literal("You arrived to " + destinationStation));
+            RoutingService.INSTANCE.setUserDestination(player.getUUID(), null, level);
             return null;
         }
 
@@ -138,10 +140,7 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
             return InteractionResult.PASS;
         }
 
-        AbstractMinecart minecart = AbstractMinecart.createMinecart(pLevel, pPos.getX(), pPos.getY() + 0.5, pPos.getZ(), AbstractMinecart.Type.RIDEABLE);
-        pLevel.addFreshEntity(minecart);
-        pLevel.gameEvent(GameEvent.ENTITY_PLACE, pPos, GameEvent.Context.of(pPlayer, pLevel.getBlockState(pPos)));
-        minecart.interact(pPlayer, InteractionHand.MAIN_HAND);
+        MinecartUtil.spawnAndRide(pLevel, pPlayer, pPos);
 
         return InteractionResult.PASS;
     }

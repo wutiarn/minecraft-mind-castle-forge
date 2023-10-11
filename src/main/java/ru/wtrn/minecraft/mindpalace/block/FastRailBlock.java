@@ -2,6 +2,7 @@ package ru.wtrn.minecraft.mindpalace.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -19,6 +20,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs;
+import ru.wtrn.minecraft.mindpalace.util.MinecartUtil;
 import ru.wtrn.minecraft.mindpalace.util.RailTraverser;
 import ru.wtrn.minecraft.mindpalace.util.math.vec.VectorUtils;
 
@@ -39,10 +41,9 @@ public class FastRailBlock extends RailBlock {
             return InteractionResult.PASS;
         }
 
-        AbstractMinecart minecart = AbstractMinecart.createMinecart(pLevel, pPos.getX() + 0.5, pPos.getY() + 0.0625, pPos.getZ() + 0.5, AbstractMinecart.Type.RIDEABLE);
-        pLevel.addFreshEntity(minecart);
-        pLevel.gameEvent(GameEvent.ENTITY_PLACE, pPos, GameEvent.Context.of(pPlayer, pLevel.getBlockState(pPos)));
-        minecart.interact(pPlayer, InteractionHand.MAIN_HAND);
+        AbstractMinecart minecart = MinecartUtil.spawnAndRide(pLevel, pPlayer, pPos);
+        Vec3i directionVector = pPlayer.getDirection().getNormal();
+        minecart.push(directionVector.getX(), directionVector.getY(), directionVector.getZ());
 
         return InteractionResult.PASS;
     }

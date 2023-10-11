@@ -20,5 +20,8 @@ public class ModCommonConfigs {
     public static final ForgeConfigSpec.ConfigValue<Double> FAST_RAILS_BASE_SPEED = BUILDER.comment("Fast rails base speed. 0.4 or less is recommended to avoid slopes and corners traverse issues.")
             .define("fast_rails_low_speed", 0.4);
 
+    public static final ForgeConfigSpec.ConfigValue<Integer> FAST_RAILS_MAX_SPEED_DISTANCE = BUILDER.comment("Count of strait rail blocks ahead required for max speed")
+            .define("fast_rails_max_speed_distance", 100);
+
     public static final ForgeConfigSpec SPEC = BUILDER.build();
 }

@@ -60,22 +60,23 @@ public class FastRailBlock extends RailBlock {
 
         Double highSpeed = ModCommonConfigs.FAST_RAILS_HIGH_SPEED.get();
         final Double baseSpeed = ModCommonConfigs.FAST_RAILS_BASE_SPEED.get();
+        final int maxSpeedDistance = ModCommonConfigs.FAST_RAILS_MAX_SPEED_DISTANCE.get();
+
+        Direction direction = VectorUtils.toHorizontalDirection(directionVector);
 
         double maxJumpPath = highSpeed - baseSpeed;
+        int straightTravelDistance = getStraightTravelDistance(pos, direction, level);
+
+        float jumpSpeedCoefficient = Math.min((straightTravelDistance / (float) maxSpeedDistance), 1);
+        maxJumpPath *= jumpSpeedCoefficient;
+
         if (maxJumpPath > 0) {
-            performJump(pos, maxJumpPath, cart, level, directionVector);
+            Vec3 safeTravelVector = findSafePath(pos, direction, level, maxJumpPath);
+            if (!Vec3.ZERO.closerThan(safeTravelVector, 0.1)) {
+                cart.move(MoverType.SELF, safeTravelVector);
+            }
         }
         cart.setDeltaMovement(directionVector.scale(baseSpeed));
-    }
-
-    private void performJump(BlockPos startPos, double maxJumpPath, AbstractMinecart cart, Level level, Vec3 directionVector) {
-        Direction direction = VectorUtils.toHorizontalDirection(directionVector);
-        Vec3 safeTravelVector = findSafePath(startPos, direction, level, maxJumpPath);
-
-        if (Vec3.ZERO.closerThan(safeTravelVector, 0.1)) {
-            return;
-        }
-        cart.move(MoverType.SELF, safeTravelVector);
     }
 
     private boolean isOccupiedByPlayer(AbstractMinecart cart) {
@@ -115,6 +116,18 @@ public class FastRailBlock extends RailBlock {
             }
         }
         return resultPath;
+    }
+
+    private int getStraightTravelDistance(BlockPos startPos, Direction direction, Level level) {
+        RailTraverser traverser = new RailTraverser(startPos, direction, level);
+        int counter = 0;
+        for (RailTraverser.NextBlock nextBlock : traverser) {
+            if (!(nextBlock.block instanceof FastRailBlock)) {
+                break;
+            }
+            counter++;
+        }
+        return counter;
     }
 
     @Override

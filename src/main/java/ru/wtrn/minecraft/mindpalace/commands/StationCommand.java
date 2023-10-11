@@ -23,32 +23,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class RoutesCommand {
+public class StationCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
-                Commands.literal("routes")
-                        .executes(RoutesCommand::refreshRoutes)
+                Commands.literal("station")
+                        .executes(StationCommand::refreshRoutes)
                         .then(
-                                Commands.literal("refresh").executes(RoutesCommand::refreshRoutes)
+                                Commands.literal("refresh").executes(StationCommand::refreshRoutes)
                         )
                         .then(
-                                Commands.literal("stations").executes(RoutesCommand::listStations)
+                                Commands.literal("list").executes(StationCommand::listStations)
                         )
                         .then(
-                                Commands.literal("setName")
+                                Commands.literal("set")
                                         .then(
                                                 Commands.argument("name", StringArgumentType.string())
-                                                        .executes(RoutesCommand::setStationName)
+                                                        .executes(StationCommand::setStationName)
                                         )
 
                         )
                         .then(
-                                Commands.literal("print")
-                                        .executes(RoutesCommand::printRoute)
+                                Commands.literal("route")
+                                        .executes(StationCommand::printRoute)
                                         .then(
                                                 Commands.argument("station", StringArgumentType.string())
-                                                        .executes(RoutesCommand::printRoute)
+                                                        .executes(StationCommand::printRoute)
                                         )
 
                         )

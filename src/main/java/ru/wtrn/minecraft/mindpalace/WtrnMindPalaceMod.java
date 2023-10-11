@@ -24,6 +24,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 import ru.wtrn.minecraft.mindpalace.block.ModBlocks;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
+import ru.wtrn.minecraft.mindpalace.commands.argument.ArgumentTypes;
 import ru.wtrn.minecraft.mindpalace.commands.argument.StationNameArgumentSerializer;
 import ru.wtrn.minecraft.mindpalace.commands.argument.StationNameArgumentType;
 import ru.wtrn.minecraft.mindpalace.config.ModClientConfigs;
@@ -39,9 +40,6 @@ public class WtrnMindPalaceMod {
     // Directly reference a slf4j logger
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static final DeferredRegister<ArgumentTypeInfo<?, ?>> ARGUMENT_TYPES =
-            DeferredRegister.create(ForgeRegistries.COMMAND_ARGUMENT_TYPES, WtrnMindPalaceMod.MOD_ID);
-
     public WtrnMindPalaceMod() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
@@ -51,6 +49,7 @@ public class WtrnMindPalaceMod {
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModEntities.register(modEventBus);
+        ArgumentTypes.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
@@ -61,17 +60,12 @@ public class WtrnMindPalaceMod {
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
-
-        StationNameArgumentSerializer stationNameArgumentSerializer = new StationNameArgumentSerializer();
-        ArgumentTypeInfos.registerByClass(StationNameArgumentType.class, stationNameArgumentSerializer);
-        ARGUMENT_TYPES.register("station_name", () -> stationNameArgumentSerializer);
-        ARGUMENT_TYPES.register(modEventBus);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         // Some common setup code
-        LOGGER.info("HELLO FROM COMMON SETUP");
-        LOGGER.info("DIRT BLOCK >> {}", ForgeRegistries.BLOCKS.getKey(Blocks.DIRT));
+//        LOGGER.info("HELLO FROM COMMON SETUP");
+//        LOGGER.info("DIRT BLOCK >> {}", ForgeRegistries.BLOCKS.getKey(Blocks.DIRT));
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {

@@ -2,6 +2,9 @@ package ru.wtrn.minecraft.mindpalace;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.api.distmarker.Dist;
@@ -16,10 +19,13 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 import ru.wtrn.minecraft.mindpalace.block.ModBlocks;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
+import ru.wtrn.minecraft.mindpalace.commands.argument.StationNameArgumentSerializer;
+import ru.wtrn.minecraft.mindpalace.commands.argument.StationNameArgumentType;
 import ru.wtrn.minecraft.mindpalace.config.ModClientConfigs;
 import ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs;
 import ru.wtrn.minecraft.mindpalace.entity.ModEntities;
@@ -32,6 +38,9 @@ public class WtrnMindPalaceMod {
     public static final String MOD_ID = "wtrnmindpalace";
     // Directly reference a slf4j logger
     private static final Logger LOGGER = LogUtils.getLogger();
+
+    public static final DeferredRegister<ArgumentTypeInfo<?, ?>> ARGUMENT_TYPES =
+            DeferredRegister.create(ForgeRegistries.COMMAND_ARGUMENT_TYPES, WtrnMindPalaceMod.MOD_ID);
 
     public WtrnMindPalaceMod() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -52,6 +61,11 @@ public class WtrnMindPalaceMod {
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
+
+        StationNameArgumentSerializer stationNameArgumentSerializer = new StationNameArgumentSerializer();
+        ArgumentTypeInfos.registerByClass(StationNameArgumentType.class, stationNameArgumentSerializer);
+        ARGUMENT_TYPES.register("station_name", () -> stationNameArgumentSerializer);
+        ARGUMENT_TYPES.register(modEventBus);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

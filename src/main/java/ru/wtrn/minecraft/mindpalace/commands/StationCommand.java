@@ -14,6 +14,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.jgrapht.GraphPath;
 import ru.wtrn.minecraft.mindpalace.block.RoutingRailBlock;
+import ru.wtrn.minecraft.mindpalace.commands.argument.StationNameArgumentType;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingNode;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingServiceState;
@@ -47,7 +48,7 @@ public class StationCommand {
                                 Commands.literal("route")
                                         .executes(StationCommand::printRoute)
                                         .then(
-                                                Commands.argument("station", StringArgumentType.string())
+                                                Commands.argument("station", new StationNameArgumentType())
                                                         .executes(StationCommand::printRoute)
                                         )
 

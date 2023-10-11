@@ -29,6 +29,7 @@ public class RoutingService {
     }
 
     public HashMap<String, BlockPos> getStations(Level level) {
+        // TODO: Support calls from client-side
         DimensionRoutingState state = getState(level);
         return state.persistentState.stations();
     }

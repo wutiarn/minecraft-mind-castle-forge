@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.world.level.Level;
@@ -23,18 +24,13 @@ public class StationNameArgumentType implements ArgumentType<String> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        Collection<String> availableStations;
-        if (context.getSource() instanceof CommandSourceStack source) {
-            availableStations = getAvailableStations(source.getLevel());
-        } else {
-            availableStations = List.of();
-        }
+        Collection<String> availableStations = getAvailableStations(Minecraft.getInstance().level);
         return SharedSuggestionProvider.suggest(availableStations, builder);
     }
 
     @Override
     public Collection<String> getExamples() {
-        return List.of();
+        return getAvailableStations(Minecraft.getInstance().level);
     }
 
     private Collection<String> getAvailableStations(Level level) {

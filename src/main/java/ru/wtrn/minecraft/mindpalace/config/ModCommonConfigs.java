@@ -16,16 +16,19 @@ public class ModCommonConfigs {
             .define("default_image_width", 3);
 
     public static final ForgeConfigSpec.ConfigValue<Double> FAST_RAILS_HIGH_SPEED = BUILDER.comment("Speed on long distances")
-            .define("fast_rails_high_speed", 2.0);
+            .define("fast_rails_high_speed", 3.0);
 
     public static final ForgeConfigSpec.ConfigValue<Double> FAST_RAILS_LOW_SPEED = BUILDER.comment("Speed on short distances")
-            .define("fast_rails_low_speed", 1.0);
+            .define("fast_rails_low_speed", 0.7);
 
     public static final ForgeConfigSpec.ConfigValue<Double> FAST_RAILS_BASE_SPEED = BUILDER.comment("Base speed for minecart. Should be 0.4 or less is recommended to avoid slopes and corners traverse issues.")
             .define("fast_rails_base_speed", 0.4);
 
-    public static final ForgeConfigSpec.ConfigValue<Integer> FAST_RAILS_MAX_SPEED_DISTANCE = BUILDER.comment("Count of strait rail blocks ahead required for max speed")
-            .define("fast_rails_max_speed_distance", 100);
+    public static final ForgeConfigSpec.ConfigValue<Integer> FAST_RAILS_MIN_SPEEDUP_DISTANCE = BUILDER.comment("Count of straight rail blocks ahead required for speedup to start")
+            .define("fast_rails_min_speedup_distance", 30);
+
+    public static final ForgeConfigSpec.ConfigValue<Integer> FAST_RAILS_MAX_SPEEDUP_DISTANCE = BUILDER.comment("Count of straight rail blocks ahead required for speedup to reach max speed")
+            .define("fast_rails_max_speedup_distance", 100);
 
     public static final ForgeConfigSpec SPEC = BUILDER.build();
 }

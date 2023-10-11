@@ -61,19 +61,23 @@ public class FastRailBlock extends RailBlock {
         final Double lowSpeed = ModCommonConfigs.FAST_RAILS_LOW_SPEED.get();
         final Double highSpeed = ModCommonConfigs.FAST_RAILS_HIGH_SPEED.get();
         final Double baseSpeed = ModCommonConfigs.FAST_RAILS_BASE_SPEED.get();
-        final int maxSpeedDistance = ModCommonConfigs.FAST_RAILS_MAX_SPEED_DISTANCE.get();
+        final int minSpeedupDistance = ModCommonConfigs.FAST_RAILS_MIN_SPEEDUP_DISTANCE.get();
+        final int maxSpeedupDistance = ModCommonConfigs.FAST_RAILS_MAX_SPEEDUP_DISTANCE.get();
 
         Direction direction = VectorUtils.toHorizontalDirection(directionVector);
 
-        double maxJumpPath = highSpeed - baseSpeed;
+        double jumpSpeed = lowSpeed - baseSpeed;
         int straightTravelDistance = getStraightTravelDistance(pos, direction, level);
 
-        float jumpSpeedCoefficient = Math.min((straightTravelDistance / (float) maxSpeedDistance), 1);
-        maxJumpPath *= jumpSpeedCoefficient;
-        maxJumpPath = Math.max(maxJumpPath, lowSpeed - baseSpeed);
+        if (straightTravelDistance > minSpeedupDistance) {
+            double speedupJumpSpeed = highSpeed - lowSpeed;
+            float jumpSpeedCoefficient = Math.min(((straightTravelDistance - minSpeedupDistance) / (float) maxSpeedupDistance), 1);
+            speedupJumpSpeed *= jumpSpeedCoefficient;
+            jumpSpeed = Math.max(jumpSpeed, speedupJumpSpeed);
+        }
 
-        if (maxJumpPath > 0) {
-            Vec3 safeTravelVector = findSafePath(pos, direction, level, maxJumpPath);
+        if (jumpSpeed > 0) {
+            Vec3 safeTravelVector = findSafePath(pos, direction, level, jumpSpeed);
             if (!Vec3.ZERO.closerThan(safeTravelVector, 0.1)) {
                 cart.move(MoverType.SELF, safeTravelVector);
             }

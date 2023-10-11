@@ -10,6 +10,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EntityBlock;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.block.RailBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -117,20 +119,30 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
             return InteractionResult.PASS;
         }
 
-        long startTimestamp = System.currentTimeMillis();
+        if (pPlayer.isShiftKeyDown()) {
+            long startTimestamp = System.currentTimeMillis();
 
-        Direction direction = pPlayer.getDirection();
-        RailTraverser.NextBlock neighbour = findNeighbourRoutingRail(pPos, direction, pLevel);
-        String foundNeighbourDetails = null;
-        Integer distance = null;
-        if (neighbour != null) {
-            foundNeighbourDetails = neighbour.pos.toString();
-            distance = neighbour.traversedBlocksCount;
+            Direction direction = pPlayer.getDirection();
+            RailTraverser.NextBlock neighbour = findNeighbourRoutingRail(pPos, direction, pLevel);
+            String foundNeighbourDetails = null;
+            Integer distance = null;
+            if (neighbour != null) {
+                foundNeighbourDetails = neighbour.pos.toString();
+                distance = neighbour.traversedBlocksCount;
+            }
+
+            long duration = System.currentTimeMillis() - startTimestamp;
+
+            pPlayer.sendSystemMessage(Component.literal("Direction %s. Found: %s. Distance: %s. Duration: %sms".formatted(direction, foundNeighbourDetails, distance, duration)));
+
+            return InteractionResult.PASS;
         }
 
-        long duration = System.currentTimeMillis() - startTimestamp;
+        AbstractMinecart minecart = AbstractMinecart.createMinecart(pLevel, pPos.getX(), pPos.getY() + 0.5, pPos.getZ(), AbstractMinecart.Type.RIDEABLE);
+        pLevel.addFreshEntity(minecart);
+        pLevel.gameEvent(GameEvent.ENTITY_PLACE, pPos, GameEvent.Context.of(pPlayer, pLevel.getBlockState(pPos)));
+        minecart.interact(pPlayer, InteractionHand.MAIN_HAND);
 
-        pPlayer.sendSystemMessage(Component.literal("Direction %s. Found: %s. Distance: %s. Duration: %sms".formatted(direction, foundNeighbourDetails, distance, duration)));
         return InteractionResult.PASS;
     }
 

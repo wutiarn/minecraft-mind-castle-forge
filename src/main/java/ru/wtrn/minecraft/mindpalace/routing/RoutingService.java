@@ -1,5 +1,6 @@
 package ru.wtrn.minecraft.mindpalace.routing;
 
+import com.google.gson.Gson;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -13,14 +14,26 @@ import org.slf4j.LoggerFactory;
 import ru.wtrn.minecraft.mindpalace.block.ModBlocks;
 import ru.wtrn.minecraft.mindpalace.block.RoutingRailBlock;
 
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class RoutingService {
     public static RoutingService INSTANCE = new RoutingService();
     private static final Logger logger = LoggerFactory.getLogger(RoutingService.class);
-    private final RoutingServiceState state = new RoutingServiceState(new HashMap<>(), new HashMap<>());
+    private static final Gson gson = new Gson();
+    private static final Path persistentStatePath = Path.of("./routing.json");
     private final DefaultDirectedWeightedGraph<BlockPos, RouteRailsEdge> graph = new DefaultDirectedWeightedGraph<>(RouteRailsEdge.class);
     private final ShortestPathAlgorithm<BlockPos, RouteRailsEdge> shortestPathFinder = new DijkstraShortestPath<>(graph);
+    private final RoutingServiceState state;
+
+    public RoutingService() {
+        this.state = loadState();
+    }
 
     public Collection<RoutingNode> rebuildGraph(BlockPos startBlockPos, Level level) {
         Collection<RoutingNode> discoveredNodes = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlockPos, null);
@@ -94,5 +107,28 @@ public class RoutingService {
 
     private RoutingRailBlock getRoutingRailBlock() {
         return (RoutingRailBlock) ModBlocks.ROUTING_RAIL_BLOCK.get();
+    }
+
+
+    public RoutingServiceState loadState() {
+        try {
+            String state = Files.readString(persistentStatePath);
+            return gson.fromJson(state, RoutingServiceState.class);
+        } catch (Exception e) {
+            logger.error("Failed to load routing state", e);
+            return new RoutingServiceState(
+                    new HashMap<>(),
+                    new HashMap<>()
+            );
+        }
+    }
+
+    public void persistState() {
+        try {
+            String json = gson.toJson(state);
+            Files.write(persistentStatePath, json.getBytes(), StandardOpenOption.WRITE);
+        } catch (Exception e) {
+            logger.error("Failed to persist routing state", e);
+        }
     }
 }

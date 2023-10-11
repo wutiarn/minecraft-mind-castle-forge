@@ -21,7 +21,11 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.jgrapht.GraphPath;
+import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
+import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import ru.wtrn.minecraft.mindpalace.entity.RoutingRailBlockEntity;
+import ru.wtrn.minecraft.mindpalace.routing.RouteRailsEdge;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingServiceState;
 import ru.wtrn.minecraft.mindpalace.util.RailTraverser;
@@ -57,19 +61,19 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
             return null;
         }
 
-        GraphPath<BlockPos, RoutingServiceState.RouteRailsEdge> path = RoutingService.INSTANCE.calculateRoute(pos, destinationStation, level);
+        GraphPath<BlockPos, RouteRailsEdge> path = RoutingService.INSTANCE.calculateRoute(pos, destinationStation, level);
         if (path == null) {
             player.sendSystemMessage(Component.literal("Failed to calculate path to station " + destinationStation));
             return null;
         }
 
-        List<RoutingServiceState.RouteRailsEdge> edgeList = path.getEdgeList();
+        List<RouteRailsEdge> edgeList = path.getEdgeList();
         if (edgeList.isEmpty()) {
             player.sendSystemMessage(Component.literal("You arrived to " + destinationStation));
             return null;
         }
 
-        RoutingServiceState.RouteRailsEdge firstEdge = edgeList.get(0);
+        RouteRailsEdge firstEdge = edgeList.get(0);
         return firstEdge.getDirection();
     }
 

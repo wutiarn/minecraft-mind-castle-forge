@@ -15,6 +15,7 @@ import net.minecraft.world.phys.HitResult;
 import org.jgrapht.GraphPath;
 import ru.wtrn.minecraft.mindpalace.block.RoutingRailBlock;
 import ru.wtrn.minecraft.mindpalace.commands.argument.StationNameArgumentType;
+import ru.wtrn.minecraft.mindpalace.routing.RouteRailsEdge;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingNode;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingServiceState;
@@ -69,7 +70,7 @@ public class StationCommand {
         ServerLevel level = source.getLevel();
 
         source.sendSystemMessage(Component.literal("Rebuilding routes..."));
-        Collection<RoutingNode> discoveredNodes = RoutingService.INSTANCE.rebuildState(startBlockPos, level);
+        Collection<RoutingNode> discoveredNodes = RoutingService.INSTANCE.rebuildGraph(startBlockPos, level);
         String debugString = discoveredNodes.stream().map(RoutingNode::toString).collect(Collectors.joining("\n"));
         source.sendSystemMessage(Component.literal("Discovered nodes:\n" + debugString));
 
@@ -133,7 +134,7 @@ public class StationCommand {
             return 1;
         }
 
-        GraphPath<BlockPos, RoutingServiceState.RouteRailsEdge> path = RoutingService.INSTANCE.calculateRoute(pos, dstStation, source.getLevel());
+        GraphPath<BlockPos, RouteRailsEdge> path = RoutingService.INSTANCE.calculateRoute(pos, dstStation, source.getLevel());
         if (path == null) {
             source.sendFailure(Component.literal("No path found to " + dstStation));
             return 1;
@@ -141,8 +142,8 @@ public class StationCommand {
         StringBuilder sb = new StringBuilder();
         sb.append("Path to station %s:".formatted(dstStation));
 
-        List<RoutingServiceState.RouteRailsEdge> vertexList = path.getEdgeList();
-        for (RoutingServiceState.RouteRailsEdge edge : vertexList) {
+        List<RouteRailsEdge> vertexList = path.getEdgeList();
+        for (RouteRailsEdge edge : vertexList) {
             BlockPos dstPos = edge.getDst();
             sb.append("\n%s %s blocks to %s/%s/%s".formatted(edge.getDirection(), edge.getDistance(), dstPos.getX(), dstPos.getY(), dstPos.getZ()));
         }

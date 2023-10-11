@@ -107,6 +107,10 @@ public class FastRailBlock extends RailBlock {
 
             if (permittedPathLength < deltaLength) {
                 double scaleFactor = permittedPathLength / deltaLength;
+                if (Math.abs(delta.y) > 0) {
+                    // Avoid partial height changes
+                    scaleFactor = 0;
+                }
                 delta = delta.scale(scaleFactor);
                 deltaLength = deltaLength * scaleFactor;
                 isCompleted = true;

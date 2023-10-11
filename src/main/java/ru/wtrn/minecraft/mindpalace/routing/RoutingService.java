@@ -1,7 +1,6 @@
 package ru.wtrn.minecraft.mindpalace.routing;
 
 import com.google.gson.Gson;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -29,7 +28,7 @@ public class RoutingService {
     private static final Path persistentStatePath = Path.of("./routing.json");
     private final DefaultDirectedWeightedGraph<BlockPos, RouteRailsEdge> graph = new DefaultDirectedWeightedGraph<>(RouteRailsEdge.class);
     private final ShortestPathAlgorithm<BlockPos, RouteRailsEdge> shortestPathFinder = new DijkstraShortestPath<>(graph);
-    private final RoutingServiceState state;
+    private final RoutingServicePersistentState state;
 
     public RoutingService() {
         this.state = loadState();
@@ -54,7 +53,7 @@ public class RoutingService {
         return path;
     }
 
-    public boolean setStationName(BlockPos pos, String name, CommandSourceStack source) {
+    public boolean setStationName(BlockPos pos, String name) {
         state.setStationName(pos, name);
         return true;
     }
@@ -110,13 +109,13 @@ public class RoutingService {
     }
 
 
-    public RoutingServiceState loadState() {
+    public RoutingServicePersistentState loadState() {
         try {
             String state = Files.readString(persistentStatePath);
-            return gson.fromJson(state, RoutingServiceState.class);
+            return gson.fromJson(state, RoutingServicePersistentState.class);
         } catch (Exception e) {
             logger.error("Failed to load routing state", e);
-            return new RoutingServiceState(
+            return new RoutingServicePersistentState(
                     new HashMap<>(),
                     new HashMap<>()
             );

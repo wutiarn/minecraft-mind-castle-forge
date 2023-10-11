@@ -5,7 +5,7 @@ import net.minecraft.core.BlockPos;
 import java.util.HashMap;
 import java.util.UUID;
 
-public record RoutingServiceState(
+public record RoutingServicePersistentState(
         HashMap<String, BlockPos> stations,
         HashMap<UUID, String> destinationByUserUUID
 ) {

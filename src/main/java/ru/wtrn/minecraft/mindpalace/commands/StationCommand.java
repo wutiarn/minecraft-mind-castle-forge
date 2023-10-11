@@ -18,7 +18,6 @@ import ru.wtrn.minecraft.mindpalace.commands.argument.StationNameArgumentType;
 import ru.wtrn.minecraft.mindpalace.routing.RouteRailsEdge;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingNode;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
-import ru.wtrn.minecraft.mindpalace.routing.RoutingServiceState;
 
 import java.util.Collection;
 import java.util.List;
@@ -88,7 +87,7 @@ public class StationCommand {
         }
 
         String name = context.getArgument("name", String.class);
-        boolean success = RoutingService.INSTANCE.setStationName(pos, name, source);
+        boolean success = RoutingService.INSTANCE.setStationName(pos, name);
         if (!success) {
             return 1;
         }

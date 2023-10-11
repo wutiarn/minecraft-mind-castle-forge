@@ -21,13 +21,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.jgrapht.GraphPath;
-import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
-import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import ru.wtrn.minecraft.mindpalace.entity.RoutingRailBlockEntity;
 import ru.wtrn.minecraft.mindpalace.routing.RouteRailsEdge;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
-import ru.wtrn.minecraft.mindpalace.routing.RoutingServiceState;
 import ru.wtrn.minecraft.mindpalace.util.RailTraverser;
 
 import java.util.List;

@@ -58,7 +58,8 @@ public class FastRailBlock extends RailBlock {
             return;
         }
 
-        Double highSpeed = ModCommonConfigs.FAST_RAILS_HIGH_SPEED.get();
+        final Double lowSpeed = ModCommonConfigs.FAST_RAILS_LOW_SPEED.get();
+        final Double highSpeed = ModCommonConfigs.FAST_RAILS_HIGH_SPEED.get();
         final Double baseSpeed = ModCommonConfigs.FAST_RAILS_BASE_SPEED.get();
         final int maxSpeedDistance = ModCommonConfigs.FAST_RAILS_MAX_SPEED_DISTANCE.get();
 
@@ -69,6 +70,7 @@ public class FastRailBlock extends RailBlock {
 
         float jumpSpeedCoefficient = Math.min((straightTravelDistance / (float) maxSpeedDistance), 1);
         maxJumpPath *= jumpSpeedCoefficient;
+        maxJumpPath = Math.max(maxJumpPath, lowSpeed - baseSpeed);
 
         if (maxJumpPath > 0) {
             Vec3 safeTravelVector = findSafePath(pos, direction, level, maxJumpPath);

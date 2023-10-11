@@ -51,7 +51,7 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
             return null;
         }
 
-        String destinationStation = RoutingService.INSTANCE.getUserDestination(player.getUUID());
+        String destinationStation = RoutingService.INSTANCE.getUserDestinationStation(player.getUUID());
         if (destinationStation == null) {
             player.sendSystemMessage(Component.literal("No destination station set. Use /go command."));
             return null;

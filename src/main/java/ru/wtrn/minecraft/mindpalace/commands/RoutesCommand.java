@@ -12,9 +12,16 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import org.jgrapht.GraphPath;
 import ru.wtrn.minecraft.mindpalace.block.RoutingRailBlock;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingNode;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
+import ru.wtrn.minecraft.mindpalace.routing.RoutingServiceState;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class RoutesCommand {
 
@@ -57,7 +64,14 @@ public class RoutesCommand {
         }
 
         long startTime = System.currentTimeMillis();
-        RoutingService.INSTANCE.rebuildGraph(startBlockPos, source);
+
+        ServerLevel level = source.getLevel();
+
+        source.sendSystemMessage(Component.literal("Rebuilding routes..."));
+        Collection<RoutingNode> discoveredNodes = RoutingService.INSTANCE.rebuildState(startBlockPos, level);
+        String debugString = discoveredNodes.stream().map(RoutingNode::toString).collect(Collectors.joining("\n"));
+        source.sendSystemMessage(Component.literal("Discovered nodes:\n" + debugString));
+
         long duration = System.currentTimeMillis() - startTime;
         source.sendSuccess(() -> Component.literal("Routes rebuild completed in %sms".formatted(duration)), true);
         return 0;
@@ -72,7 +86,7 @@ public class RoutesCommand {
         }
 
         String name = context.getArgument("name", String.class);
-        boolean success = RoutingService.INSTANCE.setName(pos, name, source);
+        boolean success = RoutingService.INSTANCE.setStationName(pos, name, source);
         if (!success) {
             return 1;
         }
@@ -82,11 +96,16 @@ public class RoutesCommand {
 
     public static int listStations(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
-
-        boolean success = RoutingService.INSTANCE.listStations(source);
-        if (!success) {
-            return 1;
-        }
+        String stationsList = RoutingService.INSTANCE.getStations()
+                .entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(it -> {
+                    BlockPos stationPos = it.getValue();
+                    return "%s @ %s/%s/%s".formatted(it.getKey(), stationPos.getX(), stationPos.getY(), stationPos.getZ());
+                })
+                .collect(Collectors.joining("\n"));
+        source.sendSystemMessage(Component.literal("Stations list:\n" + stationsList));
         return 0;
     }
 
@@ -97,7 +116,7 @@ public class RoutesCommand {
         if (pos == null) {
             return 1;
         }
-        String dstStation = null;
+        String dstStation;
          try {
             dstStation = context.getArgument("station", String.class);
         } catch (Exception e) {
@@ -106,16 +125,29 @@ public class RoutesCommand {
                  source.sendFailure(Component.literal("This command can be invoked only by player"));
                  return 1;
              }
-             dstStation = RoutingService.INSTANCE.getUserDestination(player.getUUID());
+             dstStation = RoutingService.INSTANCE.getUserDestinationStation(player.getUUID());
         };
         if (dstStation == null) {
             source.sendFailure(Component.literal("No destination station specified (in command or using /go command before)"));
             return 1;
         }
-        boolean success = RoutingService.INSTANCE.printRoute(pos, dstStation, source);
-        if (!success) {
+
+        GraphPath<BlockPos, RoutingServiceState.RouteRailsEdge> path = RoutingService.INSTANCE.calculateRoute(pos, dstStation, source.getLevel());
+        if (path == null) {
+            source.sendFailure(Component.literal("No path found to " + dstStation));
             return 1;
         }
+        StringBuilder sb = new StringBuilder();
+        sb.append("Path to station %s:".formatted(dstStation));
+
+        List<RoutingServiceState.RouteRailsEdge> vertexList = path.getEdgeList();
+        for (RoutingServiceState.RouteRailsEdge edge : vertexList) {
+            BlockPos dstPos = edge.getDst();
+            sb.append("\n%s %s blocks to %s/%s/%s".formatted(edge.getDirection(), edge.getDistance(), dstPos.getX(), dstPos.getY(), dstPos.getZ()));
+        }
+
+        source.sendSystemMessage(Component.literal(sb.toString()));
+
         return 0;
     }
 

@@ -18,11 +18,13 @@ import java.util.HashMap;
 public class DimensionRoutingState {
     private static final Gson gson = new Gson();
     private static final Logger logger = LoggerFactory.getLogger(RoutingService.class);
+    private final String dimensionId;
     public final DefaultDirectedWeightedGraph<BlockPos, RouteRailsEdge> graph = new DefaultDirectedWeightedGraph<>(RouteRailsEdge.class);
     public final ShortestPathAlgorithm<BlockPos, RouteRailsEdge> shortestPathFinder = new DijkstraShortestPath<>(graph);
     public final PersistentDimensionRoutingState persistentState;
 
     public DimensionRoutingState(String dimensionId) {
+        this.dimensionId = dimensionId;
         this.persistentState = loadState(dimensionId);
     }
 
@@ -39,10 +41,10 @@ public class DimensionRoutingState {
         }
     }
 
-    public void persistState(String dimensionId) {
+    public void persistState() {
         try {
             String json = gson.toJson(persistentState);
-            Files.write(getPersistentFile(dimensionId), json.getBytes(), StandardOpenOption.WRITE);
+            Files.write(getPersistentFile(dimensionId), json.getBytes(), StandardOpenOption.CREATE);
         } catch (Exception e) {
             logger.error("Failed to persist routing state", e);
         }
@@ -52,6 +54,7 @@ public class DimensionRoutingState {
         Path baseDir = Path.of("routing");
         //noinspection ResultOfMethodCallIgnored
         baseDir.toFile().mkdirs();
+        dimensionId = dimensionId.replace(":", "_");
         return baseDir.resolve(dimensionId + ".json");
     }
 }

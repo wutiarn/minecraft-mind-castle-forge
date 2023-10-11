@@ -47,6 +47,7 @@ public class RoutingService {
     public boolean setStationName(BlockPos pos, String name, Level level) {
         DimensionRoutingState state = getState(level);
         state.persistentState.setStationName(pos, name);
+        state.persistState();
         return true;
     }
 
@@ -72,6 +73,7 @@ public class RoutingService {
             return false;
         }
         state.persistentState.setUserDestination(userId, dstStationName);
+        state.persistState();
         return true;
     }
 

@@ -87,7 +87,7 @@ public class StationCommand {
         }
 
         String name = context.getArgument("name", String.class);
-        boolean success = RoutingService.INSTANCE.setStationName(pos, name);
+        boolean success = RoutingService.INSTANCE.setStationName(pos, name, source.getLevel());
         if (!success) {
             return 1;
         }
@@ -97,7 +97,7 @@ public class StationCommand {
 
     public static int listStations(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
-        String stationsList = RoutingService.INSTANCE.getStations()
+        String stationsList = RoutingService.INSTANCE.getStations(source.getLevel())
                 .entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByKey())
@@ -126,7 +126,7 @@ public class StationCommand {
                  source.sendFailure(Component.literal("This command can be invoked only by player"));
                  return 1;
              }
-             dstStation = RoutingService.INSTANCE.getUserDestinationStation(player.getUUID());
+             dstStation = RoutingService.INSTANCE.getUserDestinationStation(player.getUUID(), source.getLevel());
         };
         if (dstStation == null) {
             source.sendFailure(Component.literal("No destination station specified (in command or using /go command before)"));

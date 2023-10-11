@@ -1,11 +1,11 @@
-package ru.wtrn.minecraft.mindpalace.routing;
+package ru.wtrn.minecraft.mindpalace.routing.state;
 
 import net.minecraft.core.BlockPos;
 
 import java.util.HashMap;
 import java.util.UUID;
 
-public record RoutingServicePersistentState(
+public record PersistentDimensionRoutingState(
         HashMap<String, BlockPos> stations,
         HashMap<UUID, String> destinationByUserUUID
 ) {

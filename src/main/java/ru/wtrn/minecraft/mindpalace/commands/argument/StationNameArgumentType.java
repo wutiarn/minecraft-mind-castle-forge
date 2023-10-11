@@ -6,10 +6,13 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.world.level.Level;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class StationNameArgumentType implements ArgumentType<String> {
@@ -20,15 +23,21 @@ public class StationNameArgumentType implements ArgumentType<String> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return SharedSuggestionProvider.suggest(getAvailableStations(), builder);
+        Collection<String> availableStations;
+        if (context.getSource() instanceof CommandSourceStack source) {
+            availableStations = getAvailableStations(source.getLevel());
+        } else {
+            availableStations = List.of();
+        }
+        return SharedSuggestionProvider.suggest(availableStations, builder);
     }
 
     @Override
     public Collection<String> getExamples() {
-        return getAvailableStations();
+        return List.of();
     }
 
-    private Collection<String> getAvailableStations() {
-        return RoutingService.INSTANCE.getStations().keySet();
+    private Collection<String> getAvailableStations(Level level) {
+        return RoutingService.INSTANCE.getStations(level).keySet();
     }
 }

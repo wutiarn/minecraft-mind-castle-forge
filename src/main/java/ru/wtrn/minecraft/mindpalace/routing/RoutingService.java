@@ -1,60 +1,51 @@
 package ru.wtrn.minecraft.mindpalace.routing;
 
-import com.google.gson.Gson;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import org.jgrapht.GraphPath;
-import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
-import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.wtrn.minecraft.mindpalace.block.ModBlocks;
 import ru.wtrn.minecraft.mindpalace.block.RoutingRailBlock;
+import ru.wtrn.minecraft.mindpalace.routing.state.DimensionRoutingState;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RoutingService {
     public static RoutingService INSTANCE = new RoutingService();
     private static final Logger logger = LoggerFactory.getLogger(RoutingService.class);
-    private static final Gson gson = new Gson();
-    private static final Path persistentStatePath = Path.of("./routing.json");
-    private final DefaultDirectedWeightedGraph<BlockPos, RouteRailsEdge> graph = new DefaultDirectedWeightedGraph<>(RouteRailsEdge.class);
-    private final ShortestPathAlgorithm<BlockPos, RouteRailsEdge> shortestPathFinder = new DijkstraShortestPath<>(graph);
-    private final RoutingServicePersistentState state;
-
-    public RoutingService() {
-        this.state = loadState();
-    }
+    private static final ConcurrentHashMap<String, DimensionRoutingState> stateByDimension = new ConcurrentHashMap<>();
 
     public Collection<RoutingNode> rebuildGraph(BlockPos startBlockPos, Level level) {
         Collection<RoutingNode> discoveredNodes = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlockPos, null);
-        updateGraph(discoveredNodes);
+        DimensionRoutingState state = getState(level);
+        updateGraph(discoveredNodes, state);
         return discoveredNodes;
     }
 
-    public HashMap<String, BlockPos> getStations() {
-        return state.stations();
+    public HashMap<String, BlockPos> getStations(Level level) {
+        DimensionRoutingState state = getState(level);
+        return state.persistentState.stations();
     }
 
     public GraphPath<BlockPos, RouteRailsEdge> calculateRoute(BlockPos src, String dstName, Level level) {
-        GraphPath<BlockPos, RouteRailsEdge> path = calculateRoute(src, dstName);
+        DimensionRoutingState state = getState(level);
+        GraphPath<BlockPos, RouteRailsEdge> path = calculateRoute(src, dstName, state);
         if (path == null) {
             rebuildGraph(src, level);
-            path = calculateRoute(src, dstName);
+            path = calculateRoute(src, dstName, level);
         }
         return path;
     }
 
-    public boolean setStationName(BlockPos pos, String name) {
-        state.setStationName(pos, name);
+    public boolean setStationName(BlockPos pos, String name, Level level) {
+        DimensionRoutingState state = getState(level);
+        state.persistentState.setStationName(pos, name);
         return true;
     }
 
@@ -65,69 +56,54 @@ public class RoutingService {
 
     public void onRoutingRailRemoved(BlockPos pos, Level level) {
         logger.info("Removed routing rail at {}", pos);
-        graph.removeVertex(pos);
+        DimensionRoutingState state = getState(level);
+        state.graph.removeVertex(pos);
     }
 
-    public String getUserDestinationStation(UUID userId) {
-        return state.getUserDestinationStationName(userId);
+    public String getUserDestinationStation(UUID userId, Level level) {
+        DimensionRoutingState state = getState(level);
+        return state.persistentState.getUserDestinationStationName(userId);
     }
 
-    public boolean setUserDestination(UUID userId, String dstStationName) {
-        if (state.getStationPos(dstStationName) == null) {
+    public boolean setUserDestination(UUID userId, String dstStationName, Level level) {
+        DimensionRoutingState state = getState(level);
+        if (state.persistentState.getStationPos(dstStationName) == null) {
             return false;
         }
-        state.setUserDestination(userId, dstStationName);
+        state.persistentState.setUserDestination(userId, dstStationName);
         return true;
     }
 
-    private GraphPath<BlockPos, RouteRailsEdge> calculateRoute(BlockPos src, String dstName) {
-        BlockPos dst = state.stations().get(dstName);
+    private GraphPath<BlockPos, RouteRailsEdge> calculateRoute(BlockPos src, String dstName, DimensionRoutingState state) {
+        BlockPos dst = state.persistentState.stations().get(dstName);
         if (dst == null) {
             return null;
         }
         try {
-            return shortestPathFinder.getPath(src, dst);
+            return state.shortestPathFinder.getPath(src, dst);
         } catch (Exception e) {
             logger.warn("Route calculation from {} to {} failed", src, dst, e);
             return null;
         }
     }
 
-    private void updateGraph(Collection<RoutingNode> nodes) {
+    private void updateGraph(Collection<RoutingNode> nodes, DimensionRoutingState state) {
         for (RoutingNode discoveredNode : nodes) {
-            graph.addVertex(discoveredNode.pos);
+            state.graph.addVertex(discoveredNode.pos);
             for (Map.Entry<Direction, RoutingNode.Connection> connectionEntry : discoveredNode.connections.entrySet()) {
                 RoutingNode.Connection connection = connectionEntry.getValue();
-                graph.addVertex(connection.peer().pos);
-                graph.addEdge(discoveredNode.pos, connection.peer().pos, new RouteRailsEdge(discoveredNode.pos, connection.peer().pos, connectionEntry.getKey(), connection.distance()));
+                state.graph.addVertex(connection.peer().pos);
+                state.graph.addEdge(discoveredNode.pos, connection.peer().pos, new RouteRailsEdge(discoveredNode.pos, connection.peer().pos, connectionEntry.getKey(), connection.distance()));
             }
         }
     }
 
+    private DimensionRoutingState getState(Level level) {
+        String dimensionId = level.dimension().location().toString().replace("_", "");
+        return stateByDimension.computeIfAbsent(dimensionId, DimensionRoutingState::new);
+    }
+
     private RoutingRailBlock getRoutingRailBlock() {
         return (RoutingRailBlock) ModBlocks.ROUTING_RAIL_BLOCK.get();
-    }
-
-
-    public RoutingServicePersistentState loadState() {
-        try {
-            String state = Files.readString(persistentStatePath);
-            return gson.fromJson(state, RoutingServicePersistentState.class);
-        } catch (Exception e) {
-            logger.error("Failed to load routing state", e);
-            return new RoutingServicePersistentState(
-                    new HashMap<>(),
-                    new HashMap<>()
-            );
-        }
-    }
-
-    public void persistState() {
-        try {
-            String json = gson.toJson(state);
-            Files.write(persistentStatePath, json.getBytes(), StandardOpenOption.WRITE);
-        } catch (Exception e) {
-            logger.error("Failed to persist routing state", e);
-        }
     }
 }

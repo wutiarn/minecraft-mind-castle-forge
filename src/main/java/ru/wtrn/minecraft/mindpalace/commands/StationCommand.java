@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 public class StationCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        StationNameArgumentType stationNameArgumentType = new StationNameArgumentType();
         dispatcher.register(
                 Commands.literal("station")
                         .executes(StationCommand::refreshRoutes)
@@ -47,7 +48,7 @@ public class StationCommand {
                         .then(
                                 Commands.literal("remove")
                                         .then(
-                                                Commands.argument("name", StringArgumentType.string())
+                                                Commands.argument("name", stationNameArgumentType)
                                                         .executes(StationCommand::removeStation)
                                         )
 
@@ -56,7 +57,7 @@ public class StationCommand {
                                 Commands.literal("route")
                                         .executes(StationCommand::printRoute)
                                         .then(
-                                                Commands.argument("station", new StationNameArgumentType())
+                                                Commands.argument("station", stationNameArgumentType)
                                                         .executes(StationCommand::printRoute)
                                         )
 

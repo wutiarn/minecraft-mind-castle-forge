@@ -18,7 +18,7 @@ import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class StationListPacket {
@@ -30,7 +30,7 @@ public class StationListPacket {
     }
 
     public static void sendStationsToPlayer(ServerPlayer player) {
-        HashMap<String, BlockPos> stations = RoutingService.INSTANCE.getStations(player.level());
+        Map<String, BlockPos> stations = RoutingService.INSTANCE.getStations(player.level());
         StationListPacket packet = new StationListPacket(stations.keySet());
         ModPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }

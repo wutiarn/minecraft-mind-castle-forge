@@ -1,6 +1,9 @@
 package ru.wtrn.minecraft.mindpalace.routing.state;
 
+import com.google.common.collect.HashBiMap;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
 import net.minecraft.core.BlockPos;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
@@ -16,7 +19,9 @@ import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 
 public class DimensionRoutingState {
-    private static final Gson gson = new Gson();
+    private static final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(HashBiMap.class, (InstanceCreator<HashBiMap<?, ?>>) type -> HashBiMap.create())
+            .create();
     private static final Logger logger = LoggerFactory.getLogger(RoutingService.class);
     public final DefaultDirectedWeightedGraph<BlockPos, RouteRailsEdge> graph = new DefaultDirectedWeightedGraph<>(RouteRailsEdge.class);
     public final ShortestPathAlgorithm<BlockPos, RouteRailsEdge> shortestPathFinder = new DijkstraShortestPath<>(graph);
@@ -35,7 +40,7 @@ public class DimensionRoutingState {
         } catch (Exception e) {
             logger.error("Failed to load routing state", e);
             return new PersistentDimensionRoutingState(
-                    new HashMap<>(),
+                    HashBiMap.create(),
                     new HashMap<>()
             );
         }

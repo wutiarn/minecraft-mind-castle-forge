@@ -15,6 +15,7 @@ import ru.wtrn.minecraft.mindpalace.block.ModBlocks;
 import ru.wtrn.minecraft.mindpalace.block.RoutingRailBlock;
 import ru.wtrn.minecraft.mindpalace.net.packets.StationListPacket;
 import ru.wtrn.minecraft.mindpalace.routing.state.DimensionRoutingState;
+import ru.wtrn.minecraft.mindpalace.util.BroadcastUtils;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
@@ -27,13 +28,14 @@ public class RoutingService {
     private static final ConcurrentHashMap<String, DimensionRoutingState> stateByDimension = new ConcurrentHashMap<>();
 
     public Collection<RoutingNode> rebuildGraph(BlockPos startBlockPos, Level level) {
+        MinecraftServer server = Objects.requireNonNull(level.getServer());
+        BroadcastUtils.broadcastMessage(server, "Rebuilding routes...");
         long startTime = System.currentTimeMillis();
         Collection<RoutingNode> discoveredNodes = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlockPos, null);
         DimensionRoutingState state = getState(level);
         updateGraph(discoveredNodes, state);
         long duration = System.currentTimeMillis() - startTime;
-        Objects.requireNonNull(level.getServer()).getPlayerList()
-                .broadcastSystemMessage(Component.literal("Routes rebuild completed in %sms".formatted(duration)), false);
+        BroadcastUtils.broadcastMessage(server, "Routes rebuild completed in %sms".formatted(duration));
         return discoveredNodes;
     }
 
@@ -74,7 +76,6 @@ public class RoutingService {
 
     public void onRoutingRailPlaced(BlockPos pos, Level level) {
         logger.info("Placed new routing rail at {}", pos);
-        rebuildGraph(pos, level);
     }
 
     public void onRoutingRailRemoved(BlockPos pos, Level level) {
@@ -120,16 +121,7 @@ public class RoutingService {
     }
 
     private void updateGraph(Collection<RoutingNode> nodes, DimensionRoutingState state) {
-        for (RoutingNode discoveredNode : nodes) {
-            state.graph.addVertex(discoveredNode.pos);
-            for (Map.Entry<Direction, RoutingNode.Connection> connectionEntry : discoveredNode.connections.entrySet()) {
-                RoutingNode.Connection connection = connectionEntry.getValue();
-                state.graph.addVertex(connection.peer().pos);
-                RouteRailsEdge edge = new RouteRailsEdge(discoveredNode.pos, connection.peer().pos, connectionEntry.getKey(), connection.distance());
-                state.graph.setEdgeWeight(edge, connection.distance());
-                state.graph.addEdge(discoveredNode.pos, connection.peer().pos, edge);
-            }
-        }
+       state.updateGraph(nodes);
     }
 
     private DimensionRoutingState getState(Level level) {

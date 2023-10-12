@@ -11,9 +11,8 @@ import java.util.Objects;
 
 public class RoutingNode {
     private final Logger logger = LoggerFactory.getLogger(RoutingNode.class);
-    BlockPos pos;
-    String name;
-    Map<Direction, Connection> connections = new HashMap<>();
+    public BlockPos pos;
+    public Map<Direction, Connection> connections = new HashMap<>();
 
     public RoutingNode(BlockPos pos) {
         this.pos = pos;
@@ -30,10 +29,6 @@ public class RoutingNode {
 
     public BlockPos getPos() {
         return pos;
-    }
-
-    public String getName() {
-        return name;
     }
 
     @Override

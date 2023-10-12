@@ -121,7 +121,9 @@ public class RoutingService {
             for (Map.Entry<Direction, RoutingNode.Connection> connectionEntry : discoveredNode.connections.entrySet()) {
                 RoutingNode.Connection connection = connectionEntry.getValue();
                 state.graph.addVertex(connection.peer().pos);
-                state.graph.addEdge(discoveredNode.pos, connection.peer().pos, new RouteRailsEdge(discoveredNode.pos, connection.peer().pos, connectionEntry.getKey(), connection.distance()));
+                RouteRailsEdge edge = new RouteRailsEdge(discoveredNode.pos, connection.peer().pos, connectionEntry.getKey(), connection.distance());
+                state.graph.setEdgeWeight(edge, connection.distance());
+                state.graph.addEdge(discoveredNode.pos, connection.peer().pos, edge);
             }
         }
     }

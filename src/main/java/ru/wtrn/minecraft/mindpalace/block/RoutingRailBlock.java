@@ -77,6 +77,15 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
             return null;
         }
 
+        StringBuilder sb = new StringBuilder();
+
+        String stationName = RoutingService.INSTANCE.getStationName(level, pos);
+        if (stationName != null) {
+            sb.append("This is ").append(stationName).append(". ");
+        }
+        sb.append("%s blocks remaining until destination (%s)".formatted((int) path.getWeight(), destinationStation));
+        player.sendSystemMessage(Component.literal(sb.toString()));
+
         RouteRailsEdge firstEdge = edgeList.get(0);
         return firstEdge.getDirection();
     }

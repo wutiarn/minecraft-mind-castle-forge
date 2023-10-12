@@ -3,6 +3,7 @@ package ru.wtrn.minecraft.mindpalace.routing;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.WeightedIntrusiveEdgesSpecifics;
 
 import java.util.Objects;
 
@@ -43,11 +44,6 @@ public class RouteRailsEdge extends DefaultWeightedEdge {
     @Override
     protected Object getTarget() {
         return dst;
-    }
-
-    @Override
-    protected double getWeight() {
-        return distance;
     }
 
     @Override

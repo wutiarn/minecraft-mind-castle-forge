@@ -2,6 +2,9 @@ package ru.wtrn.minecraft.mindpalace.routing;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
@@ -15,10 +18,7 @@ import ru.wtrn.minecraft.mindpalace.routing.state.DimensionRoutingState;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RoutingService {
@@ -27,9 +27,13 @@ public class RoutingService {
     private static final ConcurrentHashMap<String, DimensionRoutingState> stateByDimension = new ConcurrentHashMap<>();
 
     public Collection<RoutingNode> rebuildGraph(BlockPos startBlockPos, Level level) {
+        long startTime = System.currentTimeMillis();
         Collection<RoutingNode> discoveredNodes = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlockPos, null);
         DimensionRoutingState state = getState(level);
         updateGraph(discoveredNodes, state);
+        long duration = System.currentTimeMillis() - startTime;
+        Objects.requireNonNull(level.getServer()).getPlayerList()
+                .broadcastSystemMessage(Component.literal("Routes rebuild completed in %sms".formatted(duration)), false);
         return discoveredNodes;
     }
 

@@ -73,8 +73,6 @@ public class StationCommand {
             return 1;
         }
 
-        long startTime = System.currentTimeMillis();
-
         ServerLevel level = source.getLevel();
 
         source.sendSystemMessage(Component.literal("Rebuilding routes..."));
@@ -82,8 +80,6 @@ public class StationCommand {
         String debugString = discoveredNodes.stream().map(RoutingNode::toString).collect(Collectors.joining("\n"));
         source.sendSystemMessage(Component.literal("Discovered nodes:\n" + debugString));
 
-        long duration = System.currentTimeMillis() - startTime;
-        source.sendSuccess(() -> Component.literal("Routes rebuild completed in %sms".formatted(duration)), true);
         return 0;
     }
 

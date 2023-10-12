@@ -32,8 +32,8 @@ public record PersistentDimensionRoutingState(
     }
 
     @Nullable
-    public String getStationName(BlockPos name) {
-        return stations.inverse().get(name);
+    public String getStationName(BlockPos pos) {
+        return stations.inverse().get(pos);
     }
 
     public void setUserDestination(UUID userId, String dstStationName) {

@@ -13,6 +13,7 @@ import ru.wtrn.minecraft.mindpalace.block.RoutingRailBlock;
 import ru.wtrn.minecraft.mindpalace.net.packets.StationListPacket;
 import ru.wtrn.minecraft.mindpalace.routing.state.DimensionRoutingState;
 
+import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,9 +34,14 @@ public class RoutingService {
     }
 
     public Map<String, BlockPos> getStations(Level level) {
-        // TODO: Support calls from client-side
         DimensionRoutingState state = getState(level);
         return state.persistentState.stations();
+    }
+
+    @Nullable
+    public String getStationName(Level level, BlockPos pos) {
+        DimensionRoutingState state = getState(level);
+        return state.persistentState.getStationName(pos);
     }
 
     public GraphPath<BlockPos, RouteRailsEdge> calculateRoute(BlockPos src, String dstName, Level level) {

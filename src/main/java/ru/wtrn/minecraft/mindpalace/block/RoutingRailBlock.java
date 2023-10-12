@@ -120,16 +120,20 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
-        if (pLevel.isClientSide() || pHand != InteractionHand.MAIN_HAND) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (level.isClientSide() || hand != InteractionHand.MAIN_HAND) {
             return InteractionResult.PASS;
         }
 
-        if (pPlayer.isShiftKeyDown()) {
+        if (player.isShiftKeyDown()) {
+            String stationName = RoutingService.INSTANCE.getStationName(level, pos);
+            if (stationName != null) {
+                player.sendSystemMessage(Component.literal("Station: %s".formatted(stationName)));
+            }
             long startTimestamp = System.currentTimeMillis();
 
-            Direction direction = pPlayer.getDirection();
-            RailTraverser.NextBlock neighbour = findNeighbourRoutingRail(pPos, direction, pLevel);
+            Direction direction = player.getDirection();
+            RailTraverser.NextBlock neighbour = findNeighbourRoutingRail(pos, direction, level);
             String foundNeighbourDetails = null;
             Integer distance = null;
             if (neighbour != null) {
@@ -139,12 +143,12 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
 
             long duration = System.currentTimeMillis() - startTimestamp;
 
-            pPlayer.sendSystemMessage(Component.literal("Direction %s. Found: %s. Distance: %s. Duration: %sms".formatted(direction, foundNeighbourDetails, distance, duration)));
+            player.sendSystemMessage(Component.literal("Direction %s. Found: %s. Distance: %s. Duration: %sms".formatted(direction, foundNeighbourDetails, distance, duration)));
 
             return InteractionResult.PASS;
         }
 
-        MinecartUtil.spawnAndRide(pLevel, pPlayer, pPos);
+        MinecartUtil.spawnAndRide(level, player, pos);
 
         return InteractionResult.PASS;
     }

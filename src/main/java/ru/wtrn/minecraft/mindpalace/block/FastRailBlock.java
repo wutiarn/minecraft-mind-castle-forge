@@ -70,7 +70,7 @@ public class FastRailBlock extends RailBlock {
         int straightTravelDistance = getStraightTravelDistance(pos, direction, level);
 
         if (straightTravelDistance > minSpeedupDistance) {
-            double speedupJumpSpeed = highSpeed - lowSpeed;
+            double speedupJumpSpeed = highSpeed - baseSpeed;
             float jumpSpeedCoefficient = Math.min(((straightTravelDistance - minSpeedupDistance) / (float) maxSpeedupDistance), 1);
             speedupJumpSpeed *= jumpSpeedCoefficient;
             jumpSpeed = Math.max(jumpSpeed, speedupJumpSpeed);

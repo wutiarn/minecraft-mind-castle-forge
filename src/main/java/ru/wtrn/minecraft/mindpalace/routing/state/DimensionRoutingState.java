@@ -5,7 +5,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
@@ -20,7 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 public class DimensionRoutingState {
     private static final Gson gson = new GsonBuilder()
@@ -35,7 +34,7 @@ public class DimensionRoutingState {
     public DimensionRoutingState(Path path) {
         this.persistentState = loadState(path);
         this.persistentPath = path;
-        resetGraph();
+        updateGraph(persistentState.getConnections());
     }
 
     public static PersistentDimensionRoutingState loadState(Path statePath) {
@@ -46,7 +45,8 @@ public class DimensionRoutingState {
             logger.error("Failed to load routing state", e);
             return new PersistentDimensionRoutingState(
                     HashBiMap.create(),
-                    new HashMap<>()
+                    new HashMap<>(),
+                    List.of()
             );
         }
     }
@@ -64,6 +64,9 @@ public class DimensionRoutingState {
 
     public void updateGraph(Collection<RoutingNodeConnection> connections) {
         resetGraph();
+        if (connections == null) {
+            return;
+        }
         for (RoutingNodeConnection connection : connections) {
             graph.addVertex(connection.src);
             graph.addVertex(connection.dst);
@@ -71,6 +74,7 @@ public class DimensionRoutingState {
             graph.setEdgeWeight(edge, connection.distance);
             graph.addEdge(connection.src, connection.dst, edge);
         }
+        this.persistentState.setConnections(connections);
     }
 
     private void resetGraph() {

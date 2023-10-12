@@ -1,22 +1,25 @@
 package ru.wtrn.minecraft.mindpalace.routing.state;
 
 import com.google.common.collect.HashBiMap;
-import com.google.gson.InstanceCreator;
 import net.minecraft.core.BlockPos;
+import ru.wtrn.minecraft.mindpalace.routing.RoutingNodeConnection;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
-public record PersistentDimensionRoutingState(
-        HashBiMap<String, BlockPos> stations,
-        HashMap<UUID, String> destinationByUserUUID
-) {
-    @SuppressWarnings("unused")
-    public PersistentDimensionRoutingState(Map<String, BlockPos> stations, HashMap<UUID, String> destinationByUserUUID) {
-        this(HashBiMap.create(stations), destinationByUserUUID);
+public final class PersistentDimensionRoutingState {
+    private final HashBiMap<String, BlockPos> stations;
+    private final HashMap<UUID, String> destinationByUserUUID;
+    private Collection<RoutingNodeConnection> connections;
+
+    public PersistentDimensionRoutingState(
+            HashBiMap<String, BlockPos> stations,
+            HashMap<UUID, String> destinationByUserUUID,
+            List<RoutingNodeConnection> connections
+    ) {
+        this.stations = stations;
+        this.destinationByUserUUID = destinationByUserUUID;
+        this.connections = connections;
     }
 
     public void setStationName(BlockPos pos, String name) {
@@ -45,5 +48,17 @@ public record PersistentDimensionRoutingState(
 
     public String getUserDestinationStationName(UUID userId) {
         return destinationByUserUUID.get(userId);
+    }
+
+    public Map<String, BlockPos> getStations() {
+        return stations;
+    }
+
+    public Collection<RoutingNodeConnection> getConnections() {
+        return connections;
+    }
+
+    public void setConnections(Collection<RoutingNodeConnection> connections) {
+        this.connections = connections;
     }
 }

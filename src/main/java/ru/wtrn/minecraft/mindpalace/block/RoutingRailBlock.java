@@ -10,7 +10,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.EntityBlock;
@@ -18,7 +17,6 @@ import net.minecraft.world.level.block.RailBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -64,7 +62,7 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
             return null;
         }
 
-        GraphPath<BlockPos, RouteRailsEdge> path = RoutingService.INSTANCE.calculateRoute(pos, destinationStation, level);
+        GraphPath<BlockPos, RouteRailsEdge> path = RoutingService.INSTANCE.calculateRouteInternal(pos, destinationStation, level);
         if (path == null) {
             player.sendSystemMessage(Component.literal("Failed to calculate path to station " + destinationStation));
             return null;

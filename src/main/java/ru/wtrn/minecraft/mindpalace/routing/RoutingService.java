@@ -29,7 +29,7 @@ public class RoutingService {
         long startTime = System.currentTimeMillis();
         Collection<RoutingNodeConnection> connections = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlockPos, null);
         DimensionRoutingState state = getState(level);
-        updateGraph(connections, state);
+        updateGraph(connections, state, level);
         long duration = System.currentTimeMillis() - startTime;
         BroadcastUtils.broadcastMessage(server, "Routes rebuild completed in %sms".formatted(duration));
         return connections;
@@ -37,7 +37,7 @@ public class RoutingService {
 
     public Map<String, BlockPos> getStations(Level level) {
         DimensionRoutingState state = getState(level);
-        return state.persistentState.stations();
+        return state.persistentState.getStations();
     }
 
     @Nullable
@@ -46,12 +46,12 @@ public class RoutingService {
         return state.persistentState.getStationName(pos);
     }
 
-    public GraphPath<BlockPos, RouteRailsEdge> calculateRoute(BlockPos src, String dstName, Level level) {
+    public GraphPath<BlockPos, RouteRailsEdge> calculateRouteInternal(BlockPos src, String dstName, Level level) {
         DimensionRoutingState state = getState(level);
-        GraphPath<BlockPos, RouteRailsEdge> path = calculateRoute(src, dstName, state);
+        GraphPath<BlockPos, RouteRailsEdge> path = calculateRouteInternal(src, dstName, state);
         if (path == null) {
             rebuildGraph(src, level);
-            path = calculateRoute(src, dstName, level);
+            path = calculateRouteInternal(src, dstName, state);
         }
         return path;
     }
@@ -103,8 +103,8 @@ public class RoutingService {
         stateByDimension.clear();
     }
 
-    private GraphPath<BlockPos, RouteRailsEdge> calculateRoute(BlockPos src, String dstName, DimensionRoutingState state) {
-        BlockPos dst = state.persistentState.stations().get(dstName);
+    private GraphPath<BlockPos, RouteRailsEdge> calculateRouteInternal(BlockPos src, String dstName, DimensionRoutingState state) {
+        BlockPos dst = state.persistentState.getStations().get(dstName);
         if (dst == null) {
             return null;
         }
@@ -116,8 +116,9 @@ public class RoutingService {
         }
     }
 
-    private void updateGraph(Collection<RoutingNodeConnection> connections, DimensionRoutingState state) {
+    private void updateGraph(Collection<RoutingNodeConnection> connections, DimensionRoutingState state, Level level) {
        state.updateGraph(connections);
+       onStateChange(level, state);
     }
 
     private DimensionRoutingState getState(Level level) {
@@ -132,7 +133,7 @@ public class RoutingService {
 
     private void onStateChange(Level level, DimensionRoutingState state) {
         state.persistState();
-        StationListPacket.sendStationsToLevel(level, state.persistentState.stations().keySet());
+        StationListPacket.sendStationsToLevel(level, state.persistentState.getStations().keySet());
     }
 
     private RoutingRailBlock getRoutingRailBlock() {

@@ -55,6 +55,13 @@ public class RoutingService {
         return true;
     }
 
+    public boolean removeStation(String name, Level level) {
+        DimensionRoutingState state = getState(level);
+        state.persistentState.removeStation(name);
+        onStateChange(level, state);
+        return true;
+    }
+
     public void onRoutingRailPlaced(BlockPos pos, Level level) {
         logger.info("Placed new routing rail at {}", pos);
         rebuildGraph(pos, level);

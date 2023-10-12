@@ -13,6 +13,10 @@ public record PersistentDimensionRoutingState(
         stations.put(name, pos);
     }
 
+    public void removeStation(String name) {
+        stations.remove(name);
+    }
+
     public BlockPos getStationPos(String name) {
         return stations.get(name);
     }

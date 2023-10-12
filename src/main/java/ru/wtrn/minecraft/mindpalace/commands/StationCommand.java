@@ -45,6 +45,14 @@ public class StationCommand {
 
                         )
                         .then(
+                                Commands.literal("remove")
+                                        .then(
+                                                Commands.argument("name", StringArgumentType.string())
+                                                        .executes(StationCommand::removeStation)
+                                        )
+
+                        )
+                        .then(
                                 Commands.literal("route")
                                         .executes(StationCommand::printRoute)
                                         .then(
@@ -92,6 +100,12 @@ public class StationCommand {
             return 1;
         }
         source.sendSuccess(() -> Component.literal("Station name set to " + name), true);
+        return 0;
+    }
+
+    public static int removeStation(CommandContext<CommandSourceStack> context) {
+        String name = context.getArgument("name", String.class);
+        RoutingService.INSTANCE.removeStation(name, context.getSource().getLevel());
         return 0;
     }
 

@@ -7,6 +7,7 @@ import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import ru.wtrn.minecraft.mindpalace.commands.GoCommand;
 import ru.wtrn.minecraft.mindpalace.commands.ImageFrameCommand;
 import ru.wtrn.minecraft.mindpalace.commands.StationCommand;
 import ru.wtrn.minecraft.mindpalace.entity.ModEntities;
+import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
 import ru.wtrn.minecraft.mindpalace.tags.ModBlockTagsProvider;
 
 public class EventsHandler {
@@ -59,6 +61,11 @@ public class EventsHandler {
             ImageFrameCommand.register(event.getDispatcher());
             StationCommand.register(event.getDispatcher());
             GoCommand.register(event.getDispatcher());
+        }
+
+        @SubscribeEvent
+        public static void onServerAboutToStart(ServerAboutToStartEvent event) {
+            RoutingService.INSTANCE.resetCache();
         }
 
         @SubscribeEvent

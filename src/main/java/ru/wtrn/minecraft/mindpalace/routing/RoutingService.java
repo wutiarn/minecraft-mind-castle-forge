@@ -84,6 +84,10 @@ public class RoutingService {
         return true;
     }
 
+    public void resetCache() {
+        stateByDimension.clear();
+    }
+
     private GraphPath<BlockPos, RouteRailsEdge> calculateRoute(BlockPos src, String dstName, DimensionRoutingState state) {
         BlockPos dst = state.persistentState.stations().get(dstName);
         if (dst == null) {

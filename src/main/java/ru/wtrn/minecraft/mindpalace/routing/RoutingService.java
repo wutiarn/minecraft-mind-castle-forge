@@ -2,7 +2,9 @@ package ru.wtrn.minecraft.mindpalace.routing;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.LevelResource;
 import org.jgrapht.GraphPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +12,7 @@ import ru.wtrn.minecraft.mindpalace.block.ModBlocks;
 import ru.wtrn.minecraft.mindpalace.block.RoutingRailBlock;
 import ru.wtrn.minecraft.mindpalace.routing.state.DimensionRoutingState;
 
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -106,8 +109,13 @@ public class RoutingService {
     }
 
     private DimensionRoutingState getState(Level level) {
-        String dimensionId = level.dimension().location().toString().replace("_", "");
-        return stateByDimension.computeIfAbsent(dimensionId, DimensionRoutingState::new);
+        MinecraftServer server = level.getServer();
+        if (server == null) {
+            throw new IllegalStateException("Routing service state is not available on client side");
+        }
+        String dimensionId = level.dimension().location().toString().replace(":", "_");
+        Path path = server.getWorldPath(new LevelResource("routing")).resolve(dimensionId + ".json");
+        return stateByDimension.computeIfAbsent(dimensionId, (ignored) -> new DimensionRoutingState(path));
     }
 
     private RoutingRailBlock getRoutingRailBlock() {

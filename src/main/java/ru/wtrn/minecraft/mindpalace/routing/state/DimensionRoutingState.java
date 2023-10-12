@@ -18,19 +18,19 @@ import java.util.HashMap;
 public class DimensionRoutingState {
     private static final Gson gson = new Gson();
     private static final Logger logger = LoggerFactory.getLogger(RoutingService.class);
-    private final String dimensionId;
     public final DefaultDirectedWeightedGraph<BlockPos, RouteRailsEdge> graph = new DefaultDirectedWeightedGraph<>(RouteRailsEdge.class);
     public final ShortestPathAlgorithm<BlockPos, RouteRailsEdge> shortestPathFinder = new DijkstraShortestPath<>(graph);
     public final PersistentDimensionRoutingState persistentState;
+    private final Path persistentPath;
 
-    public DimensionRoutingState(String dimensionId) {
-        this.dimensionId = dimensionId;
-        this.persistentState = loadState(dimensionId);
+    public DimensionRoutingState(Path path) {
+        this.persistentState = loadState(path);
+        this.persistentPath = path;
     }
 
-    public static PersistentDimensionRoutingState loadState(String dimensionId) {
+    public static PersistentDimensionRoutingState loadState(Path statePath) {
         try {
-            String state = Files.readString(getPersistentFile(dimensionId));
+            String state = Files.readString(statePath);
             return gson.fromJson(state, PersistentDimensionRoutingState.class);
         } catch (Exception e) {
             logger.error("Failed to load routing state", e);
@@ -44,17 +44,11 @@ public class DimensionRoutingState {
     public void persistState() {
         try {
             String json = gson.toJson(persistentState);
-            Files.write(getPersistentFile(dimensionId), json.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            //noinspection ResultOfMethodCallIgnored
+            persistentPath.getParent().toFile().mkdirs();
+            Files.write(persistentPath, json.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (Exception e) {
             logger.error("Failed to persist routing state", e);
         }
-    }
-
-    private static Path getPersistentFile(String dimensionId) {
-        Path baseDir = Path.of("routing");
-        //noinspection ResultOfMethodCallIgnored
-        baseDir.toFile().mkdirs();
-        dimensionId = dimensionId.replace(":", "_");
-        return baseDir.resolve(dimensionId + ".json");
     }
 }

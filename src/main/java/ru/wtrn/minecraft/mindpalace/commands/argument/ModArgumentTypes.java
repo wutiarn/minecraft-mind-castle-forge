@@ -7,7 +7,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import ru.wtrn.minecraft.mindpalace.WtrnMindPalaceMod;
 
-public class ArgumentTypes {
+public class ModArgumentTypes {
 
     public static void register(IEventBus eventBus) {
         StationNameArgumentSerializer stationNameArgumentInfo = new StationNameArgumentSerializer();

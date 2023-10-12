@@ -1,6 +1,7 @@
 package ru.wtrn.minecraft.mindpalace.events;
 
 import net.minecraft.data.DataProvider;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
@@ -18,6 +19,7 @@ import ru.wtrn.minecraft.mindpalace.commands.GoCommand;
 import ru.wtrn.minecraft.mindpalace.commands.ImageFrameCommand;
 import ru.wtrn.minecraft.mindpalace.commands.StationCommand;
 import ru.wtrn.minecraft.mindpalace.entity.ModEntities;
+import ru.wtrn.minecraft.mindpalace.net.packets.StationListPacket;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
 import ru.wtrn.minecraft.mindpalace.tags.ModBlockTagsProvider;
 
@@ -71,11 +73,13 @@ public class EventsHandler {
         @SubscribeEvent
         public static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
             logger.info("Player {} changed dimension to {}", event.getEntity().getName().getString(), event.getTo().location());
+            StationListPacket.sendStationsToPlayer((ServerPlayer) event.getEntity());
         }
 
         @SubscribeEvent
         public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
             logger.info("Player {} logged in", event.getEntity().getName().getString());
+            StationListPacket.sendStationsToPlayer((ServerPlayer) event.getEntity());
         }
     }
 }

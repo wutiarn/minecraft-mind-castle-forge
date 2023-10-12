@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.wtrn.minecraft.mindpalace.block.ModBlocks;
 import ru.wtrn.minecraft.mindpalace.block.RoutingRailBlock;
+import ru.wtrn.minecraft.mindpalace.net.packets.StationListPacket;
 import ru.wtrn.minecraft.mindpalace.routing.state.DimensionRoutingState;
 
 import java.nio.file.Path;
@@ -50,7 +51,7 @@ public class RoutingService {
     public boolean setStationName(BlockPos pos, String name, Level level) {
         DimensionRoutingState state = getState(level);
         state.persistentState.setStationName(pos, name);
-        state.persistState();
+        onStateChange(level, state);
         return true;
     }
 
@@ -80,7 +81,7 @@ public class RoutingService {
             return false;
         }
         state.persistentState.setUserDestination(userId, dstStationName);
-        state.persistState();
+        onStateChange(level, state);
         return true;
     }
 
@@ -120,6 +121,11 @@ public class RoutingService {
         String dimensionId = level.dimension().location().toString().replace(":", "_");
         Path path = server.getWorldPath(new LevelResource("routing")).resolve(dimensionId + ".json");
         return stateByDimension.computeIfAbsent(dimensionId, (ignored) -> new DimensionRoutingState(path));
+    }
+
+    private void onStateChange(Level level, DimensionRoutingState state) {
+        state.persistState();
+        StationListPacket.sendStationsToLevel(level, state.persistentState.stations().keySet());
     }
 
     private RoutingRailBlock getRoutingRailBlock() {

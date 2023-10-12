@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class StationNameArgumentType implements ArgumentType<String> {
+
+    private static Collection<String> stationNames = List.of();
+
     @Override
     public String parse(StringReader reader) throws CommandSyntaxException {
         return reader.readString();
@@ -24,16 +27,20 @@ public class StationNameArgumentType implements ArgumentType<String> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        Collection<String> availableStations = getAvailableStations(Minecraft.getInstance().level);
+        Collection<String> availableStations = getAvailableStations();
         return SharedSuggestionProvider.suggest(availableStations, builder);
     }
 
     @Override
     public Collection<String> getExamples() {
-        return getAvailableStations(Minecraft.getInstance().level);
+        return getAvailableStations();
     }
 
-    private Collection<String> getAvailableStations(Level level) {
-        return RoutingService.INSTANCE.getStations(level).keySet();
+    public static void setStationNames(Collection<String> stationNames) {
+        StationNameArgumentType.stationNames = stationNames;
+    }
+
+    private Collection<String> getAvailableStations() {
+        return stationNames;
     }
 }

@@ -6,7 +6,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 import ru.wtrn.minecraft.mindpalace.WtrnMindPalaceMod;
 import ru.wtrn.minecraft.mindpalace.net.packets.StationListPacket;
 
-public class WtrnMindPalaceModPacketHandler {
+public class ModPacketHandler {
     private static final String PROTOCOL_VERSION = "1";
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(WtrnMindPalaceMod.MOD_ID, "main"),
@@ -15,7 +15,7 @@ public class WtrnMindPalaceModPacketHandler {
             PROTOCOL_VERSION::equals
     );
 
-    private static void register() {
+    public static void register() {
         INSTANCE.registerMessage(1, StationListPacket.class, StationListPacket::encode, StationListPacket::decode, StationListPacket::handle);
     }
 

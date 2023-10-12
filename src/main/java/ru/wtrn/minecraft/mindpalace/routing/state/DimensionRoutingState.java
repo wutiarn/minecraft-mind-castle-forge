@@ -12,7 +12,7 @@ import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.wtrn.minecraft.mindpalace.routing.RouteRailsEdge;
-import ru.wtrn.minecraft.mindpalace.routing.RoutingNode;
+import ru.wtrn.minecraft.mindpalace.routing.RoutingNodeConnection;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
 
 import java.nio.file.Files;
@@ -62,17 +62,14 @@ public class DimensionRoutingState {
         }
     }
 
-    public void updateGraph(Collection<RoutingNode> nodes) {
+    public void updateGraph(Collection<RoutingNodeConnection> connections) {
         resetGraph();
-        for (RoutingNode discoveredNode : nodes) {
-            graph.addVertex(discoveredNode.pos);
-            for (Map.Entry<Direction, RoutingNode.Connection> connectionEntry : discoveredNode.connections.entrySet()) {
-                RoutingNode.Connection connection = connectionEntry.getValue();
-                graph.addVertex(connection.peer().pos);
-                RouteRailsEdge edge = new RouteRailsEdge(discoveredNode.pos, connection.peer().pos, connectionEntry.getKey(), connection.distance());
-                graph.setEdgeWeight(edge, connection.distance());
-                graph.addEdge(discoveredNode.pos, connection.peer().pos, edge);
-            }
+        for (RoutingNodeConnection connection : connections) {
+            graph.addVertex(connection.src);
+            graph.addVertex(connection.dst);
+            RouteRailsEdge edge = new RouteRailsEdge(connection.direction);
+            graph.setEdgeWeight(edge, connection.distance);
+            graph.addEdge(connection.src, connection.dst, edge);
         }
     }
 

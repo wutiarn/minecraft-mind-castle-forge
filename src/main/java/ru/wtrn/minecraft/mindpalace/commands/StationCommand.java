@@ -16,7 +16,7 @@ import org.jgrapht.GraphPath;
 import ru.wtrn.minecraft.mindpalace.block.RoutingRailBlock;
 import ru.wtrn.minecraft.mindpalace.commands.argument.StationNameArgumentType;
 import ru.wtrn.minecraft.mindpalace.routing.RouteRailsEdge;
-import ru.wtrn.minecraft.mindpalace.routing.RoutingNode;
+import ru.wtrn.minecraft.mindpalace.routing.RoutingNodeConnection;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
 
 import java.util.Collection;
@@ -76,9 +76,9 @@ public class StationCommand {
         ServerLevel level = source.getLevel();
 
         source.sendSystemMessage(Component.literal("Rebuilding routes..."));
-        Collection<RoutingNode> discoveredNodes = RoutingService.INSTANCE.rebuildGraph(startBlockPos, level);
-        String debugString = discoveredNodes.stream().map(RoutingNode::toString).collect(Collectors.joining("\n"));
-        source.sendSystemMessage(Component.literal("Discovered nodes:\n" + debugString));
+        Collection<RoutingNodeConnection> discoveredNodes = RoutingService.INSTANCE.rebuildGraph(startBlockPos, level);
+        String debugString = discoveredNodes.stream().map(RoutingNodeConnection::toString).collect(Collectors.joining("\n"));
+        source.sendSystemMessage(Component.literal("Discovered connections:\n" + debugString));
 
         return 0;
     }

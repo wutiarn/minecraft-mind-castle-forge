@@ -1,10 +1,6 @@
 package ru.wtrn.minecraft.mindpalace.routing;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
@@ -27,16 +23,16 @@ public class RoutingService {
     private static final Logger logger = LoggerFactory.getLogger(RoutingService.class);
     private static final ConcurrentHashMap<String, DimensionRoutingState> stateByDimension = new ConcurrentHashMap<>();
 
-    public Collection<RoutingNode> rebuildGraph(BlockPos startBlockPos, Level level) {
+    public Collection<RoutingNodeConnection> rebuildGraph(BlockPos startBlockPos, Level level) {
         MinecraftServer server = Objects.requireNonNull(level.getServer());
         BroadcastUtils.broadcastMessage(server, "Rebuilding routes...");
         long startTime = System.currentTimeMillis();
-        Collection<RoutingNode> discoveredNodes = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlockPos, null);
+        Collection<RoutingNodeConnection> connections = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlockPos, null);
         DimensionRoutingState state = getState(level);
-        updateGraph(discoveredNodes, state);
+        updateGraph(connections, state);
         long duration = System.currentTimeMillis() - startTime;
         BroadcastUtils.broadcastMessage(server, "Routes rebuild completed in %sms".formatted(duration));
-        return discoveredNodes;
+        return connections;
     }
 
     public Map<String, BlockPos> getStations(Level level) {
@@ -120,8 +116,8 @@ public class RoutingService {
         }
     }
 
-    private void updateGraph(Collection<RoutingNode> nodes, DimensionRoutingState state) {
-       state.updateGraph(nodes);
+    private void updateGraph(Collection<RoutingNodeConnection> connections, DimensionRoutingState state) {
+       state.updateGraph(connections);
     }
 
     private DimensionRoutingState getState(Level level) {

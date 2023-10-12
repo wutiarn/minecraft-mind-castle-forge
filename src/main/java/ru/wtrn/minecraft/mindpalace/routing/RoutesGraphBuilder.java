@@ -11,8 +11,9 @@ import java.util.*;
 public class RoutesGraphBuilder {
     private final RoutingRailBlock block;
     private final Level level;
-    private Map<BlockPos, DiscoveredNode> discoveredNodes = new HashMap<>();
-    private Queue<DiscoveredNode> pendingNodes = new LinkedList<>();
+    private final Set<BlockPos> processedNodes = new HashSet<>();
+    private final List<RoutingNodeConnection> discoveredConnections = new ArrayList<>();
+    private final Queue<PendingNode> pendingNodes = new LinkedList<>();
 
     private static final List<Direction> scannedDirections = List.of(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST);
 
@@ -21,35 +22,34 @@ public class RoutesGraphBuilder {
         this.level = level;
     }
 
-    public Collection<RoutingNode> buildGraph(BlockPos startBlockPos, Integer maxDepth) {
-        DiscoveredNode startNode = new DiscoveredNode(new RoutingNode(startBlockPos), 0);
-        discoveredNodes.put(startBlockPos, startNode);
+    public Collection<RoutingNodeConnection> buildGraph(BlockPos startBlockPos, Integer maxDepth) {
+        PendingNode startNode = new PendingNode(startBlockPos, 0);
         pendingNodes.add(startNode);
-        while (true){
-            DiscoveredNode node = pendingNodes.poll();
+        while (true) {
+            PendingNode node = pendingNodes.poll();
             if (node == null || (maxDepth != null && node.hopsFromStart > maxDepth)) {
                 break;
             }
             scanNodeNeighbors(node);
         }
-        return discoveredNodes.values().stream().map(it -> it.node).toList();
+        return discoveredConnections;
     }
 
-    private void scanNodeNeighbors(DiscoveredNode startNode) {
+    private void scanNodeNeighbors(PendingNode startNode) {
         for (Direction direction : scannedDirections) {
-            RailTraverser.NextBlock found = block.findNeighbourRoutingRail(startNode.node.pos, direction, level);
+            RailTraverser.NextBlock found = block.findNeighbourRoutingRail(startNode.pos, direction, level);
             if (found == null) {
                 continue;
             }
-            boolean newNodeDiscovered = !discoveredNodes.containsKey(found.pos);
-            DiscoveredNode foundNode = discoveredNodes.computeIfAbsent(found.pos, (pos) -> new DiscoveredNode(new RoutingNode(pos), startNode.hopsFromStart + 1));
-            startNode.node.addConnection(direction, new RoutingNode.Connection(foundNode.node, found.traversedBlocksCount));
+            boolean newNodeDiscovered = processedNodes.add(found.pos);
+            RoutingNodeConnection connection = new RoutingNodeConnection(startNode.pos, found.pos, direction, found.traversedBlocksCount);
+            discoveredConnections.add(connection);
             if (newNodeDiscovered) {
-                pendingNodes.add(foundNode);
+                pendingNodes.add(new PendingNode(found.pos, startNode.hopsFromStart + 1));
             }
         }
     }
 
-    record DiscoveredNode(RoutingNode node, int hopsFromStart) {
+    record PendingNode(BlockPos pos, int hopsFromStart) {
     }
 }

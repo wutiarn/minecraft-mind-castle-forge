@@ -74,10 +74,11 @@ public class DimensionRoutingState {
 
     public void patchGraph(Collection<RoutingNodeConnection> connections) {
         for (RoutingNodeConnection connection : connections) {
-            if (!graph.containsVertex(connection.src)) {
+            BlockPos src = connection.getSrc();
+            if (!graph.containsVertex(src)) {
                 continue;
             }
-            Set<RouteRailsEdge> outgoingEdges = graph.outgoingEdgesOf(connection.src);
+            Set<RouteRailsEdge> outgoingEdges = graph.outgoingEdgesOf(src);
             if (!outgoingEdges.isEmpty()) {
                 List<RouteRailsEdge> edgesToRemove = List.copyOf(outgoingEdges);
                 graph.removeAllEdges(edgesToRemove);
@@ -89,11 +90,13 @@ public class DimensionRoutingState {
     }
 
     private void addConnection(RoutingNodeConnection connection) {
-        graph.addVertex(connection.src);
-        graph.addVertex(connection.dst);
-        RouteRailsEdge edge = new RouteRailsEdge(connection.direction);
-        graph.setEdgeWeight(edge, connection.distance);
-        graph.addEdge(connection.src, connection.dst, edge);
+        BlockPos src = connection.getSrc();
+        graph.addVertex(src);
+        BlockPos dst = connection.getDst();
+        graph.addVertex(dst);
+        RouteRailsEdge edge = new RouteRailsEdge(connection.getDirection());
+        graph.setEdgeWeight(edge, connection.getDistance());
+        graph.addEdge(src, dst, edge);
     }
 
     private Collection<RoutingNodeConnection> dumpGraphConnections() {

@@ -76,7 +76,7 @@ public class StationCommand {
         ServerLevel level = source.getLevel();
 
         source.sendSystemMessage(Component.literal("Rebuilding routes..."));
-        Collection<RoutingNodeConnection> discoveredNodes = RoutingService.INSTANCE.rebuildGraph(startBlockPos, level);
+        Collection<RoutingNodeConnection> discoveredNodes = RoutingService.INSTANCE.rebuildGraph(startBlockPos, level, null);
         String debugString = discoveredNodes.stream().map(RoutingNodeConnection::toString).collect(Collectors.joining("\n"));
         source.sendSystemMessage(Component.literal("Discovered connections:\n" + debugString));
 

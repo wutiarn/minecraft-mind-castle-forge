@@ -23,15 +23,15 @@ public class RoutingService {
     private static final Logger logger = LoggerFactory.getLogger(RoutingService.class);
     private static final ConcurrentHashMap<String, DimensionRoutingState> stateByDimension = new ConcurrentHashMap<>();
 
-    public Collection<RoutingNodeConnection> rebuildGraph(BlockPos startBlockPos, Level level) {
+    public Collection<RoutingNodeConnection> rebuildGraph(BlockPos startBlockPos, Level level, Integer depth) {
         MinecraftServer server = Objects.requireNonNull(level.getServer());
-        BroadcastUtils.broadcastMessage(server, "Rebuilding routes...");
+        BroadcastUtils.broadcastMessage(server, "Rebuilding routes: startPos=%s/%s/%s, depth=%s".formatted(startBlockPos.getX(), startBlockPos.getY(), startBlockPos.getZ(), depth));
         long startTime = System.currentTimeMillis();
-        Collection<RoutingNodeConnection> connections = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlockPos, null);
+        Collection<RoutingNodeConnection> connections = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlockPos, depth);
         DimensionRoutingState state = getState(level);
-        updateGraph(connections, state, level);
+        updateGraph(connections, state, level, depth == null);
         long duration = System.currentTimeMillis() - startTime;
-        BroadcastUtils.broadcastMessage(server, "Routes rebuild completed in %sms".formatted(duration));
+        BroadcastUtils.broadcastMessage(server, "Routes rebuild completed in %sms. Discovered %s connection(s)".formatted(duration, connections.size()));
         return connections;
     }
 
@@ -50,7 +50,7 @@ public class RoutingService {
         DimensionRoutingState state = getState(level);
         GraphPath<BlockPos, RouteRailsEdge> path = calculateRouteInternal(src, dstName, state);
         if (path == null) {
-            rebuildGraph(src, level);
+            rebuildGraph(src, level, null);
             path = calculateRouteInternal(src, dstName, state);
         }
         return path;
@@ -72,6 +72,7 @@ public class RoutingService {
 
     public void onRoutingRailPlaced(BlockPos pos, Level level) {
         logger.info("Placed new routing rail at {}", pos);
+        rebuildGraph(pos, level, 1);
     }
 
     public void onRoutingRailRemoved(BlockPos pos, Level level) {
@@ -116,8 +117,12 @@ public class RoutingService {
         }
     }
 
-    private void updateGraph(Collection<RoutingNodeConnection> connections, DimensionRoutingState state, Level level) {
-       state.updateGraph(connections);
+    private void updateGraph(Collection<RoutingNodeConnection> connections, DimensionRoutingState state, Level level, boolean reset) {
+       if (reset) {
+           state.initGraph(connections);
+       } else {
+           state.patchGraph(connections);
+       }
        onStateChange(level, state);
     }
 

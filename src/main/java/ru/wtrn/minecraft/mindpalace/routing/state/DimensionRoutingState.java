@@ -17,9 +17,7 @@ import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class DimensionRoutingState {
     private static final Gson gson = new GsonBuilder()
@@ -34,7 +32,7 @@ public class DimensionRoutingState {
     public DimensionRoutingState(Path path) {
         this.persistentState = loadState(path);
         this.persistentPath = path;
-        updateGraph(persistentState.getConnections());
+        initGraph(persistentState.getConnections());
     }
 
     public static PersistentDimensionRoutingState loadState(Path statePath) {
@@ -53,6 +51,7 @@ public class DimensionRoutingState {
 
     public void persistState() {
         try {
+            persistentState.setConnections(dumpGraphConnections());
             String json = gson.toJson(persistentState);
             //noinspection ResultOfMethodCallIgnored
             persistentPath.getParent().toFile().mkdirs();
@@ -62,23 +61,44 @@ public class DimensionRoutingState {
         }
     }
 
-    public void updateGraph(Collection<RoutingNodeConnection> connections) {
-        resetGraph();
+    public void initGraph(Collection<RoutingNodeConnection> connections) {
+        graph = new DefaultDirectedWeightedGraph<>(RouteRailsEdge.class);
+        shortestPathFinder = new DijkstraShortestPath<>(graph);
         if (connections == null) {
             return;
         }
         for (RoutingNodeConnection connection : connections) {
-            graph.addVertex(connection.src);
-            graph.addVertex(connection.dst);
-            RouteRailsEdge edge = new RouteRailsEdge(connection.direction);
-            graph.setEdgeWeight(edge, connection.distance);
-            graph.addEdge(connection.src, connection.dst, edge);
+            addConnection(connection);
         }
-        this.persistentState.setConnections(connections);
     }
 
-    private void resetGraph() {
-        graph = new DefaultDirectedWeightedGraph<>(RouteRailsEdge.class);
-        shortestPathFinder = new DijkstraShortestPath<>(graph);
+    public void patchGraph(Collection<RoutingNodeConnection> connections) {
+        for (RoutingNodeConnection connection : connections) {
+            if (!graph.containsVertex(connection.src)) {
+                continue;
+            }
+            Set<RouteRailsEdge> outgoingEdges = graph.outgoingEdgesOf(connection.src);
+            graph.removeAllEdges(outgoingEdges);
+        }
+        for (RoutingNodeConnection connection : connections) {
+            addConnection(connection);
+        }
+    }
+
+    private void addConnection(RoutingNodeConnection connection) {
+        graph.addVertex(connection.src);
+        graph.addVertex(connection.dst);
+        RouteRailsEdge edge = new RouteRailsEdge(connection.direction);
+        graph.setEdgeWeight(edge, connection.distance);
+        graph.addEdge(connection.src, connection.dst, edge);
+    }
+
+    private Collection<RoutingNodeConnection> dumpGraphConnections() {
+        Set<RouteRailsEdge> edgeSet = graph.edgeSet();
+        ArrayList<RoutingNodeConnection> connections = new ArrayList<>(edgeSet.size());
+        for (RouteRailsEdge edge : edgeSet) {
+            connections.add(new RoutingNodeConnection(edge.getSrc(), edge.getDst(), edge.getDirection(), edge.getDistance()));
+        }
+        return connections;
     }
 }

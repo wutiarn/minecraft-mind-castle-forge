@@ -30,7 +30,7 @@ public class StationListPacket {
     }
 
     public static void sendStationsToPlayer(ServerPlayer player) {
-        Map<String, BlockPos> stations = RoutingService.INSTANCE.getStations(player.level());
+        Map<String, String> stations = RoutingService.INSTANCE.getStations(player.level());
         StationListPacket packet = new StationListPacket(stations.keySet());
         ModPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }

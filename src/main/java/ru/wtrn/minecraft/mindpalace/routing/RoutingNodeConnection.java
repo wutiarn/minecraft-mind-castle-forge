@@ -2,6 +2,7 @@ package ru.wtrn.minecraft.mindpalace.routing;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import ru.wtrn.minecraft.mindpalace.util.BlockPosUtil;
 
 import java.util.Arrays;
 
@@ -12,18 +13,18 @@ public class RoutingNodeConnection {
     private int distance;
 
     public RoutingNodeConnection(BlockPos src, BlockPos dst, Direction direction, int distance) {
-        this.src = blockPosToString(src);
-        this.dst = blockPosToString(dst);
+        this.src = BlockPosUtil.blockPosToString(src);
+        this.dst = BlockPosUtil.blockPosToString(dst);
         this.direction = direction;
         this.distance = distance;
     }
 
     public BlockPos getSrc() {
-        return blockPosFromString(src);
+        return BlockPosUtil.blockPosFromString(src);
     }
 
     public BlockPos getDst() {
-        return blockPosFromString(dst);
+        return BlockPosUtil.blockPosFromString(dst);
     }
 
     public Direction getDirection() {
@@ -39,12 +40,5 @@ public class RoutingNodeConnection {
         return src + " > " + direction + " " + distance + " > " + dst;
     }
 
-    private String blockPosToString(BlockPos pos) {
-        return pos.getX() + "/" + pos.getY() + "/" + pos.getZ();
-    }
 
-    private BlockPos blockPosFromString(String posStr) {
-        int[] split = Arrays.stream(posStr.split("/")).mapToInt(Integer::parseInt).toArray();
-        return new BlockPos(split[0], split[1], split[2]);
-    }
 }

@@ -3,17 +3,18 @@ package ru.wtrn.minecraft.mindpalace.routing.state;
 import com.google.common.collect.HashBiMap;
 import net.minecraft.core.BlockPos;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingNodeConnection;
+import ru.wtrn.minecraft.mindpalace.util.BlockPosUtil;
 
 import javax.annotation.Nullable;
 import java.util.*;
 
 public final class PersistentDimensionRoutingState {
-    private final HashBiMap<String, BlockPos> stations;
+    private final HashBiMap<String, String> stations;
     private final HashMap<UUID, String> destinationByUserUUID;
     private Collection<RoutingNodeConnection> connections;
 
     public PersistentDimensionRoutingState(
-            HashBiMap<String, BlockPos> stations,
+            HashBiMap<String, String> stations,
             HashMap<UUID, String> destinationByUserUUID,
             List<RoutingNodeConnection> connections
     ) {
@@ -23,7 +24,7 @@ public final class PersistentDimensionRoutingState {
     }
 
     public void setStationName(BlockPos pos, String name) {
-        stations.put(name, pos);
+        stations.put(name, BlockPosUtil.blockPosToString(pos));
     }
 
     public boolean removeStation(String name) {
@@ -31,12 +32,16 @@ public final class PersistentDimensionRoutingState {
     }
 
     public BlockPos getStationPos(String name) {
-        return stations.get(name);
+        String found = stations.get(name);
+        if (found == null) {
+            return null;
+        }
+        return BlockPosUtil.blockPosFromString(found);
     }
 
     @Nullable
     public String getStationName(BlockPos pos) {
-        return stations.inverse().get(pos);
+        return stations.inverse().get(BlockPosUtil.blockPosToString(pos));
     }
 
     public void setUserDestination(UUID userId, String dstStationName) {
@@ -50,7 +55,7 @@ public final class PersistentDimensionRoutingState {
         return destinationByUserUUID.get(userId);
     }
 
-    public Map<String, BlockPos> getStations() {
+    public Map<String, String> getStations() {
         return stations;
     }
 

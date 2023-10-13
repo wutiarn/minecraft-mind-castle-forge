@@ -35,7 +35,7 @@ public class RoutingService {
         return connections;
     }
 
-    public Map<String, BlockPos> getStations(Level level) {
+    public Map<String, String> getStations(Level level) {
         DimensionRoutingState state = getState(level);
         return state.persistentState.getStations();
     }
@@ -108,7 +108,7 @@ public class RoutingService {
     }
 
     private GraphPath<BlockPos, RouteRailsEdge> calculateRouteInternal(BlockPos src, String dstName, DimensionRoutingState state) {
-        BlockPos dst = state.persistentState.getStations().get(dstName);
+        BlockPos dst = state.persistentState.getStationPos(dstName);
         if (dst == null) {
             return null;
         }

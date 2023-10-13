@@ -119,8 +119,7 @@ public class StationCommand {
                 .stream()
                 .sorted(Map.Entry.comparingByKey())
                 .map(it -> {
-                    BlockPos stationPos = it.getValue();
-                    return "%s @ %s/%s/%s".formatted(it.getKey(), stationPos.getX(), stationPos.getY(), stationPos.getZ());
+                    return "%s @ %s".formatted(it.getKey(), it.getValue());
                 })
                 .collect(Collectors.joining("\n"));
         source.sendSystemMessage(Component.literal("Stations list:\n" + stationsList));

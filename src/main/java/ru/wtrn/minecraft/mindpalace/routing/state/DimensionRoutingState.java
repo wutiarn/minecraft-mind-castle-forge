@@ -78,7 +78,10 @@ public class DimensionRoutingState {
                 continue;
             }
             Set<RouteRailsEdge> outgoingEdges = graph.outgoingEdgesOf(connection.src);
-            graph.removeAllEdges(outgoingEdges);
+            if (!outgoingEdges.isEmpty()) {
+                List<RouteRailsEdge> edgesToRemove = List.copyOf(outgoingEdges);
+                graph.removeAllEdges(edgesToRemove);
+            }
         }
         for (RoutingNodeConnection connection : connections) {
             addConnection(connection);

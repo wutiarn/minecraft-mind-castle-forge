@@ -76,7 +76,7 @@ public class StationCommand {
         ServerLevel level = source.getLevel();
 
         source.sendSystemMessage(Component.literal("Rebuilding routes..."));
-        Collection<RoutingNodeConnection> discoveredNodes = RoutingService.INSTANCE.rebuildGraph(startBlockPos, level, null);
+        Collection<RoutingNodeConnection> discoveredNodes = RoutingService.INSTANCE.rebuildGraph(startBlockPos, level, null, true);
         String debugString = discoveredNodes.stream().map(RoutingNodeConnection::toString).collect(Collectors.joining("\n"));
         source.sendSystemMessage(Component.literal("Discovered connections:\n" + debugString));
 
@@ -101,8 +101,14 @@ public class StationCommand {
     }
 
     public static int removeStation(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
         String name = context.getArgument("name", String.class);
-        RoutingService.INSTANCE.removeStation(name, context.getSource().getLevel());
+        boolean removed = RoutingService.INSTANCE.removeStation(name, source.getLevel());
+        if (!removed) {
+            source.sendFailure(Component.literal("Station %s not found".formatted(name)));
+            return 1;
+        }
+        source.sendSystemMessage(Component.literal("Station %s removed".formatted(name)));
         return 0;
     }
 

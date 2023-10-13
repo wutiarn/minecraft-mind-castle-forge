@@ -11,7 +11,7 @@ import java.util.*;
 public class RoutesGraphBuilder {
     private final RoutingRailBlock block;
     private final Level level;
-    private final Set<BlockPos> processedNodes = new HashSet<>();
+    private final Set<BlockPos> discoveredNodes = new HashSet<>();
     private final List<RoutingNodeConnection> discoveredConnections = new ArrayList<>();
     private final Queue<PendingNode> pendingNodes = new LinkedList<>();
 
@@ -25,6 +25,7 @@ public class RoutesGraphBuilder {
     public Collection<RoutingNodeConnection> buildGraph(BlockPos startBlockPos, Integer maxDepth) {
         PendingNode startNode = new PendingNode(startBlockPos, 0);
         pendingNodes.add(startNode);
+        discoveredNodes.add(startNode.pos);
         while (true) {
             PendingNode node = pendingNodes.poll();
             if (node == null || (maxDepth != null && node.hopsFromStart > maxDepth)) {
@@ -41,7 +42,7 @@ public class RoutesGraphBuilder {
             if (found == null) {
                 continue;
             }
-            boolean newNodeDiscovered = processedNodes.add(found.pos);
+            boolean newNodeDiscovered = discoveredNodes.add(found.pos);
             RoutingNodeConnection connection = new RoutingNodeConnection(startNode.pos, found.pos, direction, found.traversedBlocksCount);
             discoveredConnections.add(connection);
             if (newNodeDiscovered) {

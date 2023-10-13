@@ -26,8 +26,8 @@ public final class PersistentDimensionRoutingState {
         stations.put(name, pos);
     }
 
-    public void removeStation(String name) {
-        stations.remove(name);
+    public boolean removeStation(String name) {
+        return stations.remove(name) != null;
     }
 
     public BlockPos getStationPos(String name) {

@@ -23,13 +23,13 @@ public class RoutingService {
     private static final Logger logger = LoggerFactory.getLogger(RoutingService.class);
     private static final ConcurrentHashMap<String, DimensionRoutingState> stateByDimension = new ConcurrentHashMap<>();
 
-    public Collection<RoutingNodeConnection> rebuildGraph(BlockPos startBlockPos, Level level, Integer depth) {
+    public Collection<RoutingNodeConnection> rebuildGraph(BlockPos startBlockPos, Level level, Integer depth, boolean reset) {
         MinecraftServer server = Objects.requireNonNull(level.getServer());
-        BroadcastUtils.broadcastMessage(server, "Rebuilding routes: startPos=%s/%s/%s, depth=%s".formatted(startBlockPos.getX(), startBlockPos.getY(), startBlockPos.getZ(), depth));
+        BroadcastUtils.broadcastMessage(server, "Rebuilding routes: startPos=%s/%s/%s, depth=%s, reset=%s".formatted(startBlockPos.getX(), startBlockPos.getY(), startBlockPos.getZ(), depth, reset));
         long startTime = System.currentTimeMillis();
         Collection<RoutingNodeConnection> connections = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlockPos, depth);
         DimensionRoutingState state = getState(level);
-        updateGraph(connections, state, level, depth == null);
+        updateGraph(connections, state, level, reset);
         long duration = System.currentTimeMillis() - startTime;
         BroadcastUtils.broadcastMessage(server, "Routes rebuild completed in %sms. Discovered %s connection(s)".formatted(duration, connections.size()));
         return connections;
@@ -50,7 +50,7 @@ public class RoutingService {
         DimensionRoutingState state = getState(level);
         GraphPath<BlockPos, RouteRailsEdge> path = calculateRouteInternal(src, dstName, state);
         if (path == null) {
-            rebuildGraph(src, level, null);
+            rebuildGraph(src, level, null, false);
             path = calculateRouteInternal(src, dstName, state);
         }
         return path;
@@ -65,20 +65,23 @@ public class RoutingService {
 
     public boolean removeStation(String name, Level level) {
         DimensionRoutingState state = getState(level);
-        state.persistentState.removeStation(name);
-        onStateChange(level, state);
-        return true;
+        boolean removed = state.persistentState.removeStation(name);
+        if (removed) {
+            onStateChange(level, state);
+        }
+        return removed;
     }
 
     public void onRoutingRailPlaced(BlockPos pos, Level level) {
         logger.info("Placed new routing rail at {}", pos);
-        rebuildGraph(pos, level, 1);
+        rebuildGraph(pos, level, 1, false);
     }
 
     public void onRoutingRailRemoved(BlockPos pos, Level level) {
         logger.info("Removed routing rail at {}", pos);
         DimensionRoutingState state = getState(level);
         state.graph.removeVertex(pos);
+        state.persistState();
     }
 
     public String getUserDestinationStation(UUID userId, Level level) {

@@ -12,6 +12,9 @@ public class ModCommonConfigs {
     public static final ForgeConfigSpec.ConfigValue<String> MCI_SECRET = BUILDER.comment("MCI Secret")
             .define("mci_secret", "TODO");
 
+    public static final ForgeConfigSpec.ConfigValue<String> MCI_MEMOS_TOKEN = BUILDER.comment("MCI Memos token")
+            .define("mci_memos_token", "TODO");
+
     public static final ForgeConfigSpec.ConfigValue<Integer> DEFAULT_IMAGE_WIDTH = BUILDER.comment("Default width for new images")
             .define("default_image_width", 3);
 

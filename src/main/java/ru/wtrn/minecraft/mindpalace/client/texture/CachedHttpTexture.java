@@ -29,9 +29,8 @@ public class CachedHttpTexture extends CachedTexture {
             if (!response.isSuccessful()) {
                 throw new IllegalStateException("MCI returned HTTP " + response.code() + ". Response: " + response);
             }
-            InputStream inputStream = response.body().byteStream();
-            long contentLength = response.body().contentLength();
-            BufferedImage image = ImageLoader.loadImage(inputStream, (int) contentLength);
+            byte[] bytes = response.body().bytes();
+            BufferedImage image = ImageLoader.loadImage(bytes);
             this.preparedImage = prepareImage(image);
         } catch (Exception e) {
             this.fallbackSupplier = TextureCache.ERROR_TEXTURE;

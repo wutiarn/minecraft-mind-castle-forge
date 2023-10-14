@@ -1,6 +1,7 @@
 package ru.wtrn.minecraft.mindpalace.http;
 
 import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -18,7 +19,8 @@ public interface MciHttpService {
     OkHttpClient HTTP_CLIENT = new OkHttpClient.Builder()
             .addInterceptor(chain -> {
                 Request request = chain.request().newBuilder()
-                        .header("Authorization", ModCommonConfigs.MCI_SECRET.get())
+                        .header("MCI-Shared-Secret", ModCommonConfigs.MCI_SECRET.get())
+                        .header("Authorization", ModCommonConfigs.MCI_MEMOS_TOKEN.get())
                         .build();
                 return chain.proceed(request);
             })
@@ -26,11 +28,7 @@ public interface MciHttpService {
     MciHttpService INSTANCE = new Retrofit.Builder()
             .baseUrl(MCI_SERVER_URL.get())
             .client(HTTP_CLIENT)
-            .addConverterFactory(GsonConverterFactory.create(
-                    new GsonBuilder()
-                            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                            .create()
-            ))
+            .addConverterFactory(GsonConverterFactory.create(new Gson()))
             .build()
             .create(MciHttpService.class);
 

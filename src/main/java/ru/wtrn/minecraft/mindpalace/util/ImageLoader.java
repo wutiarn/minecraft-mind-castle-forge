@@ -6,18 +6,13 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 
 public class ImageLoader {
-    public static BufferedImage loadImage(InputStream is, int contentLength) throws Exception {
-        BufferedInputStream bufferedStream = new BufferedInputStream(is, contentLength);
-        bufferedStream.mark(contentLength + 1);
-        BufferedImage image = ImageIO.read(bufferedStream);
-        bufferedStream.reset();
-        Metadata metadata = ImageMetadataReader.readMetadata(bufferedStream, contentLength);
+    public static BufferedImage loadImage(byte[] bytes) throws Exception {
+        BufferedImage image = ImageIO.read(new ByteArrayInputStream(bytes));
+        Metadata metadata = ImageMetadataReader.readMetadata(new ByteArrayInputStream(bytes));
         ExifIFD0Directory exifMetadata = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
         int orientationTag = ExifIFD0Directory.TAG_ORIENTATION;
         if (exifMetadata == null || !exifMetadata.containsTag(orientationTag)) {

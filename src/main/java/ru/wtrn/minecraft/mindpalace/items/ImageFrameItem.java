@@ -34,6 +34,9 @@ public class ImageFrameItem extends Item {
      * Called when this item is used when targeting a Block
      */
     public InteractionResult useOn(UseOnContext pContext) {
+        if (pContext.getLevel().isClientSide()) {
+            return InteractionResult.PASS;
+        }
         BlockPos blockpos = pContext.getClickedPos();
         Direction direction = pContext.getClickedFace();
         BlockPos blockpos1 = blockpos.relative(direction);

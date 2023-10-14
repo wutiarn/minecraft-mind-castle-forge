@@ -14,6 +14,10 @@ import retrofit2.http.Path;
 import ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs;
 import ru.wtrn.minecraft.mindpalace.http.model.MciImageMetadata;
 
+import java.util.concurrent.TimeUnit;
+
+import static ru.wtrn.minecraft.mindpalace.config.ModClientConfigs.MCI_CONNECT_TIMEOUT_SECONDS;
+import static ru.wtrn.minecraft.mindpalace.config.ModClientConfigs.MCI_READ_TIMEOUT_SECONDS;
 import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.MCI_SERVER_URL;
 
 public interface MciHttpService {
@@ -24,6 +28,8 @@ public interface MciHttpService {
                         .build();
                 return chain.proceed(request);
             })
+            .connectTimeout(MCI_CONNECT_TIMEOUT_SECONDS.get(), TimeUnit.SECONDS)
+            .readTimeout(MCI_READ_TIMEOUT_SECONDS.get(), TimeUnit.SECONDS)
             .build();
     MciHttpService INSTANCE = new Retrofit.Builder()
             .baseUrl(MCI_SERVER_URL.get())

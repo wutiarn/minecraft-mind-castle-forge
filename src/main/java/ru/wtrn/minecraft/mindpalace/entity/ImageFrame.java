@@ -28,10 +28,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.apache.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import retrofit2.Call;
+import retrofit2.Response;
 import ru.wtrn.minecraft.mindpalace.client.texture.CachedTexture;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
 import ru.wtrn.minecraft.mindpalace.config.ModClientConfigs;
@@ -46,6 +48,7 @@ import ru.wtrn.minecraft.mindpalace.util.math.base.Facing;
 import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
 import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.function.Supplier;
 
@@ -189,7 +192,12 @@ public class ImageFrame extends HangingEntity {
             try {
                 String memosToken = ModClientConfigs.MCI_MEMOS_TOKEN.get();
                 Call<MciImageMetadata> metadata = MciHttpService.INSTANCE.getImageMetadata(imageId, memosToken);
-                MutableComponent component = metadata.execute().body().toChatInfo();
+                Response<MciImageMetadata> response = metadata.execute();
+                if (!response.isSuccessful()) {
+                    LOGGER.error("Failed to get image {} metadata. Status {}. Body: {}", imageId, response.code(), response.errorBody());
+                    pPlayer.sendSystemMessage(Component.literal("ID #%s. Metadata fetch failed: status %s.".formatted(imageId, response.code())));
+                }
+                MutableComponent component = response.body().toChatInfo();
                 pPlayer.sendSystemMessage(component);
             } catch (Exception e) {
                 LOGGER.error("Failed to get image {} metadata", imageId, e);

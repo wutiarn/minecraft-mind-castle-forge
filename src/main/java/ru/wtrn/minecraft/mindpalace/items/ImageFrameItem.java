@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import ru.wtrn.minecraft.mindpalace.entity.ImageFrame;
 import ru.wtrn.minecraft.mindpalace.http.MciHttpService;
 import ru.wtrn.minecraft.mindpalace.entity.ModEntities;
+import ru.wtrn.minecraft.mindpalace.http.PlayerMemosTokensHolder;
 
 import java.io.IOException;
 import java.util.List;
@@ -50,8 +51,15 @@ public class ImageFrameItem extends Item {
                 long imageId;
                 boolean isLatestImage = isLatestImage(itemstack);
                 if (isLatestImage) {
+                    String memosToken = PlayerMemosTokensHolder.INSTANCE.getToken(player.getUUID());
+                    if (memosToken == null) {
+                        pContext.getPlayer().sendSystemMessage(
+                                Component.literal("Failed to find memos token for user ").append(player.getName())
+                        );
+                        return InteractionResult.FAIL;
+                    }
                     try {
-                        imageId = getLatestImageId();
+                        imageId = getLatestImageId(memosToken);
                     } catch (Exception e) {
                         pContext.getPlayer().sendSystemMessage(
                                 Component.literal("Failed to retrieve latest image id from server: " + e)
@@ -135,7 +143,7 @@ public class ImageFrameItem extends Item {
         return getImageId(stack) == 0;
     }
 
-    private long getLatestImageId() throws IOException {
-        return MciHttpService.INSTANCE.getLatestImageMetadata().execute().body().id;
+    private long getLatestImageId(String playerMemosToken) throws IOException {
+        return MciHttpService.INSTANCE.getLatestImageMetadata(playerMemosToken).execute().body().id;
     }
 }

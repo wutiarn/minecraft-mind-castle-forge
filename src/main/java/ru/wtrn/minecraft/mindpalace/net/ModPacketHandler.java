@@ -4,6 +4,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 import ru.wtrn.minecraft.mindpalace.WtrnMindPalaceMod;
+import ru.wtrn.minecraft.mindpalace.net.packets.MciAuthPacket;
 import ru.wtrn.minecraft.mindpalace.net.packets.StationListPacket;
 
 public class ModPacketHandler {
@@ -16,7 +17,9 @@ public class ModPacketHandler {
     );
 
     public static void register() {
-        INSTANCE.registerMessage(1, StationListPacket.class, StationListPacket::encode, StationListPacket::decode, StationListPacket::handle);
+        int i = 0;
+        INSTANCE.registerMessage(i++, StationListPacket.class, StationListPacket::encode, StationListPacket::decode, StationListPacket::handle);
+        INSTANCE.registerMessage(i++, MciAuthPacket.class, MciAuthPacket::encode, MciAuthPacket::decode, MciAuthPacket::handle);
     }
 
 }

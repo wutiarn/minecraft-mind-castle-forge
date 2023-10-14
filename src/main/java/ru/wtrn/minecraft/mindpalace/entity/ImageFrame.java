@@ -34,7 +34,9 @@ import org.slf4j.Logger;
 import retrofit2.Call;
 import ru.wtrn.minecraft.mindpalace.client.texture.CachedTexture;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
+import ru.wtrn.minecraft.mindpalace.config.ModClientConfigs;
 import ru.wtrn.minecraft.mindpalace.http.MciHttpService;
+import ru.wtrn.minecraft.mindpalace.http.PlayerMemosTokensHolder;
 import ru.wtrn.minecraft.mindpalace.http.model.MciImageMetadata;
 import ru.wtrn.minecraft.mindpalace.items.ImageFrameItem;
 import ru.wtrn.minecraft.mindpalace.items.ModItems;
@@ -185,7 +187,8 @@ public class ImageFrame extends HangingEntity {
                 return InteractionResult.SUCCESS;
             }
             try {
-                Call<MciImageMetadata> metadata = MciHttpService.INSTANCE.getImageMetadata(imageId);
+                String memosToken = ModClientConfigs.MCI_MEMOS_TOKEN.get();
+                Call<MciImageMetadata> metadata = MciHttpService.INSTANCE.getImageMetadata(imageId, memosToken);
                 MutableComponent component = metadata.execute().body().toChatInfo();
                 pPlayer.sendSystemMessage(component);
             } catch (Exception e) {

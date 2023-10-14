@@ -9,6 +9,7 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Path;
 import ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs;
 import ru.wtrn.minecraft.mindpalace.http.model.MciImageMetadata;
@@ -20,7 +21,6 @@ public interface MciHttpService {
             .addInterceptor(chain -> {
                 Request request = chain.request().newBuilder()
                         .header("MCI-Shared-Secret", ModCommonConfigs.MCI_SECRET.get())
-                        .header("Authorization", ModCommonConfigs.MCI_MEMOS_TOKEN.get())
                         .build();
                 return chain.proceed(request);
             })
@@ -33,8 +33,8 @@ public interface MciHttpService {
             .create(MciHttpService.class);
 
     @GET("/i/{imageId}/meta.json")
-    Call<MciImageMetadata> getImageMetadata(@Path("imageId") long imageId);
+    Call<MciImageMetadata> getImageMetadata(@Path("imageId") long imageId, @Header("Authorization") String token);
 
     @GET("/i/latest/meta.json")
-    Call<MciImageMetadata> getLatestImageMetadata();
+    Call<MciImageMetadata> getLatestImageMetadata(@Header("Authorization") String token);
 }

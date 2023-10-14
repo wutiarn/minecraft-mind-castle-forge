@@ -5,6 +5,7 @@ import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import ru.wtrn.minecraft.mindpalace.config.ModClientConfigs;
 import ru.wtrn.minecraft.mindpalace.http.MciHttpService;
 import ru.wtrn.minecraft.mindpalace.util.ImageLoader;
 
@@ -22,8 +23,10 @@ public class CachedHttpTexture extends CachedTexture {
 
     @Override
     protected void loadImage() throws Exception {
+        String memosToken = ModClientConfigs.MCI_MEMOS_TOKEN.get();
         Request request = new Request.Builder()
                 .url(url)
+                .header("Authorization", memosToken)
                 .build();
         try (Response response = MciHttpService.HTTP_CLIENT.newCall(request).execute()) {
             if (!response.isSuccessful()) {

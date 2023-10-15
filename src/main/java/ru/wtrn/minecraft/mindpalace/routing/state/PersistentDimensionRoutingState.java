@@ -1,8 +1,6 @@
 package ru.wtrn.minecraft.mindpalace.routing.state;
 
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Multimaps;
-import com.google.common.collect.SetMultimap;
 import net.minecraft.core.BlockPos;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingNodeConnection;
 import ru.wtrn.minecraft.mindpalace.util.BlockPosUtil;
@@ -14,7 +12,7 @@ public final class PersistentDimensionRoutingState {
     private final HashBiMap<String, String> stations = HashBiMap.create();
     private final HashMap<UUID, String> destinationByUserUUID = new HashMap<>();
     private Collection<RoutingNodeConnection> connections = new ArrayList<>();
-    private final SetMultimap<String, String> bridgedStations = Multimaps.newSetMultimap(new HashMap<>(), HashSet::new);
+    private final HashMap<String, HashSet<String>> bridgedStations = new HashMap<>();
     private final HashMap<String, String> launchBlockDestinationStations = new HashMap<>();
 
     public void setStationName(BlockPos pos, String name) {
@@ -62,18 +60,26 @@ public final class PersistentDimensionRoutingState {
     }
 
     public void addBridge(String firstStation, String secondStation) {
-        bridgedStations.put(firstStation, secondStation);
-        bridgedStations.put(secondStation, firstStation);
+        bridgedStations.computeIfAbsent(firstStation, (ignored) -> new HashSet<>()).add(secondStation);
+        bridgedStations.computeIfAbsent(secondStation, (ignored) -> new HashSet<>()).add(firstStation);
     }
 
     public boolean removeBridge(String firstStation, String secondStation) {
         boolean changed = false;
-        changed |= bridgedStations.remove(firstStation, secondStation);
-        changed |= bridgedStations.remove(secondStation, firstStation);
+
+        HashSet<String> firstStationBridges = bridgedStations.get(firstStation);
+        if (firstStationBridges != null) {
+            changed |= firstStationBridges.remove(secondStation);
+        }
+
+        HashSet<String> secondStationBridges = bridgedStations.get(secondStation);
+        if (secondStationBridges != null) {
+            changed |= secondStationBridges.remove(firstStation);
+        }
         return changed;
     }
 
-    public SetMultimap<String, String> getBridgedStations() {
+    public HashMap<String, HashSet<String>> getBridgedStations() {
         return bridgedStations;
     }
 

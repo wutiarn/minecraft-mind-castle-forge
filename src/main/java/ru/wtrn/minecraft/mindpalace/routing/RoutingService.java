@@ -103,6 +103,16 @@ public class RoutingService {
         return true;
     }
 
+    public void addBridge(String firstStation, String secondStation, Level level) {
+        DimensionRoutingState state = getState(level);
+        state.persistentState.addBridge(firstStation, secondStation);
+    }
+
+    public boolean removeBridge(String firstStation, String secondStation, Level level) {
+        DimensionRoutingState state = getState(level);
+        return state.persistentState.removeBridge(firstStation, secondStation);
+    }
+
     public void resetCache() {
         stateByDimension.clear();
     }

@@ -66,9 +66,15 @@ public class StationCommand {
                                 Commands.literal("bridge")
                                         .then(
                                                 Commands.argument("destination", stationNameArgumentType)
-                                                        .executes(StationCommand::printRoute)
+                                                        .executes((ctx) -> handleBridgeCommand(ctx, false))
                                         )
-
+                        )
+                        .then(
+                                Commands.literal("removeBridge")
+                                        .then(
+                                                Commands.argument("destination", stationNameArgumentType)
+                                                        .executes((ctx) -> handleBridgeCommand(ctx, true))
+                                        )
                         )
         );
     }
@@ -176,16 +182,35 @@ public class StationCommand {
         return 0;
     }
 
-    public static int setBridge(CommandContext<CommandSourceStack> context) {
+    private static int handleBridgeCommand(CommandContext<CommandSourceStack> context, boolean isRemoval) {
         CommandSourceStack source = context.getSource();
 
         BlockPos pos = getTargetedRoutingRailBlockPos(source);
         if (pos == null) {
             return 1;
         }
+        ServerLevel level = source.getLevel();
+        String srcStation = RoutingService.INSTANCE.getStationName(level, pos);
+        if (srcStation == null) {
+            source.sendFailure(Component.literal("Targeted block must have station name"));
+            return 1;
+        }
         String dstStation = context.getArgument("destination", String.class);
 
-        return 0;
+        if (isRemoval) {
+            boolean removed = RoutingService.INSTANCE.removeBridge(srcStation, dstStation, level);
+            if (removed) {
+                source.sendSystemMessage(Component.literal("Removed bridge from %s to %s".formatted(srcStation, dstStation)));
+                return 0;
+            } else {
+                source.sendFailure(Component.literal("Failed to remove bridge from %s to %s: not bridged".formatted(srcStation, dstStation)));
+                return 1;
+            }
+        } else {
+            RoutingService.INSTANCE.addBridge(srcStation, dstStation, level);
+            source.sendSystemMessage(Component.literal("Station %s bridged to %s".formatted(srcStation, dstStation)));
+            return 0;
+        }
     }
 
     private static BlockPos getTargetedRoutingRailBlockPos(CommandSourceStack source) {

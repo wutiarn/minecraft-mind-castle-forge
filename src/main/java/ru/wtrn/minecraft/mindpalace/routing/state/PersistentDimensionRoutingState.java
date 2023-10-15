@@ -1,7 +1,6 @@
 package ru.wtrn.minecraft.mindpalace.routing.state;
 
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import net.minecraft.core.BlockPos;
@@ -67,9 +66,11 @@ public final class PersistentDimensionRoutingState {
         bridgedStations.put(secondStation, firstStation);
     }
 
-    public void removeBridge(String firstStation, String secondStation) {
-        bridgedStations.remove(firstStation, secondStation);
-        bridgedStations.remove(secondStation, firstStation);
+    public boolean removeBridge(String firstStation, String secondStation) {
+        boolean changed = false;
+        changed |= bridgedStations.remove(firstStation, secondStation);
+        changed |= bridgedStations.remove(secondStation, firstStation);
+        return changed;
     }
 
     public SetMultimap<String, String> getBridgedStations() {

@@ -4,6 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -36,56 +38,92 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
 
     @Override
     public void onMinecartPass(BlockState state, Level level, BlockPos pos, AbstractMinecart cart) {
-        Direction targetDirection = getTargetDirection(pos, level, cart);
-        if (targetDirection != null) {
-            Vec3 travelVector = Vec3.atLowerCornerOf(targetDirection.getNormal());
-            cart.move(MoverType.SELF, travelVector);
-            cart.setDeltaMovement(travelVector);
-        } else {
-            ServerPlayer player = getPlayerPassenger(cart);
-            if (player != null) {
-                player.teleportTo(pos.getX(), pos.getY(), pos.getZ());
-            }
-            cart.kill();
-        }
-    }
-
-    private Direction getTargetDirection(BlockPos pos, Level level, AbstractMinecart cart) {
         ServerPlayer player = getPlayerPassenger(cart);
         if (player == null) {
-            return null;
+            cart.kill();
+            return;
         }
 
         String destinationStation = RoutingService.INSTANCE.getUserDestinationStation(player.getUUID(), level);
-        if (destinationStation == null) {
-            player.sendSystemMessage(Component.literal("No destination station set. Use /go command."));
-            return null;
+
+        GraphPath<BlockPos, RouteRailsEdge> path = null;
+        if (destinationStation != null) {
+            path = RoutingService.INSTANCE.calculateRouteInternal(pos, destinationStation, level);
+            if (path == null) {
+                player.sendSystemMessage(Component.literal("Failed to calculate path to station " + destinationStation));
+                ejectPlayer(cart, pos);
+                return;
+            }
+
+            List<RouteRailsEdge> edgeList = path.getEdgeList();
+            if (edgeList.isEmpty()) {
+                player.sendSystemMessage(Component.literal("You arrived to " + destinationStation));
+                RoutingService.INSTANCE.setUserDestination(player.getUUID(), null, level);
+                ejectPlayer(cart, pos);
+                return;
+            }
         }
 
-        GraphPath<BlockPos, RouteRailsEdge> path = RoutingService.INSTANCE.calculateRouteInternal(pos, destinationStation, level);
-        if (path == null) {
-            player.sendSystemMessage(Component.literal("Failed to calculate path to station " + destinationStation));
-            return null;
-        }
-
-        List<RouteRailsEdge> edgeList = path.getEdgeList();
-        if (edgeList.isEmpty()) {
-            player.sendSystemMessage(Component.literal("You arrived to " + destinationStation));
-            RoutingService.INSTANCE.setUserDestination(player.getUUID(), null, level);
-            return null;
-        }
-
-        StringBuilder sb = new StringBuilder();
-
+        StringBuilder statusBuilder = new StringBuilder();
         String stationName = RoutingService.INSTANCE.getStationName(level, pos);
         if (stationName != null) {
-            sb.append("This is ").append(stationName).append(". ");
+            statusBuilder.append("This is ").append(stationName).append(". ");
         }
-        sb.append("%s blocks remaining until destination (%s)".formatted((int) path.getWeight(), destinationStation));
-        player.sendSystemMessage(Component.literal(sb.toString()));
 
+        Direction targetDirection;
+        if (path == null) {
+            Direction cartDirection = cart.getMotionDirection();
+            BlockPos targetBlockPos = pos.relative(cartDirection);
+
+            BlockState targetBlockState = level.getBlockState(targetBlockPos);
+            if (targetBlockState.getTags().noneMatch(BlockTags.RAILS::equals)) {
+                ejectPlayer(cart, pos);
+            };
+
+            targetDirection = cartDirection;
+        } else {
+            List<RouteRailsEdge> edgeList = path.getEdgeList();
+            // edgeList is checked for emptiness above, so firstEdge is never null
+            RouteRailsEdge firstEdge = edgeList.get(0);
+            if (firstEdge.getDirection() == null) {
+                performBridgeTeleport(edgeList, level, cart, player);
+                return;
+            }
+
+            int blocksRemaining = 0;
+            for (RouteRailsEdge edge : edgeList) {
+                if (edge.getDirection() == null) {
+                    // Ignore bridge (teleport) edge weights
+                    continue;
+                }
+                blocksRemaining += edge.getDistance();
+            }
+            statusBuilder.append("%s blocks remaining until destination (%s)".formatted(blocksRemaining, destinationStation));
+
+            targetDirection = firstEdge.getDirection();
+        }
+
+        if (!statusBuilder.isEmpty()) {
+            player.sendSystemMessage(Component.literal(statusBuilder.toString()));
+        }
+
+        Vec3 travelVector = Vec3.atLowerCornerOf(targetDirection.getNormal());
+        cart.move(MoverType.SELF, travelVector);
+        cart.setDeltaMovement(travelVector);
+    }
+
+    private void performBridgeTeleport(List<RouteRailsEdge> edgeList, Level level, AbstractMinecart cart, ServerPlayer player) {
         RouteRailsEdge firstEdge = edgeList.get(0);
-        return firstEdge.getDirection();
+        player.sendSystemMessage(Component.literal("Bridge teleports are not yet implemented"));
+        ejectPlayer(cart, firstEdge.getSrc());
+    }
+
+    private void ejectPlayer(AbstractMinecart cart, BlockPos pos) {
+        ServerPlayer player = getPlayerPassenger(cart);
+        if (player != null) {
+            player.teleportTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+        }
+        cart.kill();
     }
 
     private ServerPlayer getPlayerPassenger(AbstractMinecart cart) {

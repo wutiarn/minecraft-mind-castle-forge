@@ -30,6 +30,7 @@ import ru.wtrn.minecraft.mindpalace.util.RailTraverser;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public class RoutingRailBlock extends RailBlock implements EntityBlock {
@@ -130,14 +131,29 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
 
     private void performBridgeTeleport(List<RouteRailsEdge> edgeList, Level level, AbstractMinecart cart, ServerPlayer player) {
         RouteRailsEdge firstEdge = edgeList.get(0);
-        player.sendSystemMessage(Component.literal("Bridge teleports are not yet implemented"));
-        ejectPlayer(cart, firstEdge.getSrc());
+        String startStation = RoutingService.INSTANCE.getStationName(level, firstEdge.getSrc());
+        StringBuilder sb = new StringBuilder("Using bridge ").append(startStation);
+
+        RouteRailsEdge lastBridgeEdge = null;
+        for (RouteRailsEdge edge : edgeList) {
+            if (edge.getDirection() != null) {
+                break;
+            }
+            lastBridgeEdge = edge;
+
+            String stationName = RoutingService.INSTANCE.getStationName(level, edge.getDst());
+            sb.append(" -> ").append(stationName);
+        }
+
+        player.sendSystemMessage(Component.literal(sb.toString()));
+        BlockPos dst = Objects.requireNonNull(lastBridgeEdge).getDst();
+        cart.teleportTo(dst.getX() + 0.5, dst.getY(), dst.getZ() + 0.5);
     }
 
     private void ejectPlayer(AbstractMinecart cart, BlockPos pos) {
         ServerPlayer player = getPlayerPassenger(cart);
         if (player != null) {
-            player.teleportTo(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+            player.teleportTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
         }
         cart.kill();
     }

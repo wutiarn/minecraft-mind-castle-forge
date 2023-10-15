@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.server.command.EnumArgument;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
-import ru.wtrn.minecraft.mindpalace.items.ImageFrame;
+import ru.wtrn.minecraft.mindpalace.entity.ImageFrame;
 import ru.wtrn.minecraft.mindpalace.items.ImageFrameItem;
 import ru.wtrn.minecraft.mindpalace.items.ModItems;
 
@@ -63,7 +63,7 @@ public class ImageFrameCommand {
         ItemStack stack = new ItemStack(item, 1);
         item.setImageId(stack, imageId);
         context.getSource().getPlayer().getInventory().add(stack);
-        context.getSource().sendSuccess(Component.literal("Given " + item.getName(stack).getString()), true);
+        context.getSource().sendSuccess(() -> Component.literal("Given " + item.getName(stack).getString()), true);
     }
 
     public static int setImageSize(CommandContext<CommandSourceStack> context) {
@@ -85,7 +85,7 @@ public class ImageFrameCommand {
 
     public static int reloadTextures(CommandContext<CommandSourceStack> context) {
         TextureCache.forceCleanup();
-        context.getSource().sendSuccess(Component.literal("Image cache cleanup completed"), true);
+        context.getSource().sendSuccess(() -> Component.literal("Image cache cleanup completed"), true);
         return 0;
     }
 

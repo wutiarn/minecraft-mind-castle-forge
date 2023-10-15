@@ -21,5 +21,6 @@ public class ModBlockTagsProvider extends TagsProvider<Block> {
     @Override
     protected void addTags(HolderLookup.Provider pProvider) {
         this.tag(BlockTags.RAILS).add(ModBlocks.FAST_RAIL_BLOCK.getKey());
+        this.tag(BlockTags.RAILS).add(ModBlocks.ROUTING_RAIL_BLOCK.getKey());
     }
 }

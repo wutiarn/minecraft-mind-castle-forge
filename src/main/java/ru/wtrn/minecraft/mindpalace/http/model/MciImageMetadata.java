@@ -13,21 +13,18 @@ import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.MCI_SERVER_UR
 
 public class MciImageMetadata {
     public long id;
-    public long createdAt;
+    public String url;
+    public long updatedAt;
     public String description;
-    public int width;
-    public int height;
-    public String mimetype;
 
     public MutableComponent toChatInfo() {
-        String timestamp = Instant.ofEpochSecond(createdAt).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.RFC_1123_DATE_TIME);
+        String timestamp = Instant.ofEpochSecond(updatedAt).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.RFC_1123_DATE_TIME);
         return Component.literal(
                 "---"+ "\n" +
-                        "Resolution: " + width + "x" + height + "\n" +
-                        "Description: " + description + "\n" +
+                        description + "\n" +
                         "Timestamp: " + timestamp + "\n" +
                         "ID #" + id + "\n"
                 )
-                .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, MCI_SERVER_URL.get() + "/i/" + id)));
+                .setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url)));
     }
 }

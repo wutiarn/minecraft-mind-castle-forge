@@ -5,6 +5,7 @@ import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import ru.wtrn.minecraft.mindpalace.config.ModClientConfigs;
 import ru.wtrn.minecraft.mindpalace.http.MciHttpService;
 import ru.wtrn.minecraft.mindpalace.util.ImageLoader;
 
@@ -22,16 +23,17 @@ public class CachedHttpTexture extends CachedTexture {
 
     @Override
     protected void loadImage() throws Exception {
+        String memosToken = ModClientConfigs.MCI_MEMOS_TOKEN.get();
         Request request = new Request.Builder()
                 .url(url)
+                .header("Authorization", memosToken)
                 .build();
         try (Response response = MciHttpService.HTTP_CLIENT.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 throw new IllegalStateException("MCI returned HTTP " + response.code() + ". Response: " + response);
             }
-            InputStream inputStream = response.body().byteStream();
-            long contentLength = response.body().contentLength();
-            BufferedImage image = ImageLoader.loadImage(inputStream, (int) contentLength);
+            byte[] bytes = response.body().bytes();
+            BufferedImage image = ImageLoader.loadImage(bytes);
             this.preparedImage = prepareImage(image);
         } catch (Exception e) {
             this.fallbackSupplier = TextureCache.ERROR_TEXTURE;

@@ -1,4 +1,4 @@
-package ru.wtrn.minecraft.mindpalace.items;
+package ru.wtrn.minecraft.mindpalace.entity;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
@@ -28,22 +28,28 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.apache.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import retrofit2.Call;
+import retrofit2.Response;
 import ru.wtrn.minecraft.mindpalace.client.texture.CachedTexture;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
+import ru.wtrn.minecraft.mindpalace.config.ModClientConfigs;
 import ru.wtrn.minecraft.mindpalace.http.MciHttpService;
+import ru.wtrn.minecraft.mindpalace.http.PlayerMemosTokensHolder;
 import ru.wtrn.minecraft.mindpalace.http.model.MciImageMetadata;
+import ru.wtrn.minecraft.mindpalace.items.ImageFrameItem;
+import ru.wtrn.minecraft.mindpalace.items.ModItems;
 import ru.wtrn.minecraft.mindpalace.util.CachedAction;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Axis;
 import ru.wtrn.minecraft.mindpalace.util.math.base.Facing;
 import ru.wtrn.minecraft.mindpalace.util.math.box.AlignedBox;
 import ru.wtrn.minecraft.mindpalace.util.math.vec.Vec2f;
 
+import java.io.IOException;
 import java.time.Duration;
-import java.util.Map;
 import java.util.function.Supplier;
 
 import static ru.wtrn.minecraft.mindpalace.config.ModClientConfigs.IMAGES_LOAD_DISTANCE;
@@ -95,7 +101,7 @@ public class ImageFrame extends HangingEntity {
     @Override
     public void tick() {
         super.tick();
-        if (this.level.isClientSide) {
+        if (this.level().isClientSide) {
             doTickAction.invoke();
         }
     }
@@ -184,8 +190,14 @@ public class ImageFrame extends HangingEntity {
                 return InteractionResult.SUCCESS;
             }
             try {
-                Call<MciImageMetadata> metadata = MciHttpService.INSTANCE.getImageMetadata(imageId);
-                MutableComponent component = metadata.execute().body().toChatInfo();
+                String memosToken = ModClientConfigs.MCI_MEMOS_TOKEN.get();
+                Call<MciImageMetadata> metadata = MciHttpService.INSTANCE.getImageMetadata(imageId, memosToken);
+                Response<MciImageMetadata> response = metadata.execute();
+                if (!response.isSuccessful()) {
+                    LOGGER.error("Failed to get image {} metadata. Status {}. Body: {}", imageId, response.code(), response.errorBody());
+                    pPlayer.sendSystemMessage(Component.literal("ID #%s. Metadata fetch failed: status %s.".formatted(imageId, response.code())));
+                }
+                MutableComponent component = response.body().toChatInfo();
                 pPlayer.sendSystemMessage(component);
             } catch (Exception e) {
                 LOGGER.error("Failed to get image {} metadata", imageId, e);
@@ -230,7 +242,7 @@ public class ImageFrame extends HangingEntity {
         float xMargin = -0.5f;
         float yMargin = 0.5f;
         float aspectRatio;
-        if (level.isClientSide && this.cachedTextureSupplier != null) {
+        if (level().isClientSide && this.cachedTextureSupplier != null) {
             aspectRatio = cachedTextureSupplier.get().getAspectRatio();
         } else {
             aspectRatio = 16 / 9f;

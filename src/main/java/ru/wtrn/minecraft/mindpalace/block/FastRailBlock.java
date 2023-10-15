@@ -2,24 +2,29 @@ package ru.wtrn.minecraft.mindpalace.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.PoweredRailBlock;
+import net.minecraft.world.level.block.RailBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.RailShape;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs;
+import ru.wtrn.minecraft.mindpalace.util.MinecartUtil;
+import ru.wtrn.minecraft.mindpalace.util.RailTraverser;
 import ru.wtrn.minecraft.mindpalace.util.math.vec.VectorUtils;
 
-public class FastRailBlock extends PoweredRailBlock {
+public class FastRailBlock extends RailBlock {
     public FastRailBlock() {
-        super(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL), true);
+        super(BlockBehaviour.Properties.of().noCollission().strength(0.7F).sound(SoundType.METAL));
     }
 
     @Override
@@ -28,36 +33,56 @@ public class FastRailBlock extends PoweredRailBlock {
         controlSpeed(cart, level, pos);
     }
 
+    @Override
+    public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
+        if (pLevel.isClientSide() || pHand != InteractionHand.MAIN_HAND || !pPlayer.getMainHandItem().isEmpty()) {
+            return InteractionResult.PASS;
+        }
+
+        AbstractMinecart minecart = MinecartUtil.spawnAndRide(pLevel, pPlayer, pPos);
+        Vec3i directionVector = pPlayer.getDirection().getNormal();
+        minecart.push(directionVector.getX(), directionVector.getY(), directionVector.getZ());
+
+        return InteractionResult.PASS;
+    }
+
     protected void controlSpeed(AbstractMinecart cart, Level level, BlockPos pos) {
         final Vec3 cartMotion = cart.getDeltaMovement();
 
-        Vec3 directionVector = getUnitDirectionVector(cartMotion);
-        if (Vec3.ZERO.closerThan(directionVector, 0.1)) {
+        if (Vec3.ZERO.closerThan(cartMotion, 0.01)) {
             return;
         }
-
+        Vec3 directionVector = getUnitDirectionVector(cartMotion);
         if (!isOccupiedByPlayer(cart)) {
             cart.kill();
             return;
         }
 
-        Double highSpeed = ModCommonConfigs.FAST_RAILS_HIGH_SPEED.get();
+        final Double lowSpeed = ModCommonConfigs.FAST_RAILS_LOW_SPEED.get();
+        final Double highSpeed = ModCommonConfigs.FAST_RAILS_HIGH_SPEED.get();
         final Double baseSpeed = ModCommonConfigs.FAST_RAILS_BASE_SPEED.get();
+        final int minSpeedupDistance = ModCommonConfigs.FAST_RAILS_MIN_SPEEDUP_DISTANCE.get();
+        final int maxSpeedupDistance = ModCommonConfigs.FAST_RAILS_MAX_SPEEDUP_DISTANCE.get();
 
-        double maxJumpPath = highSpeed - baseSpeed;
-        if (maxJumpPath > 0) {
-            performJump(maxJumpPath, cart, level, directionVector);
+        Direction direction = VectorUtils.toHorizontalDirection(directionVector);
+
+        double jumpSpeed = lowSpeed - baseSpeed;
+        int straightTravelDistance = getStraightTravelDistance(pos, direction, level);
+
+        if (straightTravelDistance > minSpeedupDistance) {
+            double speedupJumpSpeed = highSpeed - baseSpeed;
+            float jumpSpeedCoefficient = Math.min(((straightTravelDistance - minSpeedupDistance) / (float) maxSpeedupDistance), 1);
+            speedupJumpSpeed *= jumpSpeedCoefficient;
+            jumpSpeed = Math.max(jumpSpeed, speedupJumpSpeed);
+        }
+
+        if (jumpSpeed > 0) {
+            Vec3 safeTravelVector = findSafePath(pos, direction, level, jumpSpeed);
+            if (!Vec3.ZERO.closerThan(safeTravelVector, 0.1)) {
+                cart.move(MoverType.SELF, safeTravelVector);
+            }
         }
         cart.setDeltaMovement(directionVector.scale(baseSpeed));
-    }
-
-    private void performJump(double maxJumpPath, AbstractMinecart cart, Level level, Vec3 directionVector) {
-        SafeJumpPathFinder safeJumpPathFinder = new SafeJumpPathFinder(cart.position(), level, directionVector, this, maxJumpPath);
-        Vec3 safeTravelVector = safeJumpPathFinder.getSafeTravelVector();
-        if (Vec3.ZERO.closerThan(safeTravelVector, 0.1)) {
-            return;
-        }
-        cart.move(MoverType.SELF, safeTravelVector);
     }
 
     private boolean isOccupiedByPlayer(AbstractMinecart cart) {
@@ -69,65 +94,20 @@ public class FastRailBlock extends PoweredRailBlock {
         return false;
     }
 
-    @Override
-    protected boolean findPoweredRailSignal(Level pLevel, BlockPos pPos, BlockState pState, boolean pSearchForward, int pRecursionCount) {
-        return true;
-    }
+    private Vec3 findSafePath(BlockPos startPos, Direction direction, Level level, double maxPath) {
+        RailTraverser traverser = new RailTraverser(startPos, direction, level);
+        Vec3 resultPath = Vec3.ZERO;
+        double accumulatedPath = 0;
+        boolean isCompleted = false;
 
-    private static Vec3 getUnitDirectionVector(Vec3 cartMotion) {
-        if (Math.abs(cartMotion.x) > 0) {
-            return new Vec3(Math.signum(cartMotion.x), 0, 0);
-        }
-        return new Vec3(0, 0, Math.signum(cartMotion.z));
-    }
-
-    private static class SafeJumpPathFinder {
-        private final Level level;
-        private final Vec3 directionVector;
-        private final FastRailBlock fastRailBlock;
-        private final double maxPath;
-        private double accumulatedPath = 0;
-        private Vec3 currentPos;
-        private Vec3 resultPath = null;
-
-        public SafeJumpPathFinder(Vec3 startPos, Level level, Vec3 directionVector, FastRailBlock fastRailBlock, double maxPath) {
-            this.level = level;
-            this.currentPos = startPos;
-            this.directionVector = directionVector;
-            this.fastRailBlock = fastRailBlock;
-            this.maxPath = maxPath;
-        }
-
-        public Vec3 getSafeTravelVector() {
-            if (resultPath != null) {
-                // Don't repeat calculations
-                return resultPath;
+        for (RailTraverser.NextBlock nextBlock : traverser) {
+            if (!(nextBlock.block instanceof FastRailBlock)) {
+                break;
             }
-            resultPath = Vec3.ZERO;
-            while (true) {
-                if (!processNextBlock()) break;
-            }
-            return resultPath;
-        }
-
-        boolean processNextBlock() {
-            BlockState currentBlockState = getBlockState(currentPos);
-            if (!currentBlockState.is(fastRailBlock)) {
-                return false;
-            }
-            RailShape railShape = currentBlockState.getValue(fastRailBlock.getShapeProperty());
-
-            Vec3 targetPos = getNeighbourForShape(railShape, currentPos, directionVector);
-            BlockState neigborBlockState = getBlockState(targetPos);
-            if (!neigborBlockState.is(fastRailBlock)) {
-                return false;
-            }
-
-            Vec3 delta = targetPos.add(currentPos.scale(-1));
+            Vec3 delta = nextBlock.deltaFromPrevious;
             double deltaLength = VectorUtils.getHorizontalDistance(delta);
             double permittedPathLength = maxPath - accumulatedPath;
 
-            boolean isCompleted = false;
             if (permittedPathLength < deltaLength) {
                 double scaleFactor = permittedPathLength / deltaLength;
                 delta = delta.scale(scaleFactor);
@@ -137,38 +117,34 @@ public class FastRailBlock extends PoweredRailBlock {
 
             resultPath = resultPath.add(delta);
             accumulatedPath += deltaLength;
-
-            currentPos = targetPos;
-            return !isCompleted;
-        }
-
-        private BlockState getBlockState(Vec3 pos) {
-            BlockPos blockPos = VectorUtils.toBlockPos(pos);
-            return level.getBlockState(blockPos);
-        }
-
-        private static Vec3 getNeighbourForShape(RailShape railShape, Vec3 currentPos, Vec3 directionVector) {
-            if (!railShape.isAscending()) {
-                return currentPos.add(directionVector);
+            if (isCompleted) {
+                break;
             }
-
-            Direction railDirection = null;
-            switch (railShape) {
-                case ASCENDING_EAST -> railDirection = Direction.EAST;
-                case ASCENDING_WEST -> railDirection = Direction.WEST;
-                case ASCENDING_NORTH -> railDirection = Direction.NORTH;
-                case ASCENDING_SOUTH -> railDirection = Direction.SOUTH;
-            }
-
-            Direction destinationDirection = Direction.fromNormal((int) directionVector.x, (int) directionVector.y, (int) directionVector.z);
-
-            int yValue = 1;
-            if (destinationDirection != railDirection) {
-                yValue = -1;
-            }
-
-            directionVector = new Vec3(directionVector.x, yValue, directionVector.z);
-            return currentPos.add(directionVector);
         }
+        return resultPath;
+    }
+
+    private int getStraightTravelDistance(BlockPos startPos, Direction direction, Level level) {
+        RailTraverser traverser = new RailTraverser(startPos, direction, level);
+        int counter = 0;
+        for (RailTraverser.NextBlock nextBlock : traverser) {
+            if (!(nextBlock.block instanceof FastRailBlock)) {
+                break;
+            }
+            counter++;
+        }
+        return counter;
+    }
+
+    @Override
+    public boolean isFlexibleRail(BlockState state, BlockGetter world, BlockPos pos) {
+        return false;
+    }
+
+    private static Vec3 getUnitDirectionVector(Vec3 cartMotion) {
+        if (Math.abs(cartMotion.x) > 0) {
+            return new Vec3(Math.signum(cartMotion.x), 0, 0);
+        }
+        return new Vec3(0, 0, Math.signum(cartMotion.z));
     }
 }

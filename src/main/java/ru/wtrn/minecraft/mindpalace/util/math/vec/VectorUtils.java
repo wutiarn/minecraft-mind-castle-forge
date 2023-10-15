@@ -2,6 +2,7 @@ package ru.wtrn.minecraft.mindpalace.util.math.vec;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
@@ -12,7 +13,7 @@ import ru.wtrn.minecraft.mindpalace.util.math.geo.VectorFan;
 public class VectorUtils {
 
     public static BlockPos toBlockPos(Vec3 vec3) {
-        return new BlockPos(vec3.x, vec3.y, vec3.z);
+        return new BlockPos((int) vec3.x, (int) vec3.y, (int) vec3.z);
     }
 
     public static Vec3 toVec3(BlockPos blockPos) {
@@ -21,6 +22,10 @@ public class VectorUtils {
 
     public static double getDistance(Vec3 vec3) {
         return Math.sqrt(vec3.x * vec3.x + vec3.y * vec3.y + vec3.z * vec3.z);
+    }
+
+    public static Direction toHorizontalDirection(Vec3 vec) {
+        return Direction.fromDelta((int) vec.x, 0, (int) vec.z);
     }
 
     public static double getHorizontalDistance(Vec3 vec3) {

@@ -2,10 +2,10 @@ package ru.wtrn.minecraft.mindpalace;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -15,15 +15,15 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 import ru.wtrn.minecraft.mindpalace.block.ModBlocks;
 import ru.wtrn.minecraft.mindpalace.client.texture.TextureCache;
+import ru.wtrn.minecraft.mindpalace.commands.argument.ModArgumentTypes;
 import ru.wtrn.minecraft.mindpalace.config.ModClientConfigs;
 import ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs;
 import ru.wtrn.minecraft.mindpalace.entity.ModEntities;
-import ru.wtrn.minecraft.mindpalace.items.ModCreativeModeTab;
 import ru.wtrn.minecraft.mindpalace.items.ModItems;
+import ru.wtrn.minecraft.mindpalace.net.ModPacketHandler;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(WtrnMindPalaceMod.MOD_ID)
@@ -42,6 +42,8 @@ public class WtrnMindPalaceMod {
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModEntities.register(modEventBus);
+        ModArgumentTypes.register(modEventBus);
+        ModPacketHandler.register();
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
@@ -56,14 +58,15 @@ public class WtrnMindPalaceMod {
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         // Some common setup code
-        LOGGER.info("HELLO FROM COMMON SETUP");
-        LOGGER.info("DIRT BLOCK >> {}", ForgeRegistries.BLOCKS.getKey(Blocks.DIRT));
+//        LOGGER.info("HELLO FROM COMMON SETUP");
+//        LOGGER.info("DIRT BLOCK >> {}", ForgeRegistries.BLOCKS.getKey(Blocks.DIRT));
     }
 
-    private void addCreative(CreativeModeTabEvent.BuildContents event) {
-        if (event.getTab() == ModCreativeModeTab.MIND_PALACE_TAB) {
+    private void addCreative(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() == CreativeModeTabs.REDSTONE_BLOCKS) {
             event.accept(ModItems.IMAGE_FRAME_ITEM);
             event.accept(ModBlocks.FAST_RAIL_BLOCK.get());
+            event.accept(ModBlocks.ROUTING_RAIL_BLOCK.get());
         }
     }
 

@@ -1,0 +1,11 @@
+{
+  "variants": {
+    "shape=east_west": {
+      "model": "wtrnmindpalace:block/routing_rail_block",
+      "y": 90
+    },
+    "shape=north_south": {
+      "model": "wtrnmindpalace:block/routing_rail_block"
+    }
+  }
+}

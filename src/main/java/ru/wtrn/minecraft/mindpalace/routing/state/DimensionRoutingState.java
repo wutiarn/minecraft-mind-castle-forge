@@ -7,10 +7,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
+import org.jgrapht.graph.DirectedWeightedPseudograph;
 import org.jgrapht.nio.Attribute;
 import org.jgrapht.nio.DefaultAttribute;
 import org.jgrapht.nio.dot.DOTExporter;
@@ -26,11 +26,9 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
-import static com.ibm.icu.text.PluralRules.Operand.v;
 import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.ROUTING_BRIDGE_GRAPH_WEIGHT;
 
 public class DimensionRoutingState {
@@ -39,7 +37,7 @@ public class DimensionRoutingState {
             .registerTypeAdapter(SetMultimap.class, (InstanceCreator<SetMultimap<?, ?>>) type -> Multimaps.newSetMultimap(new HashMap<>(), HashSet::new))
             .create();
     private static final Logger logger = LoggerFactory.getLogger(RoutingService.class);
-    public DefaultDirectedWeightedGraph<BlockPos, RouteRailsEdge> graph;
+    public DirectedWeightedPseudograph<BlockPos, RouteRailsEdge> graph;
     public ShortestPathAlgorithm<BlockPos, RouteRailsEdge> shortestPathFinder;
     public final PersistentDimensionRoutingState persistentState;
     private final Path persistentPath;
@@ -78,7 +76,7 @@ public class DimensionRoutingState {
     }
 
     public void initGraph(Collection<RoutingNodeConnection> connections) {
-        graph = new DefaultDirectedWeightedGraph<>(RouteRailsEdge.class);
+        graph = new DirectedWeightedPseudograph<>(RouteRailsEdge.class);
         shortestPathFinder = new DijkstraShortestPath<>(graph);
         if (connections == null) {
             return;
@@ -157,12 +155,10 @@ public class DimensionRoutingState {
             return;
         }
         Integer weight = ROUTING_BRIDGE_GRAPH_WEIGHT.get();
-
-        logger.info("Applying bridge {} ({}) -> {} ({}), weight = {}", srcStation, BlockPosUtil.blockPosToString(srcStationPos), dstStation, BlockPosUtil.blockPosToString(dstStationPos), weight);
-
         RouteRailsEdge edge = new RouteRailsEdge(null);
         graph.setEdgeWeight(edge, weight);
-        graph.addEdge(srcStationPos, dstStationPos, edge);
+        boolean success = graph.addEdge(srcStationPos, dstStationPos, edge);
+        logger.info("Applying bridge {} ({}) -> {} ({}), weight = {}, success = {}", srcStation, BlockPosUtil.blockPosToString(srcStationPos), dstStation, BlockPosUtil.blockPosToString(dstStationPos), weight, success);
     }
 
     private void addConnection(RoutingNodeConnection connection) {

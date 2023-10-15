@@ -131,7 +131,8 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
 
     private void performBridgeTeleport(List<RouteRailsEdge> edgeList, Level level, AbstractMinecart cart, ServerPlayer player) {
         RouteRailsEdge firstEdge = edgeList.get(0);
-        String startStation = RoutingService.INSTANCE.getStationName(level, firstEdge.getSrc());
+        BlockPos src = firstEdge.getSrc();
+        String startStation = RoutingService.INSTANCE.getStationName(level, src);
         StringBuilder sb = new StringBuilder("Using bridge ").append(startStation);
 
         RouteRailsEdge lastBridgeEdge = null;
@@ -149,7 +150,9 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
         BlockPos dst = Objects.requireNonNull(lastBridgeEdge).getDst();
 
         // Recreate minecart at new destination to avoid glitches
-        ejectPlayer(cart, dst);
+        player.teleportTo(src.getX() + 0.5, src.getY(), src.getZ() + 0.5);
+        cart.kill();
+        player.teleportTo(dst.getX() + 0.5, dst.getY(), dst.getZ() + 0.5);
         MinecartUtil.spawnAndRide(level, player, dst);
     }
 

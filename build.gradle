@@ -161,6 +161,7 @@ dependencies {
     library("org.jgrapht:jgrapht-core:1.5.2")
     library("org.jgrapht:jgrapht-io:1.5.2") {
         exclude group: 'org.apache.commons', module: 'commons-lang3'
+        exclude group: 'org.antlr', module: 'antlr4-runtime'
     }
 }
 

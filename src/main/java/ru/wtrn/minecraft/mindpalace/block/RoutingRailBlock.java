@@ -5,7 +5,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -29,7 +28,9 @@ import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
 import ru.wtrn.minecraft.mindpalace.util.MinecartUtil;
 import ru.wtrn.minecraft.mindpalace.util.RailTraverser;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 public class RoutingRailBlock extends RailBlock implements EntityBlock {
     public RoutingRailBlock() {
@@ -48,7 +49,7 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
 
         GraphPath<BlockPos, RouteRailsEdge> path = null;
         if (destinationStation != null) {
-            path = RoutingService.INSTANCE.calculateRouteInternal(pos, destinationStation, level);
+            path = RoutingService.INSTANCE.calculateRoute(pos, destinationStation, level);
             if (path == null) {
                 player.sendSystemMessage(Component.literal("Failed to calculate path to station " + destinationStation));
                 ejectPlayer(cart, pos);
@@ -77,10 +78,25 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
 
             BlockState targetBlockState = level.getBlockState(targetBlockPos);
             if (targetBlockState.getTags().noneMatch(BlockTags.RAILS::equals)) {
-                ejectPlayer(cart, pos);
-            };
-
-            targetDirection = cartDirection;
+                Set<RouteRailsEdge> edges = RoutingService.INSTANCE.getBlockOutgoingEdges(pos, level);
+                RouteRailsEdge longestEdge = edges.stream()
+                        .filter(it -> {
+                            if (it.getDirection() == null) {
+                                return false;
+                            }
+                            return it.getDirection() != cartDirection.getOpposite();
+                        })
+                        .max(Comparator.comparing(RouteRailsEdge::getDistance))
+                        .orElse(null);
+                if (longestEdge == null) {
+                    ejectPlayer(cart, pos);
+                    player.sendSystemMessage(Component.literal("There's no route ahead"));
+                    return;
+                }
+                targetDirection = longestEdge.getDirection();
+            } else {
+                targetDirection = cartDirection;
+            }
         } else {
             List<RouteRailsEdge> edgeList = path.getEdgeList();
             // edgeList is checked for emptiness above, so firstEdge is never null

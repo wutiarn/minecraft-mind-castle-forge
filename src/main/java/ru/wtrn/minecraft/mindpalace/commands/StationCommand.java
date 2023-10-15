@@ -163,7 +163,7 @@ public class StationCommand {
             return 1;
         }
 
-        GraphPath<BlockPos, RouteRailsEdge> path = RoutingService.INSTANCE.calculateRouteInternal(pos, dstStation, source.getLevel());
+        GraphPath<BlockPos, RouteRailsEdge> path = RoutingService.INSTANCE.calculateRoute(pos, dstStation, source.getLevel());
         if (path == null) {
             source.sendFailure(Component.literal("No path found to " + dstStation));
             return 1;

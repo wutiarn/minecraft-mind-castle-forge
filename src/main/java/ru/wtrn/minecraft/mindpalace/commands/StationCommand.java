@@ -18,6 +18,7 @@ import ru.wtrn.minecraft.mindpalace.commands.argument.StationNameArgumentType;
 import ru.wtrn.minecraft.mindpalace.routing.RouteRailsEdge;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingNodeConnection;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
+import ru.wtrn.minecraft.mindpalace.util.BlockPosUtil;
 
 import java.util.Collection;
 import java.util.List;
@@ -61,6 +62,27 @@ public class StationCommand {
                                                         .executes(StationCommand::printRoute)
                                         )
 
+                        )
+                        .then(
+                                Commands.literal("bridge")
+                                        .then(
+                                                Commands.argument("destination", stationNameArgumentType)
+                                                        .executes((ctx) -> handleBridgeCommand(ctx, false))
+                                        )
+                        )
+                        .then(
+                                Commands.literal("removeBridge")
+                                        .then(
+                                                Commands.argument("destination", stationNameArgumentType)
+                                                        .executes((ctx) -> handleBridgeCommand(ctx, true))
+                                        )
+                        )
+                        .then(
+                                Commands.literal("launchblock")
+                                        .then(
+                                                Commands.argument("destination", stationNameArgumentType)
+                                                        .executes(StationCommand::handleLaunchblockCommand)
+                                        )
                         )
         );
     }
@@ -149,7 +171,7 @@ public class StationCommand {
             return 1;
         }
 
-        GraphPath<BlockPos, RouteRailsEdge> path = RoutingService.INSTANCE.calculateRouteInternal(pos, dstStation, source.getLevel());
+        GraphPath<BlockPos, RouteRailsEdge> path = RoutingService.INSTANCE.calculateRoute(pos, dstStation, source.getLevel());
         if (path == null) {
             source.sendFailure(Component.literal("No path found to " + dstStation));
             return 1;
@@ -165,6 +187,55 @@ public class StationCommand {
 
         source.sendSystemMessage(Component.literal(sb.toString()));
 
+        return 0;
+    }
+
+    private static int handleBridgeCommand(CommandContext<CommandSourceStack> context, boolean isRemoval) {
+        CommandSourceStack source = context.getSource();
+
+        BlockPos pos = getTargetedRoutingRailBlockPos(source);
+        if (pos == null) {
+            return 1;
+        }
+        ServerLevel level = source.getLevel();
+        String srcStation = RoutingService.INSTANCE.getStationName(level, pos);
+        if (srcStation == null) {
+            source.sendFailure(Component.literal("Targeted block must have station name"));
+            return 1;
+        }
+        String dstStation = context.getArgument("destination", String.class);
+
+        if (isRemoval) {
+            boolean removed = RoutingService.INSTANCE.removeBridge(srcStation, dstStation, level);
+            if (removed) {
+                source.sendSystemMessage(Component.literal("Removed bridge from %s to %s".formatted(srcStation, dstStation)));
+                return 0;
+            } else {
+                source.sendFailure(Component.literal("Failed to remove bridge from %s to %s: not bridged".formatted(srcStation, dstStation)));
+                return 1;
+            }
+        } else {
+            RoutingService.INSTANCE.addBridge(srcStation, dstStation, level);
+            source.sendSystemMessage(Component.literal("Station %s bridged to %s".formatted(srcStation, dstStation)));
+            return 0;
+        }
+    }
+
+    private static int handleLaunchblockCommand(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+
+        BlockPos pos = getTargetedRoutingRailBlockPos(source);
+        if (pos == null) {
+            return 1;
+        }
+        ServerLevel level = source.getLevel();
+        String dstStation = context.getArgument("destination", String.class);
+        RoutingService.INSTANCE.setLaunchBlockDestinationStation(pos, dstStation, level);
+        if (dstStation != null) {
+            source.sendSystemMessage(Component.literal("Destination station %s set for launch block at %s".formatted(dstStation, BlockPosUtil.blockPosToString(pos))));
+        } else {
+            source.sendSystemMessage(Component.literal("Destination station removed for launch block at %s".formatted(BlockPosUtil.blockPosToString(pos))));
+        }
         return 0;
     }
 

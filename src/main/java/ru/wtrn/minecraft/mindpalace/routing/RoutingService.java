@@ -46,7 +46,7 @@ public class RoutingService {
         return state.persistentState.getStationName(pos);
     }
 
-    public GraphPath<BlockPos, RouteRailsEdge> calculateRouteInternal(BlockPos src, String dstName, Level level) {
+    public GraphPath<BlockPos, RouteRailsEdge> calculateRoute(BlockPos src, String dstName, Level level) {
         DimensionRoutingState state = getState(level);
         GraphPath<BlockPos, RouteRailsEdge> path = calculateRouteInternal(src, dstName, state);
         if (path == null) {
@@ -54,6 +54,14 @@ public class RoutingService {
             path = calculateRouteInternal(src, dstName, state);
         }
         return path;
+    }
+
+    public Set<RouteRailsEdge> getBlockOutgoingEdges(BlockPos pos, Level level) {
+        DimensionRoutingState state = getState(level);
+        if (!state.graph.containsVertex(pos)) {
+            return Set.of();
+        }
+        return state.graph.outgoingEdgesOf(pos);
     }
 
     public boolean setStationName(BlockPos pos, String name, Level level) {
@@ -101,6 +109,28 @@ public class RoutingService {
         state.persistentState.setUserDestination(userId, dstStationName);
         onStateChange(level, state);
         return true;
+    }
+
+    public void addBridge(String firstStation, String secondStation, Level level) {
+        DimensionRoutingState state = getState(level);
+        state.addBridge(firstStation, secondStation);
+    }
+
+    public boolean removeBridge(String firstStation, String secondStation, Level level) {
+        DimensionRoutingState state = getState(level);
+        return state.removeBridge(firstStation, secondStation);
+    }
+
+    public void setLaunchBlockDestinationStation(BlockPos pos, String destinationStation, Level level) {
+        DimensionRoutingState state = getState(level);
+        state.persistentState.setLaunchBlockDestinationStation(pos, destinationStation);
+        state.persistState();
+    }
+
+    @Nullable
+    public String getDestinationForLaunchBlock(BlockPos pos, Level level) {
+        DimensionRoutingState state = getState(level);
+        return state.persistentState.getDestinationForLaunchBlock(pos);
     }
 
     public void resetCache() {

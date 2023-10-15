@@ -30,5 +30,8 @@ public class ModCommonConfigs {
     public static final ForgeConfigSpec.ConfigValue<Integer> FAST_RAILS_MAX_SPEEDUP_DISTANCE = BUILDER.comment("Count of straight rail blocks ahead required for speedup to reach max speed")
             .define("fast_rails_max_speedup_distance", 100);
 
+    public static final ForgeConfigSpec.ConfigValue<Integer> ROUTING_BRIDGE_GRAPH_WEIGHT = BUILDER.comment("Weight of routing bridge edges")
+            .define("routing_bridge_graph_weight", 500);
+
     public static final ForgeConfigSpec SPEC = BUILDER.build();
 }

@@ -62,6 +62,14 @@ public class StationCommand {
                                         )
 
                         )
+                        .then(
+                                Commands.literal("bridge")
+                                        .then(
+                                                Commands.argument("destination", stationNameArgumentType)
+                                                        .executes(StationCommand::printRoute)
+                                        )
+
+                        )
         );
     }
 
@@ -164,6 +172,18 @@ public class StationCommand {
         }
 
         source.sendSystemMessage(Component.literal(sb.toString()));
+
+        return 0;
+    }
+
+    public static int setBridge(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+
+        BlockPos pos = getTargetedRoutingRailBlockPos(source);
+        if (pos == null) {
+            return 1;
+        }
+        String dstStation = context.getArgument("destination", String.class);
 
         return 0;
     }

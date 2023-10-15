@@ -1,6 +1,9 @@
 package ru.wtrn.minecraft.mindpalace.routing.state;
 
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.SetMultimap;
 import net.minecraft.core.BlockPos;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingNodeConnection;
 import ru.wtrn.minecraft.mindpalace.util.BlockPosUtil;
@@ -9,19 +12,11 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 public final class PersistentDimensionRoutingState {
-    private final HashBiMap<String, String> stations;
-    private final HashMap<UUID, String> destinationByUserUUID;
-    private Collection<RoutingNodeConnection> connections;
-
-    public PersistentDimensionRoutingState(
-            HashBiMap<String, String> stations,
-            HashMap<UUID, String> destinationByUserUUID,
-            List<RoutingNodeConnection> connections
-    ) {
-        this.stations = stations;
-        this.destinationByUserUUID = destinationByUserUUID;
-        this.connections = connections;
-    }
+    private final HashBiMap<String, String> stations = HashBiMap.create();
+    private final HashMap<UUID, String> destinationByUserUUID = new HashMap<>();
+    private Collection<RoutingNodeConnection> connections = new ArrayList<>();
+    private final SetMultimap<String, String> bridgedStations = Multimaps.newSetMultimap(new HashMap<>(), HashSet::new);
+    private final HashMap<String, String> launchBlockDestinationStations = new HashMap<>();
 
     public void setStationName(BlockPos pos, String name) {
         stations.put(name, BlockPosUtil.blockPosToString(pos));
@@ -65,5 +60,32 @@ public final class PersistentDimensionRoutingState {
 
     public void setConnections(Collection<RoutingNodeConnection> connections) {
         this.connections = connections;
+    }
+
+    public void addBridge(String firstStation, String secondStation) {
+        bridgedStations.put(firstStation, secondStation);
+        bridgedStations.put(secondStation, firstStation);
+    }
+
+    public void removeBridge(String firstStation, String secondStation) {
+        bridgedStations.remove(firstStation, secondStation);
+        bridgedStations.remove(secondStation, firstStation);
+    }
+
+    public SetMultimap<String, String> getBridgedStations() {
+        return bridgedStations;
+    }
+
+    public void setLaunchBlockDestinationStation(BlockPos pos, String destinationStation) {
+        String posStr = BlockPosUtil.blockPosToString(pos);
+        if (destinationStation == null) {
+            launchBlockDestinationStations.remove(posStr);
+        }
+        launchBlockDestinationStations.put(posStr, destinationStation);
+    }
+
+    @Nullable
+    public String getDestinationForLaunchBlock(BlockPos pos) {
+        return launchBlockDestinationStations.get(BlockPosUtil.blockPosToString(pos));
     }
 }

@@ -1,6 +1,8 @@
 package ru.wtrn.minecraft.mindpalace.routing.state;
 
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.SetMultimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
@@ -22,6 +24,7 @@ import java.util.*;
 public class DimensionRoutingState {
     private static final Gson gson = new GsonBuilder()
             .registerTypeAdapter(HashBiMap.class, (InstanceCreator<HashBiMap<?, ?>>) type -> HashBiMap.create())
+            .registerTypeAdapter(SetMultimap.class, (InstanceCreator<SetMultimap<?, ?>>) type -> Multimaps.newSetMultimap(new HashMap<>(), HashSet::new))
             .create();
     private static final Logger logger = LoggerFactory.getLogger(RoutingService.class);
     public DefaultDirectedWeightedGraph<BlockPos, RouteRailsEdge> graph;
@@ -41,11 +44,7 @@ public class DimensionRoutingState {
             return gson.fromJson(state, PersistentDimensionRoutingState.class);
         } catch (Exception e) {
             logger.error("Failed to load routing state", e);
-            return new PersistentDimensionRoutingState(
-                    HashBiMap.create(),
-                    new HashMap<>(),
-                    List.of()
-            );
+            return new PersistentDimensionRoutingState();
         }
     }
 

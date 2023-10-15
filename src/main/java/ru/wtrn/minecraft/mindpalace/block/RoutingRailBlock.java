@@ -60,7 +60,6 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
             List<RouteRailsEdge> edgeList = path.getEdgeList();
             if (edgeList.isEmpty()) {
                 player.sendSystemMessage(Component.literal("You arrived to " + destinationStation));
-                RoutingService.INSTANCE.setUserDestination(player.getUUID(), null, level);
                 ejectPlayer(cart, pos);
                 return;
             }
@@ -147,15 +146,18 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
 
         player.sendSystemMessage(Component.literal(sb.toString()));
         BlockPos dst = Objects.requireNonNull(lastBridgeEdge).getDst();
-        cart.teleportTo(dst.getX() + 0.5, dst.getY(), dst.getZ() + 0.5);
+
+        // Recreate minecart at new destination to avoid glitches
+        ejectPlayer(cart, dst);
+        MinecartUtil.spawnAndRide(level, player, dst);
     }
 
     private void ejectPlayer(AbstractMinecart cart, BlockPos pos) {
         ServerPlayer player = getPlayerPassenger(cart);
+        cart.kill();
         if (player != null) {
             player.teleportTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
         }
-        cart.kill();
     }
 
     private ServerPlayer getPlayerPassenger(AbstractMinecart cart) {

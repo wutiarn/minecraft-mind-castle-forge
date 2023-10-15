@@ -61,6 +61,7 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
             if (edgeList.isEmpty()) {
                 player.sendSystemMessage(Component.literal("You arrived to " + destinationStation));
                 ejectPlayer(cart, pos);
+                RoutingService.INSTANCE.setUserDestination(player.getUUID(), null, level);
                 return;
             }
         }
@@ -225,6 +226,16 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
             player.sendSystemMessage(Component.literal("Direction %s. Found: %s. Distance: %s. Duration: %sms".formatted(direction, foundNeighbourDetails, distance, duration)));
 
             return InteractionResult.PASS;
+        }
+
+        String destinationForLaunchBlock = RoutingService.INSTANCE.getDestinationForLaunchBlock(pos, level);
+        if (destinationForLaunchBlock != null) {
+            boolean destinationSet = RoutingService.INSTANCE.setUserDestination(player.getUUID(), destinationForLaunchBlock, level);
+            if (!destinationSet) {
+                player.sendSystemMessage(Component.literal("Failed to set destination to %s by launch block".formatted(destinationForLaunchBlock)));
+                return InteractionResult.PASS;
+            }
+            player.sendSystemMessage(Component.literal("Destination station set to %s by launch block".formatted(destinationForLaunchBlock)));
         }
 
         MinecartUtil.spawnAndRide(level, player, pos);

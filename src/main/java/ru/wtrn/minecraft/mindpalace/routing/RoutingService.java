@@ -121,6 +121,18 @@ public class RoutingService {
         return state.removeBridge(firstStation, secondStation);
     }
 
+    public void setLaunchBlockDestinationStation(BlockPos pos, String destinationStation, Level level) {
+        DimensionRoutingState state = getState(level);
+        state.persistentState.setLaunchBlockDestinationStation(pos, destinationStation);
+        state.persistState();
+    }
+
+    @Nullable
+    public String getDestinationForLaunchBlock(BlockPos pos, Level level) {
+        DimensionRoutingState state = getState(level);
+        return state.persistentState.getDestinationForLaunchBlock(pos);
+    }
+
     public void resetCache() {
         stateByDimension.clear();
     }

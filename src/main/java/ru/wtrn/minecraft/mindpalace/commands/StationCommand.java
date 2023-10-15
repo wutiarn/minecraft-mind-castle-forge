@@ -18,6 +18,7 @@ import ru.wtrn.minecraft.mindpalace.commands.argument.StationNameArgumentType;
 import ru.wtrn.minecraft.mindpalace.routing.RouteRailsEdge;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingNodeConnection;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
+import ru.wtrn.minecraft.mindpalace.util.BlockPosUtil;
 
 import java.util.Collection;
 import java.util.List;
@@ -74,6 +75,13 @@ public class StationCommand {
                                         .then(
                                                 Commands.argument("destination", stationNameArgumentType)
                                                         .executes((ctx) -> handleBridgeCommand(ctx, true))
+                                        )
+                        )
+                        .then(
+                                Commands.literal("launchblock")
+                                        .then(
+                                                Commands.argument("destination", stationNameArgumentType)
+                                                        .executes(StationCommand::handleLaunchblockCommand)
                                         )
                         )
         );
@@ -211,6 +219,24 @@ public class StationCommand {
             source.sendSystemMessage(Component.literal("Station %s bridged to %s".formatted(srcStation, dstStation)));
             return 0;
         }
+    }
+
+    private static int handleLaunchblockCommand(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+
+        BlockPos pos = getTargetedRoutingRailBlockPos(source);
+        if (pos == null) {
+            return 1;
+        }
+        ServerLevel level = source.getLevel();
+        String dstStation = context.getArgument("destination", String.class);
+        RoutingService.INSTANCE.setLaunchBlockDestinationStation(pos, dstStation, level);
+        if (dstStation != null) {
+            source.sendSystemMessage(Component.literal("Destination station %s set for launch block at %s".formatted(dstStation, BlockPosUtil.blockPosToString(pos))));
+        } else {
+            source.sendSystemMessage(Component.literal("Destination station removed for launch block at %s".formatted(BlockPosUtil.blockPosToString(pos))));
+        }
+        return 0;
     }
 
     private static BlockPos getTargetedRoutingRailBlockPos(CommandSourceStack source) {

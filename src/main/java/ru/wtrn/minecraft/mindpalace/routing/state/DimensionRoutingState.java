@@ -11,6 +11,9 @@ import net.minecraft.world.level.Level;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
+import org.jgrapht.nio.Attribute;
+import org.jgrapht.nio.DefaultAttribute;
+import org.jgrapht.nio.dot.DOTExporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.wtrn.minecraft.mindpalace.routing.RouteRailsEdge;
@@ -18,8 +21,12 @@ import ru.wtrn.minecraft.mindpalace.routing.RoutingNodeConnection;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
 import ru.wtrn.minecraft.mindpalace.util.BlockPosUtil;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
@@ -61,6 +68,11 @@ public class DimensionRoutingState {
             Files.write(persistentPath, json.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (Exception e) {
             logger.error("Failed to persist routing state", e);
+        }
+        try {
+            dumpGraphToGraphViz();
+        } catch (Exception e) {
+            logger.error("Failed to dump graph to graphviz file", e);
         }
     }
 
@@ -169,5 +181,27 @@ public class DimensionRoutingState {
             connections.add(new RoutingNodeConnection(edge.getSrc(), edge.getDst(), edge.getDirection(), edge.getDistance()));
         }
         return connections;
+    }
+
+    private void dumpGraphToGraphViz() throws IOException {
+        DOTExporter<BlockPos, RouteRailsEdge> exporter =
+                new DOTExporter<>(BlockPosUtil::blockPosToString);
+        exporter.setVertexAttributeProvider((v) -> {
+            Map<String, Attribute> map = new LinkedHashMap<>();
+            map.put("label", DefaultAttribute.createAttribute(v.toString()));
+            return map;
+        });
+        Writer writer = new StringWriter();
+        exporter.exportGraph(graph, writer);
+
+        Path graphvizPath = getGraphvizPath();
+        Files.write(graphvizPath, writer.toString().getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+    }
+
+    private Path getGraphvizPath() {
+        String primaryFileName = persistentPath.getFileName().toString();
+        int index = primaryFileName.lastIndexOf(".");
+        String filename = primaryFileName.substring(0, index) + ".dot";
+        return persistentPath.getParent().resolve(filename);
     }
 }

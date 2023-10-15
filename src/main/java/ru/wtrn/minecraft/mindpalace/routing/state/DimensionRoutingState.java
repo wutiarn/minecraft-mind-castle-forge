@@ -30,6 +30,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
+import static com.ibm.icu.text.PluralRules.Operand.v;
 import static ru.wtrn.minecraft.mindpalace.config.ModCommonConfigs.ROUTING_BRIDGE_GRAPH_WEIGHT;
 
 public class DimensionRoutingState {
@@ -185,10 +186,19 @@ public class DimensionRoutingState {
 
     private void dumpGraphToGraphViz() throws IOException {
         DOTExporter<BlockPos, RouteRailsEdge> exporter =
-                new DOTExporter<>(BlockPosUtil::blockPosToString);
+                new DOTExporter<>((v) ->
+                        "b" + BlockPosUtil.blockPosToString(v)
+                                .replace("/", "_")
+                                .replace("-", "n")
+                );
         exporter.setVertexAttributeProvider((v) -> {
             Map<String, Attribute> map = new LinkedHashMap<>();
-            map.put("label", DefaultAttribute.createAttribute(v.toString()));
+            map.put("label", DefaultAttribute.createAttribute(BlockPosUtil.blockPosToString(v)));
+            return map;
+        });
+        exporter.setEdgeAttributeProvider((e) -> {
+            Map<String, Attribute> map = new LinkedHashMap<>();
+            map.put("label", DefaultAttribute.createAttribute(e.getDirection() + " " + e.getDistance()));
             return map;
         });
         Writer writer = new StringWriter();

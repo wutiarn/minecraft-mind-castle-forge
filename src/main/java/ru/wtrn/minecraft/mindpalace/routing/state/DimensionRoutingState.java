@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import ru.wtrn.minecraft.mindpalace.routing.RouteRailsEdge;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingNodeConnection;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
+import ru.wtrn.minecraft.mindpalace.util.BlockPosUtil;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -142,8 +143,12 @@ public class DimensionRoutingState {
         if (dstStationPos == null) {
             return;
         }
+        Integer weight = ROUTING_BRIDGE_GRAPH_WEIGHT.get();
+
+        logger.info("Applying bridge {} ({}) -> {} ({}), weight = {}", srcStation, BlockPosUtil.blockPosToString(srcStationPos), dstStation, BlockPosUtil.blockPosToString(dstStationPos), weight);
+
         RouteRailsEdge edge = new RouteRailsEdge(null);
-        graph.setEdgeWeight(edge, ROUTING_BRIDGE_GRAPH_WEIGHT.get());
+        graph.setEdgeWeight(edge, weight);
         graph.addEdge(srcStationPos, dstStationPos, edge);
     }
 

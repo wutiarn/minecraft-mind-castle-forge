@@ -78,6 +78,10 @@ public class StationCommand {
                                         )
                         )
                         .then(
+                                Commands.literal("listBridges")
+                                        .executes(StationCommand::listBridges)
+                        )
+                        .then(
                                 Commands.literal("launchblock")
                                         .then(
                                                 Commands.argument("destination", stationNameArgumentType)
@@ -229,6 +233,18 @@ public class StationCommand {
         } else {
             source.sendSystemMessage(Component.literal("Destination station removed for launch block at %s".formatted(BlockPosUtil.blockPosToString(pos))));
         }
+        return 0;
+    }
+
+    private static int listBridges(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
+        String stationsList = RoutingService.INSTANCE.getBridgedStations(source.getLevel())
+                .entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(it -> "%s -> %s".formatted(it.getKey(), String.join(", ", it.getValue())))
+                .collect(Collectors.joining("\n"));
+        source.sendSystemMessage(Component.literal("Bridged stations:\n" + stationsList));
         return 0;
     }
 

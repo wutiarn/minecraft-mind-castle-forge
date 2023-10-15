@@ -45,6 +45,11 @@ public class RoutingService {
         return state.persistentState.getStations();
     }
 
+    public HashMap<String, HashSet<String>> getBridgedStations(Level level) {
+        DimensionRoutingState state = getState(level);
+        return state.persistentState.getBridgedStations();
+    }
+
     @Nullable
     public String getStationName(Level level, BlockPos pos) {
         DimensionRoutingState state = getState(level);

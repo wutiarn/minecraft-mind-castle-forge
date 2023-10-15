@@ -105,12 +105,12 @@ public class RoutingService {
 
     public void addBridge(String firstStation, String secondStation, Level level) {
         DimensionRoutingState state = getState(level);
-        state.persistentState.addBridge(firstStation, secondStation);
+        state.addBridge(firstStation, secondStation);
     }
 
     public boolean removeBridge(String firstStation, String secondStation, Level level) {
         DimensionRoutingState state = getState(level);
-        return state.persistentState.removeBridge(firstStation, secondStation);
+        return state.removeBridge(firstStation, secondStation);
     }
 
     public void resetCache() {

@@ -23,11 +23,16 @@ public class RoutingService {
     private static final Logger logger = LoggerFactory.getLogger(RoutingService.class);
     private static final ConcurrentHashMap<String, DimensionRoutingState> stateByDimension = new ConcurrentHashMap<>();
 
-    public Collection<RoutingNodeConnection> rebuildGraph(BlockPos startBlockPos, Level level, Integer depth, boolean reset) {
+    public Collection<RoutingNodeConnection> rebuildGraph(List<BlockPos> startBlocks, Level level, Integer depth, boolean reset) {
         MinecraftServer server = Objects.requireNonNull(level.getServer());
-        BroadcastUtils.broadcastMessage(server, "Rebuilding routes: startPos=%s/%s/%s, depth=%s, reset=%s".formatted(startBlockPos.getX(), startBlockPos.getY(), startBlockPos.getZ(), depth, reset));
+        if (startBlocks.size() == 1) {
+            BlockPos startBlockPos = startBlocks.get(0);
+            BroadcastUtils.broadcastMessage(server, "Rebuilding routes: startPos=%s/%s/%s, depth=%s, reset=%s".formatted(startBlockPos.getX(), startBlockPos.getY(), startBlockPos.getZ(), depth, reset));
+        } else {
+            BroadcastUtils.broadcastMessage(server, "Rebuilding routes: startBlocksCount=%s, depth=%s, reset=%s".formatted(startBlocks.size(), depth, reset));
+        }
         long startTime = System.currentTimeMillis();
-        Collection<RoutingNodeConnection> connections = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlockPos, depth);
+        Collection<RoutingNodeConnection> connections = new RoutesGraphBuilder(getRoutingRailBlock(), level).buildGraph(startBlocks, depth);
         DimensionRoutingState state = getState(level);
         updateGraph(connections, state, level, reset);
         long duration = System.currentTimeMillis() - startTime;
@@ -50,7 +55,7 @@ public class RoutingService {
         DimensionRoutingState state = getState(level);
         GraphPath<BlockPos, RouteRailsEdge> path = calculateRouteInternal(src, dstName, state);
         if (path == null) {
-            rebuildGraph(src, level, null, false);
+            rebuildGraph(List.of(src), level, null, false);
             path = calculateRouteInternal(src, dstName, state);
         }
         return path;
@@ -82,7 +87,7 @@ public class RoutingService {
 
     public void onRoutingRailPlaced(BlockPos pos, Level level) {
         logger.info("Placed new routing rail at {}", pos);
-        rebuildGraph(pos, level, 1, false);
+        rebuildGraph(List.of(pos), level, 1, false);
     }
 
     public void onRoutingRailRemoved(BlockPos pos, Level level) {

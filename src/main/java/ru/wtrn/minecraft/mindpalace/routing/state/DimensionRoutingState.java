@@ -155,10 +155,14 @@ public class DimensionRoutingState {
             return;
         }
         Integer weight = ROUTING_BRIDGE_GRAPH_WEIGHT.get();
-        RouteRailsEdge edge = new RouteRailsEdge(null);
-        graph.setEdgeWeight(edge, weight);
-        boolean success = graph.addEdge(srcStationPos, dstStationPos, edge);
-        logger.info("Applying bridge {} ({}) -> {} ({}), weight = {}, success = {}", srcStation, BlockPosUtil.blockPosToString(srcStationPos), dstStation, BlockPosUtil.blockPosToString(dstStationPos), weight, success);
+        try {
+            RouteRailsEdge edge = new RouteRailsEdge(null);
+            graph.setEdgeWeight(edge, weight);
+            boolean success = graph.addEdge(srcStationPos, dstStationPos, edge);
+            logger.info("Applying bridge {} ({}) -> {} ({}), weight = {}, success = {}", srcStation, BlockPosUtil.blockPosToString(srcStationPos), dstStation, BlockPosUtil.blockPosToString(dstStationPos), weight, success);
+        } catch (Exception e) {
+            logger.error("Failed to apply bridge {} ({}) -> {} ({}), weight = {}", srcStation, BlockPosUtil.blockPosToString(srcStationPos), dstStation, BlockPosUtil.blockPosToString(dstStationPos), weight, e);
+        }
     }
 
     private void addConnection(RoutingNodeConnection connection) {

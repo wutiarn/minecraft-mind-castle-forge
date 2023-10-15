@@ -89,19 +89,12 @@ public class StationCommand {
 
     public static int refreshRoutes(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
-
-        BlockPos startBlockPos = getTargetedRoutingRailBlockPos(source);
-        if (startBlockPos == null) {
-            return 1;
-        }
-
         ServerLevel level = source.getLevel();
-
         source.sendSystemMessage(Component.literal("Rebuilding routes..."));
-        Collection<RoutingNodeConnection> discoveredNodes = RoutingService.INSTANCE.rebuildGraph(startBlockPos, level, null, true);
+        List<BlockPos> startBlocks = RoutingService.INSTANCE.getStations(level).values().stream().map(BlockPosUtil::blockPosFromString).collect(Collectors.toList());
+        Collection<RoutingNodeConnection> discoveredNodes = RoutingService.INSTANCE.rebuildGraph(startBlocks, level, null, true);
         String debugString = discoveredNodes.stream().map(RoutingNodeConnection::toString).collect(Collectors.joining("\n"));
         source.sendSystemMessage(Component.literal("Discovered connections:\n" + debugString));
-
         return 0;
     }
 

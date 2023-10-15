@@ -150,18 +150,17 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
         BlockPos dst = Objects.requireNonNull(lastBridgeEdge).getDst();
 
         // Recreate minecart at new destination to avoid glitches
-        player.teleportTo(src.getX() + 0.5, src.getY(), src.getZ() + 0.5);
-        cart.kill();
         player.teleportTo(dst.getX() + 0.5, dst.getY(), dst.getZ() + 0.5);
+        cart.kill();
         MinecartUtil.spawnAndRide(level, player, dst);
     }
 
     private void ejectPlayer(AbstractMinecart cart, BlockPos pos) {
         ServerPlayer player = getPlayerPassenger(cart);
-        cart.kill();
         if (player != null) {
             player.teleportTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
         }
+        cart.kill();
     }
 
     private ServerPlayer getPlayerPassenger(AbstractMinecart cart) {

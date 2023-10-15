@@ -22,10 +22,12 @@ public class RoutesGraphBuilder {
         this.level = level;
     }
 
-    public Collection<RoutingNodeConnection> buildGraph(BlockPos startBlockPos, Integer maxDepth) {
-        PendingNode startNode = new PendingNode(startBlockPos, 0);
-        pendingNodes.add(startNode);
-        discoveredNodes.add(startNode.pos);
+    public Collection<RoutingNodeConnection> buildGraph(List<BlockPos> startBlocks, Integer maxDepth) {
+        for (BlockPos startBlock : startBlocks) {
+            PendingNode startNode = new PendingNode(startBlock, 0);
+            pendingNodes.add(startNode);
+            discoveredNodes.add(startNode.pos);
+        }
         while (true) {
             PendingNode node = pendingNodes.poll();
             if (node == null || (maxDepth != null && node.hopsFromStart > maxDepth)) {

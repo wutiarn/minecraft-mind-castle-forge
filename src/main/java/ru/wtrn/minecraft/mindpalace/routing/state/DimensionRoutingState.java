@@ -158,6 +158,12 @@ public class DimensionRoutingState {
         try {
             RouteRailsEdge edge = new RouteRailsEdge(null);
             graph.setEdgeWeight(edge, weight);
+            for (RouteRailsEdge existingEdge : graph.getAllEdges(srcStationPos, dstStationPos)) {
+                if (existingEdge.getDirection() == null) {
+                    logger.debug("Skip re-applying bridge {} ({}) -> {} ({}), weight = {}", srcStation, BlockPosUtil.blockPosToString(srcStationPos), dstStation, BlockPosUtil.blockPosToString(dstStationPos), weight);
+                    return;
+                }
+            }
             boolean success = graph.addEdge(srcStationPos, dstStationPos, edge);
             logger.info("Applying bridge {} ({}) -> {} ({}), weight = {}, success = {}", srcStation, BlockPosUtil.blockPosToString(srcStationPos), dstStation, BlockPosUtil.blockPosToString(dstStationPos), weight, success);
         } catch (Exception e) {

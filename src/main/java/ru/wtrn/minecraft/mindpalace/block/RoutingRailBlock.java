@@ -28,12 +28,12 @@ import ru.wtrn.minecraft.mindpalace.routing.RouteRailsEdge;
 import ru.wtrn.minecraft.mindpalace.routing.RoutingService;
 import ru.wtrn.minecraft.mindpalace.util.MinecartUtil;
 import ru.wtrn.minecraft.mindpalace.util.RailTraverser;
+import ru.wtrn.minecraft.mindpalace.util.math.vec.VectorUtils;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Stream;
 
 public class RoutingRailBlock extends RailBlock implements EntityBlock {
     public RoutingRailBlock() {
@@ -135,6 +135,13 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
             player.sendSystemMessage(Component.literal(statusBuilder.toString()));
         }
 
+        Vec3 currentDeltaMovement = cart.getDeltaMovement();
+        if (VectorUtils.getHorizontalDistance(currentDeltaMovement) < 0.01) {
+            // Just spawned minecart / teleported. Set yaw.
+            player.teleportTo(serverLevel, pos.getX(), pos.getY(), pos.getZ(), targetDirection.toYRot(), player.getXRot());
+            cart = MinecartUtil.spawnAndRide(level, player, pos);
+        }
+
         Vec3 travelVector = Vec3.atLowerCornerOf(targetDirection.getNormal());
         cart.move(MoverType.SELF, travelVector);
         cart.setDeltaMovement(travelVector);
@@ -161,9 +168,7 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
         BlockPos dst = Objects.requireNonNull(lastBridgeEdge).getDst();
 
         // Recreate minecart at new destination to avoid glitches
-        float yaw = player.getViewYRot(1.0f);
-        float pitch = player.getViewXRot(1.0f);
-        player.teleportTo(level, dst.getX() + 0.5, dst.getY(), dst.getZ() + 0.5, yaw, pitch);
+        player.teleportTo(dst.getX() + 0.5, dst.getY(), dst.getZ() + 0.5);
         cart.kill();
         MinecartUtil.spawnAndRide(level, player, dst);
     }

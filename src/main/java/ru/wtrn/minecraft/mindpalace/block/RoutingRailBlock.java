@@ -3,6 +3,7 @@ package ru.wtrn.minecraft.mindpalace.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
@@ -32,6 +33,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class RoutingRailBlock extends RailBlock implements EntityBlock {
     public RoutingRailBlock() {
@@ -40,6 +42,10 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
 
     @Override
     public void onMinecartPass(BlockState state, Level level, BlockPos pos, AbstractMinecart cart) {
+        if (level.isClientSide()) {
+            return;
+        }
+        ServerLevel serverLevel = (ServerLevel) level;
         ServerPlayer player = getPlayerPassenger(cart);
         if (player == null) {
             cart.kill();
@@ -80,7 +86,7 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
             BlockState targetBlockState = level.getBlockState(targetBlockPos);
             if (targetBlockState.getTags().noneMatch(BlockTags.RAILS::equals)) {
                 Set<RouteRailsEdge> edges = RoutingService.INSTANCE.getBlockOutgoingEdges(pos, level);
-                RouteRailsEdge longestEdge = edges.stream()
+                RouteRailsEdge nextEdge = edges.stream()
                         .filter(it -> {
                             if (it.getDirection() == null) {
                                 return false;
@@ -89,12 +95,17 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
                         })
                         .max(Comparator.comparing(RouteRailsEdge::getDistance))
                         .orElse(null);
-                if (longestEdge == null) {
+                if (nextEdge == null) {
+                    List<RouteRailsEdge> bridgeEdges = edges.stream().filter(it -> it.getDirection() == null).toList();
+                    if (bridgeEdges.size() == 1) {
+                        performBridgeTeleport(List.of(bridgeEdges.get(0)), serverLevel, cart, player);
+                        return;
+                    }
                     ejectPlayer(cart, pos);
                     player.sendSystemMessage(Component.literal("There's no route ahead"));
                     return;
                 }
-                targetDirection = longestEdge.getDirection();
+                targetDirection = nextEdge.getDirection();
             } else {
                 targetDirection = cartDirection;
             }
@@ -103,7 +114,7 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
             // edgeList is checked for emptiness above, so firstEdge is never null
             RouteRailsEdge firstEdge = edgeList.get(0);
             if (firstEdge.getDirection() == null) {
-                performBridgeTeleport(edgeList, level, cart, player);
+                performBridgeTeleport(edgeList, serverLevel, cart, player);
                 return;
             }
 
@@ -129,7 +140,7 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
         cart.setDeltaMovement(travelVector);
     }
 
-    private void performBridgeTeleport(List<RouteRailsEdge> edgeList, Level level, AbstractMinecart cart, ServerPlayer player) {
+    private void performBridgeTeleport(List<RouteRailsEdge> edgeList, ServerLevel level, AbstractMinecart cart, ServerPlayer player) {
         RouteRailsEdge firstEdge = edgeList.get(0);
         BlockPos src = firstEdge.getSrc();
         String startStation = RoutingService.INSTANCE.getStationName(level, src);
@@ -150,7 +161,9 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
         BlockPos dst = Objects.requireNonNull(lastBridgeEdge).getDst();
 
         // Recreate minecart at new destination to avoid glitches
-        player.teleportTo(dst.getX() + 0.5, dst.getY(), dst.getZ() + 0.5);
+        float yaw = player.getViewYRot(1.0f);
+        float pitch = player.getViewXRot(1.0f);
+        player.teleportTo(level, dst.getX() + 0.5, dst.getY(), dst.getZ() + 0.5, yaw, pitch);
         cart.kill();
         MinecartUtil.spawnAndRide(level, player, dst);
     }

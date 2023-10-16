@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.RailBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -38,6 +39,14 @@ import java.util.Set;
 public class RoutingRailBlock extends RailBlock implements EntityBlock {
     public RoutingRailBlock() {
         super(Properties.of().noCollission().strength(0.7F).sound(SoundType.METAL));
+    }
+
+    @Override
+    public RailShape getRailDirection(BlockState state, BlockGetter world, BlockPos pos, @Nullable AbstractMinecart cart) {
+        if (cart != null && Math.abs(cart.getDeltaMovement().x) > 0) {
+            return RailShape.EAST_WEST;
+        }
+        return RailShape.NORTH_SOUTH;
     }
 
     @Override
@@ -80,20 +89,20 @@ public class RoutingRailBlock extends RailBlock implements EntityBlock {
 
         Direction targetDirection;
         if (path == null) {
-            Direction cartDirection = cart.getMotionDirection();
-            BlockPos targetBlockPos = pos.relative(cartDirection);
-
-            BlockState targetBlockState = level.getBlockState(targetBlockPos);
-            if (targetBlockState.getTags().noneMatch(BlockTags.RAILS::equals)) {
+            Direction cartDirection = VectorUtils.toHorizontalDirection(cart.getDeltaMovement());
+            if (cartDirection == null || level.getBlockState(pos.relative(cartDirection)).getTags().noneMatch(BlockTags.RAILS::equals)) {
                 Set<RouteRailsEdge> edges = RoutingService.INSTANCE.getBlockOutgoingEdges(pos, level);
                 RouteRailsEdge nextEdge = edges.stream()
                         .filter(it -> {
                             if (it.getDirection() == null) {
                                 return false;
                             }
-                            return it.getDirection() != cartDirection.getOpposite();
+                            if (cartDirection != null) {
+                                return it.getDirection() != cartDirection.getOpposite();
+                            }
+                            return true;
                         })
-                        .max(Comparator.comparing(RouteRailsEdge::getDistance))
+                        .max(Comparator.comparing(it -> it.getDistance() * -1))
                         .orElse(null);
                 if (nextEdge == null) {
                     List<RouteRailsEdge> bridgeEdges = edges.stream().filter(it -> it.getDirection() == null).toList();

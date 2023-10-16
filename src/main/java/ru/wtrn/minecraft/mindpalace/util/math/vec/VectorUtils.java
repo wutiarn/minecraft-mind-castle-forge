@@ -25,7 +25,7 @@ public class VectorUtils {
     }
 
     public static Direction toHorizontalDirection(Vec3 vec) {
-        return Direction.fromDelta((int) vec.x, 0, (int) vec.z);
+        return Direction.fromDelta((int) (Math.signum(vec.x) * Math.ceil(Math.abs(vec.x))), 0, (int) (Math.signum(vec.z) * Math.ceil(Math.abs(vec.z))));
     }
 
     public static double getHorizontalDistance(Vec3 vec3) {
